@@ -7,7 +7,6 @@
 **More benchmarks**:
 http://wiki.pikosec.com/index.php?title=VymaDB:Benchmarks
 
-**For contacts:**
 Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 
 ## ENJOY

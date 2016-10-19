@@ -176,6 +176,34 @@ public:
 	uint lastBranchOffset;
 	uint lastBlockOffset;
 
+	void print()
+	{
+		#ifndef _RELEASE
+
+		printf("=================================================\n");
+
+		printf("ContentPagesCount => %u\n", ContentPagesCount);
+		printf("VarPagesCount => %u\n", VarPagesCount);
+		printf("BranchPagesCount => %u\n", BranchPagesCount);
+		printf("BlockPagesCount => %u\n", BlockPagesCount);
+
+		printf("lastContentOffset => %u\n", lastContentOffset);
+		printf("lastVarOffset => %u\n", lastVarOffset);
+		printf("lastBranchOffset => %u\n", lastBranchOffset);
+		printf("lastBlockOffset => %u\n", lastBlockOffset);
+
+		for (uint i = 0; i < 22; i++)
+		{
+			printf("%s => %u\n", tempCaptions[i], tempValues[i]);
+		}
+
+		
+		printf("=================================================\n");
+
+		#endif
+
+	}
+
 	uint getHeaderSize()
 	{
 		return HeaderSize * sizeof(uint);

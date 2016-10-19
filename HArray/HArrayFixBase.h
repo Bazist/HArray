@@ -20,13 +20,14 @@
 #pragma once
 
 #ifndef _HARRAY_FIX_BASE		 // Allow use of features specific to Windows XP or later.                   
+
 #define _HARRAY_FIX_BASE 0x709 // Change this to the appropriate value to target other versions of Windows.
 
 #endif	
 
-#include "stdafx.h"
+#define _RELEASE 0x1234567
 
-//#define _RELEASE 0x1234567
+#include "stdafx.h"
 
 const uint REPOSITORY_VERSION = 1;
 

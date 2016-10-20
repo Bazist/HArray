@@ -1,0 +1,87 @@
+VQFUP
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>Dumb forms</title>
+	<script src="/0.4.0/dap.js"></script>
+	<style>
+.MUTE	{display:none !important}	
+	
+.form{ position: absolute; padding:2em; border:1px solid gray; box-shadow:0 1em 1em rgba(0,0,0,.25); background:white; width:24em; text-align:right; }
+
+label{display:block; margin:1em; }
+
+input,
+.sub	{display:inline-block; width:8em; padding:4px; margin:.5em; border:1px solid lightgray; text-align:center; font:italic 1em sans-serif; }
+.sub	{background:whitesmoke; }
+
+button {width:6em}
+.ok:before{content:"OK"}
+.cancel:before{content:"Cancel"}
+.commit:before{content:"Commit!"}
+
+.log { border-top:1px dashed gray; padding-top:1em; margin-top:2em; }
+
+	</style>
+</head>
+<body>
+<script>
+
+var
+storage	={
+
+	put	:function(value,name){
+			var a=	typeof value !== 'object' ? value : 
+				JSON.stringify(value);/*,function(name,value){
+					return (name!=="")||Array.isArray(value) ? value : null
+				}
+				);*/;
+			localStorage.setItem(name,a);
+		},
+			
+	get	:function(key){
+		if(key=localStorage.getItem(key))
+			try{return JSON.parse(key)}
+			catch(e){return key}
+		}
+}
+
+dap.from.js(function($){ return $()
+	
+	.$("DEFAULTS",	{confVal1:"Einz", confVal2:"Zwei", confVal3:"Drei", confVal4:"Fir"})
+	.$("LABELS",	{confVal1:"Config Setting 1", confVal2:"Config Setting 2", confVal3:"Config Setting 3", confVal4:"Да, Базя, 4"})
+	.$("SUBS",	{confVal1:"confVal2",confVal2:"confVal3,confVal4"})
+	
+	.$({
+		flatten:{
+			get:function(a){return a=a.pop()[a.pop()];},
+			put:function(a){return a=a.pop()[a.pop()]=a.pop();}
+		},
+		convert:{ recall:storage.get },
+		operate:{ store:storage.put }
+	})
+	
+	.$("Dumb",
+		$("LABEL").d("! .label=(LABELS .key)get; $value=( .tgt .key )get $!=",[
+			$("sub").d("! $value; ui").u("$!=:!; ?"),
+			$("form").u("? $!=").d("? $!",[
+				$("LABEL").d("! .label",[$("INPUT").d("attr $value; .!=#")])
+				,$("subs").d("*@key ( SUBS .key )get:split.comma; Dumb( .key ..tgt )")			
+				,$("BUTTON.ok").d("ui").u("( .tgt .key $value=.!. )put")
+				,$("BUTTON.cancel").d("ui")
+			])
+		])
+	)
+	
+	.d("$tgt=( :recall`tgt DEFAULTS )? $ver=`0",[
+		$("Main").d("Dumb( @key`confVal1 $tgt )")
+		,$("BUTTON.commit").d("ui").u("store $tgt; $ver=$ver:++")
+		,$("log").d("! $ver `? $tgt:uri") //
+	])
+})
+
+</script>
+</body>
+</html>

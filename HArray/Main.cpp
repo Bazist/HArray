@@ -30,7 +30,7 @@
 
 using namespace std;
 
-const uint COUNT_KEYS = 1000000;
+const uint COUNT_KEYS = 20000000;
 const uint KEY_LEN = 256;
 
 class Str
@@ -44,7 +44,7 @@ bool operator<(const Str& a, const Str& b)
 	return strcmp(a.Val, b.Val) == 1;
 }
 
-Str keys[COUNT_KEYS];
+Str keys[1];
 
 HArrayVarRAM ha;
 
@@ -99,7 +99,6 @@ clock_t start, finish;
 	printf("Search: %d msec.", (finish - start));
 }
 
-
 void testRandom()
 {
 	clock_t start, finish;
@@ -108,7 +107,7 @@ void testRandom()
 
 	start = clock();
 
-	ha.init(4, 24);
+	ha.init(24);
 
 	for (uint i = 0; i<COUNT_KEYS; i++)
 	{
@@ -137,10 +136,85 @@ void testRandom()
 	ha.destroy();
 }
 
+void testSeqInt()
+{
+	HArrayInt ha;
+	ha.init(26);
+
+	clock_t start, finish;
+
+	//INSERT ===========================================
+
+	start = clock();
+
+	for (int i = 0; i < COUNT_KEYS; i++)
+	{
+		ha.insert(i, i);
+	}
+
+	finish = clock();
+
+	printf("Insert: %d msec, ", (finish - start));
+
+	//SEARCH ===========================================
+	start = clock();
+
+	for (uint i = 0; i<COUNT_KEYS; i++)
+	{
+		if (ha.getValueByKey(i) != i)
+			printf("Error\n");
+	}
+
+	finish = clock();
+
+	printf("Search: %d msec.", (finish - start));
+
+	//ha.print();
+
+	ha.destroy();
+}
+
+void testSeqIntMap()
+{
+	std::map<uint, uint> mymap;
+
+	clock_t start, finish;
+
+	//INSERT ===========================================
+
+	start = clock();
+
+	for (int i = 0; i < COUNT_KEYS; i++)
+	{
+		mymap[i] = i;
+	}
+
+	finish = clock();
+
+	printf("Insert: %d msec, ", (finish - start));
+
+	//SEARCH ===========================================
+	start = clock();
+
+	for (uint i = 0; i<COUNT_KEYS; i++)
+	{
+		if (mymap[i] != i)
+			printf("Error\n");
+	}
+
+	finish = clock();
+
+	printf("Search: %d msec.", (finish - start));
+
+	//ha.print();
+
+	ha.destroy();
+}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	fill();
+	
 	printf("=== HArrayVarRAM testing ===\n");
 	printf("Start benchmarks ....\n");
 	printf("Insert/Search %u random keys (%u bytes each) ...\n", COUNT_KEYS, KEY_LEN);

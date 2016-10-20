@@ -76,25 +76,22 @@ public:
 	
 	uint MAX_SAFE_SHORT;
 
-	void init(uint valueLen, 
-			  uchar headerBase)
+	void init(uchar headerBase)
 	{
-		init(valueLen,
-			 headerBase,
+		init(headerBase,
 			 INIT_MAX_PAGES,
 			 INIT_MAX_PAGES,
 			 INIT_MAX_PAGES,
 			 INIT_MAX_PAGES);
 	}
 
-	void init(uint valueLen, 
-			  uchar headerBase,
+	void init(uchar headerBase,
 			  uint contentPagesSize,
 			  uint varPagesSize,
 			  uint branchPagesSize,
 			  uint blockPagesSize)
 	{
-		ValueLen = valueLen / 4;
+		ValueLen = 1;
 		
 		HeaderBase = headerBase;
 		HeaderBits = 32-headerBase;
@@ -102,7 +99,7 @@ public:
 
 		countFreeBranchCell = 0;
 
-		MAX_SAFE_SHORT = MAX_SHORT - valueLen - 1;
+		MAX_SAFE_SHORT = MAX_SHORT - ValueLen - 1;
 
 		pHeader = new uint[HeaderSize];
 		for(uint i=0; i<HeaderSize; i++)
@@ -250,7 +247,7 @@ public:
 	void clear()
 	{
 		destroy();
-		init(4, 24);
+		init(24);
 	}
 	
 	//types: 0-empty, 1..4 branches, 5 value, 6..9 blocks offset, 10 empty branch, 11 value

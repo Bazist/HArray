@@ -125,20 +125,15 @@ public:
 	uint freeCells[MAX_SHORT];
 	uint currFreeCell;
 
-	void init(uint headerBase, uint contentBase)
+	void init(uint headerBase)
 	{
-		if(!contentBase)
-			contentBase = 32-headerBase;	
-	
 		HEADER_BASE = headerBase;
-		CONTENT_BASE = contentBase;
+		CONTENT_BASE = 32 - headerBase;
 		
 		ulong maxKey = 1;
+		maxKey <<= (headerBase + CONTENT_BASE);
 	
-		for(uint i=0; i<headerBase+contentBase; i++)
-			maxKey *= 2;
-	
-		BLOCK_BITS = contentBase;
+		BLOCK_BITS = CONTENT_BASE;
 		HEADER_SIZE = (maxKey>>BLOCK_BITS);
 		BLOCK_SIZE = (maxKey>>headerBase) - 1;
 
@@ -552,7 +547,7 @@ public:
 	{
 		//create new
 		HArrayInt* pNewArray = new HArrayInt();
-		pNewArray->init(HEADER_BASE, CONTENT_BASE);
+		pNewArray->init(HEADER_BASE);
 
 		//copy
 		uint count = 0;

@@ -54,12 +54,12 @@ public:
 	uint BlockPagesSize;
 
 	uint* pHeader;
-	
+
 	/*uint* pActiveContent;
 	ContentTypeCell* pActiveContentType;
 	BranchCell* pActiveBranch;
 	BlockCell* pActiveBlock;*/
-	
+
 	ContentPage** pContentPages;
 	VarPage** pVarPages;
 	BranchPage** pBranchPages;
@@ -73,99 +73,110 @@ public:
 	uint countFreeBranchCell;
 
 	uint ValueLen;
-	
+
 	uint MAX_SAFE_SHORT;
 
 	void init(uchar headerBase)
 	{
 		init(headerBase,
-			 INIT_MAX_PAGES,
-			 INIT_MAX_PAGES,
-			 INIT_MAX_PAGES,
-			 INIT_MAX_PAGES);
+			INIT_MAX_PAGES,
+			INIT_MAX_PAGES,
+			INIT_MAX_PAGES,
+			INIT_MAX_PAGES);
 	}
 
 	void init(uchar headerBase,
-			  uint contentPagesSize,
-			  uint varPagesSize,
-			  uint branchPagesSize,
-			  uint blockPagesSize)
+				uint contentPagesSize,
+				uint varPagesSize,
+				uint branchPagesSize,
+				uint blockPagesSize)
 	{
-		ValueLen = 1;
-		
-		HeaderBase = headerBase;
-		HeaderBits = 32-headerBase;
-		HeaderSize = (0xFFFFFFFF>>HeaderBits) + 1;
+		memset(this, 0, sizeof(HArrayVarRAM));
 
-		countFreeBranchCell = 0;
-
-		MAX_SAFE_SHORT = MAX_SHORT - ValueLen - 1;
-
-		pHeader = new uint[HeaderSize];
-		for(uint i=0; i<HeaderSize; i++)
+		try
 		{
-			pHeader[i] = 0;
+			ValueLen = 1;
+
+			HeaderBase = headerBase;
+			HeaderBits = 32 - headerBase;
+			HeaderSize = (0xFFFFFFFF >> HeaderBits) + 1;
+
+			countFreeBranchCell = 0;
+
+			MAX_SAFE_SHORT = MAX_SHORT - ValueLen - 1;
+
+			pHeader = new uint[HeaderSize];
+			for (uint i = 0; i < HeaderSize; i++)
+			{
+				pHeader[i] = 0;
+			}
+
+#ifndef _RELEASE
+
+			for (uint i = 0; i < COUNT_TEMPS; i++)
+			{
+				tempValues[i] = 0;
+				tempCaptions[i] = 0;
+			}
+
+			tempCaptions[0] = "Moves Level1";
+			tempCaptions[1] = "Moves Level2";
+			tempCaptions[2] = "Moves Level3";
+			tempCaptions[3] = "Moves Level4";
+			tempCaptions[4] = "Amount Blocks";
+			tempCaptions[5] = "Fill Blocks 1..64";
+			tempCaptions[6] = "Fill Blocks 64..128";
+			tempCaptions[7] = "Fill Blocks 128..192";
+			tempCaptions[8] = "Fill Blocks 192..256";
+			tempCaptions[9] = "Next blocks";
+			tempCaptions[10] = "Short way";
+			tempCaptions[11] = "Long way";
+			tempCaptions[12] = "CURRENT_VALUE_TYPE";
+			tempCaptions[13] = "ONLY_CONTENT_TYPE ";
+			tempCaptions[14] = "MAX_BRANCH_TYPE1  ";
+			tempCaptions[15] = "MAX_BLOCK_TYPE    ";
+			tempCaptions[16] = "Fill Blocks 1..16";
+			tempCaptions[17] = "Fill Blocks 16..32";
+			tempCaptions[18] = "Fill Blocks 32..48";
+			tempCaptions[19] = "Fill Blocks 48..64";
+			tempCaptions[20] = "Fill Blocks 1..8";
+			tempCaptions[21] = "Next Block Level 3";
+
+#endif
+
+			pContentPages = new ContentPage*[contentPagesSize];
+			pVarPages = new VarPage*[varPagesSize];
+			pBranchPages = new BranchPage*[branchPagesSize];
+			pBlockPages = new BlockPage*[blockPagesSize];
+
+			memset(pContentPages, 0, contentPagesSize * sizeof(uint));
+			memset(pVarPages, 0, varPagesSize * sizeof(uint));
+			memset(pBranchPages, 0, branchPagesSize * sizeof(uint));
+			memset(pBlockPages, 0, blockPagesSize * sizeof(uint));
+
+			ContentPagesCount = 0;
+			VarPagesCount = 0;
+			BranchPagesCount = 0;
+			BlockPagesCount = 0;
+
+			ContentPagesSize = INIT_MAX_PAGES;
+			VarPagesSize = INIT_MAX_PAGES;
+			BranchPagesSize = INIT_MAX_PAGES;
+			BlockPagesSize = INIT_MAX_PAGES;
+
+			lastContentOffset = 1;
+			lastVarOffset = 0;
+			lastBranchOffset = 0;
+			lastBlockOffset = 0;
+
+			freeBranchCells = new uint[MAX_SHORT];
 		}
-
-		#ifndef _RELEASE
-
-		for(uint i=0; i<COUNT_TEMPS; i++)
+		catch (...) //maybe out of memory exception
 		{
-			tempValues[i] = 0;
-			tempCaptions[i] = 0;
+			destroy();
+
+			throw;
 		}
-
-		tempCaptions[0] = "Moves Level1";
-		tempCaptions[1] = "Moves Level2";
-		tempCaptions[2] = "Moves Level3";
-		tempCaptions[3] = "Moves Level4";
-		tempCaptions[4] = "Amount Blocks";
-		tempCaptions[5] = "Fill Blocks 1..64";
-		tempCaptions[6] = "Fill Blocks 64..128";
-		tempCaptions[7] = "Fill Blocks 128..192";
-		tempCaptions[8] = "Fill Blocks 192..256";
-		tempCaptions[9] = "Next blocks";
-		tempCaptions[10] = "Short way";
-		tempCaptions[11] = "Long way";
-		tempCaptions[12] = "CURRENT_VALUE_TYPE";
-		tempCaptions[13] = "ONLY_CONTENT_TYPE ";
-		tempCaptions[14] = "MAX_BRANCH_TYPE1  ";
-		tempCaptions[15] = "MAX_BLOCK_TYPE    ";
-		tempCaptions[16] = "Fill Blocks 1..16";
-		tempCaptions[17] = "Fill Blocks 16..32";
-		tempCaptions[18] = "Fill Blocks 32..48";
-		tempCaptions[19] = "Fill Blocks 48..64";
-		tempCaptions[20] = "Fill Blocks 1..8";
-		tempCaptions[21] = "Next Block Level 3";
-
-		#endif
-
-		pContentPages = new ContentPage*[contentPagesSize];
-		pVarPages = new VarPage*[varPagesSize];
-		pBranchPages = new BranchPage*[branchPagesSize];
-		pBlockPages = new BlockPage*[blockPagesSize];
-
-		memset(pContentPages, 0, contentPagesSize * sizeof(uint));
-		memset(pVarPages, 0, varPagesSize * sizeof(uint));
-		memset(pBranchPages, 0, branchPagesSize * sizeof(uint));
-		memset(pBlockPages, 0, blockPagesSize * sizeof(uint));
-
-		ContentPagesCount = 0;
-		VarPagesCount = 0;
-		BranchPagesCount = 0;
-		BlockPagesCount = 0;
-
-		ContentPagesSize = INIT_MAX_PAGES;
-		VarPagesSize = INIT_MAX_PAGES;
-		BranchPagesSize = INIT_MAX_PAGES;
-		BlockPagesSize = INIT_MAX_PAGES;
-		
-		lastContentOffset = 1;
-		lastVarOffset = 0;
-		lastBranchOffset = 0;
-		lastBlockOffset = 0;
-
-		freeBranchCells = new uint[MAX_SHORT];
 	}
 
 	uint lastContentOffset;
@@ -175,7 +186,7 @@ public:
 
 	void print()
 	{
-		#ifndef _RELEASE
+#ifndef _RELEASE
 
 		printf("=================================================\n");
 
@@ -194,10 +205,10 @@ public:
 			printf("%s => %u\n", tempCaptions[i], tempValues[i]);
 		}
 
-		
+
 		printf("=================================================\n");
 
-		#endif
+#endif
 
 	}
 
@@ -225,23 +236,23 @@ public:
 	{
 		return BlockPagesCount * sizeof(BlockPage);
 	}
-	
+
 	uint getUsedMemory()
 	{
-		return	getHeaderSize() + 
-				getContentSize() + 
-				getVarSize() + 
-				getBranchSize() +
-				getBlockSize();
+		return	getHeaderSize() +
+			getContentSize() +
+			getVarSize() +
+			getBranchSize() +
+			getBlockSize();
 	}
 
 	uint getTotalMemory()
 	{
-		return	getHeaderSize() + 
-				getContentSize() + 
-				getVarSize() + 
-				getBranchSize() +
-				getBlockSize();
+		return	getHeaderSize() +
+			getContentSize() +
+			getVarSize() +
+			getBranchSize() +
+			getBlockSize();
 	}
 
 	void clear()
@@ -249,7 +260,7 @@ public:
 		destroy();
 		init(24);
 	}
-	
+
 	//types: 0-empty, 1..4 branches, 5 value, 6..9 blocks offset, 10 empty branch, 11 value
 #ifndef _RELEASE
 
@@ -262,14 +273,14 @@ public:
 	{
 		uint newSizeContentPages = ContentPagesSize * 2;
 		ContentPage** pTempContentPages = new ContentPage*[newSizeContentPages];
-			
-		uint j=0;
-		for(; j < ContentPagesSize ; j++)
+
+		uint j = 0;
+		for (; j < ContentPagesSize; j++)
 		{
 			pTempContentPages[j] = pContentPages[j];
 		}
 
-		for(; j < newSizeContentPages ; j++)
+		for (; j < newSizeContentPages; j++)
 		{
 			pTempContentPages[j] = 0;
 		}
@@ -284,14 +295,14 @@ public:
 	{
 		uint newSizeVarPages = VarPagesSize * 2;
 		VarPage** pTempVarPages = new VarPage*[newSizeVarPages];
-			
-		uint j=0;
-		for(; j < VarPagesSize ; j++)
+
+		uint j = 0;
+		for (; j < VarPagesSize; j++)
 		{
 			pTempVarPages[j] = pVarPages[j];
 		}
 
-		for(; j < newSizeVarPages ; j++)
+		for (; j < newSizeVarPages; j++)
 		{
 			pTempVarPages[j] = 0;
 		}
@@ -306,14 +317,14 @@ public:
 	{
 		uint newSizeBranchPages = BranchPagesSize * 2;
 		BranchPage** pTempBranchPages = new BranchPage*[newSizeBranchPages];
-			
-		uint j=0;
-		for(; j < BranchPagesSize ; j++)
+
+		uint j = 0;
+		for (; j < BranchPagesSize; j++)
 		{
 			pTempBranchPages[j] = pBranchPages[j];
 		}
 
-		for(; j < newSizeBranchPages ; j++)
+		for (; j < newSizeBranchPages; j++)
 		{
 			pTempBranchPages[j] = 0;
 		}
@@ -328,14 +339,14 @@ public:
 	{
 		uint newSizeBlockPages = BlockPagesSize * 2;
 		BlockPage** pTempBlockPages = new BlockPage*[newSizeBlockPages];
-			
-		uint j=0;
-		for(; j < BlockPagesSize ; j++)
+
+		uint j = 0;
+		for (; j < BlockPagesSize; j++)
 		{
 			pTempBlockPages[j] = pBlockPages[j];
 		}
 
-		for(; j < newSizeBlockPages ; j++)
+		for (; j < newSizeBlockPages; j++)
 		{
 			pTempBlockPages[j] = 0;
 		}
@@ -345,100 +356,100 @@ public:
 
 		BlockPagesSize = newSizeBlockPages;
 	}
-	
+
 	//INSERT =============================================================================================================
 
 	bool insert(uint* key, uint keyLen, uint value);
-		
+
 	//GET =============================================================================================================
 
 	uint getValueByKey(uint* key, uint keyLen);
 
 	//uint* getValueByVarKey(uint* key, uint keyLen);
-	
-	void getValuesByRangeFromBlock(uint** values, 
-									uint& count,
-									uint size,
-									uint contentOffset,
-									uint keyOffset,
-									uint blockOffset,
-									uint* minKey,
-									uint* maxKey);
-	
-	void getValuesByRange(uint** values, 
-								uint& count,
-								uint size,
-								uint keyOffset, 
-								uint contentOffset,
-								uint* minKey,
-								uint* maxKey);
-	
-	uint getValuesByRange(uint** values, 
-						 uint size, 
-						 uint* minKey, 
-						 uint* maxKey);
+
+	void getValuesByRangeFromBlock(uint** values,
+		uint& count,
+		uint size,
+		uint contentOffset,
+		uint keyOffset,
+		uint blockOffset,
+		uint* minKey,
+		uint* maxKey);
+
+	void getValuesByRange(uint** values,
+		uint& count,
+		uint size,
+		uint keyOffset,
+		uint contentOffset,
+		uint* minKey,
+		uint* maxKey);
+
+	uint getValuesByRange(uint** values,
+		uint size,
+		uint* minKey,
+		uint* maxKey);
 
 	//RANGE keys and values =============================================================================================================
-	void sortLastItem(HArrayFixPair* pairs, 
-					  uint count);
-	
+	void sortLastItem(HArrayFixPair* pairs,
+		uint count);
+
 	void getKeysAndValuesByRangeFromBlock(HArrayFixPair* pairs,
-										  uint& count,
-										  uint size,
-										  uint contentOffset,
-										  uint keyOffset,
-										  uint blockOffset,
-										  uint* minKey,
-										  uint* maxKey);
-	
+		uint& count,
+		uint size,
+		uint contentOffset,
+		uint keyOffset,
+		uint blockOffset,
+		uint* minKey,
+		uint* maxKey);
+
 	void getKeysAndValuesByRange(HArrayFixPair* pairs,
-								 uint& count,
-								 uint size,
-								 uint keyOffset, 
-								 uint contentOffset,
-								 uint* minKey,
-								 uint* maxKey);
-	
+		uint& count,
+		uint size,
+		uint keyOffset,
+		uint contentOffset,
+		uint* minKey,
+		uint* maxKey);
+
 	uint getKeysAndValuesByRange(HArrayFixPair* pairs,
-								 uint size, 
-								 uint* minKey, 
-								 uint* maxKey);
+		uint size,
+		uint* minKey,
+		uint* maxKey);
 
 	uint getTailKeyByHeadKeyAndValue(uint* headKey,
-									 uint headKeyLen,
-									 uint* tailKey,
-									 uint& tailKeyLen,
-									 uint value);
-	
+		uint headKeyLen,
+		uint* tailKey,
+		uint& tailKeyLen,
+		uint value);
+
 	//TEMPLATE ====================================================================================================
 	void scanKeysAndValuesFromBlock(uint* key,
-									uint contentOffset,
-									uint keyOffset,
-									uint blockOffset,
-									HARRAY_ITEM_VISIT_FUNC visitor);
-	
+		uint contentOffset,
+		uint keyOffset,
+		uint blockOffset,
+		HARRAY_ITEM_VISIT_FUNC visitor);
+
 	void scanKeysAndValues(uint* key,
-						   uint keyOffset, 
-						   uint contentOffset,
-						   HARRAY_ITEM_VISIT_FUNC visitor);
-	
-	uint HArrayVarRAM::scanKeysAndValues(uint* key, 
-										 uint keyLen,
-										 HARRAY_ITEM_VISIT_FUNC visitor);
+		uint keyOffset,
+		uint contentOffset,
+		HARRAY_ITEM_VISIT_FUNC visitor);
+
+	uint HArrayVarRAM::scanKeysAndValues(uint* key,
+		uint keyLen,
+		HARRAY_ITEM_VISIT_FUNC visitor);
 
 	//=============================================================================================================
 
 	void destroy()
 	{
-		if(pHeader)
+		if (pHeader)
 		{
 			delete[] pHeader;
 			pHeader = 0;
 		}
 
-		if(pContentPages)
+		if (pContentPages)
 		{
-			for(uint i=0; i<ContentPagesCount; i++)
+			for (uint i = 0; i < ContentPagesCount; i++)
 			{
 				delete pContentPages[i];
 			}
@@ -447,9 +458,9 @@ public:
 			pContentPages = 0;
 		}
 
-		if(pVarPages)
+		if (pVarPages)
 		{
-			for(uint i=0; i<VarPagesCount; i++)
+			for (uint i = 0; i < VarPagesCount; i++)
 			{
 				delete pVarPages[i];
 			}
@@ -458,20 +469,20 @@ public:
 			pVarPages = 0;
 		}
 
-		if(pBranchPages)
+		if (pBranchPages)
 		{
-			for(uint i=0; i<BranchPagesCount; i++)
+			for (uint i = 0; i < BranchPagesCount; i++)
 			{
 				delete pBranchPages[i];
 			}
-			
+
 			delete[] pBranchPages;
 			pBranchPages = 0;
 		}
 
-		if(pBlockPages)
+		if (pBlockPages)
 		{
-			for(uint i=0; i<BlockPagesCount; i++)
+			for (uint i = 0; i < BlockPagesCount; i++)
 			{
 				delete pBlockPages[i];
 			}
@@ -480,6 +491,10 @@ public:
 			pBlockPages = 0;
 		}
 
-		delete[] freeBranchCells;
+		if (freeBranchCells)
+		{
+			delete[] freeBranchCells;
+			freeBranchCells = 0;
+		}
 	}
 };

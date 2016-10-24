@@ -31,11 +31,11 @@
 #include <tchar.h>
 #include <string.h>
 
-#define uint unsigned int
+#define uint unsigned __int32
 #define ulong unsigned __int64
-#define ushort unsigned short
-#define uchar unsigned char
-#define ucode unsigned char
+#define ushort unsigned __int16
+#define uchar unsigned __int8
+#define ucode unsigned __int8
 
 const uint MAX_SHORT = 65536;
 const uint MAX_CHAR = 256;

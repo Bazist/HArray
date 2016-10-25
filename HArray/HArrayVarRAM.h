@@ -149,10 +149,10 @@ public:
 			pBranchPages = new BranchPage*[branchPagesSize];
 			pBlockPages = new BlockPage*[blockPagesSize];
 
-			memset(pContentPages, 0, contentPagesSize * sizeof(uint));
-			memset(pVarPages, 0, varPagesSize * sizeof(uint));
-			memset(pBranchPages, 0, branchPagesSize * sizeof(uint));
-			memset(pBlockPages, 0, blockPagesSize * sizeof(uint));
+			memset(pContentPages, 0, contentPagesSize * sizeof(ContentPage*));
+			memset(pVarPages, 0, varPagesSize * sizeof(VarPage*));
+			memset(pBranchPages, 0, branchPagesSize * sizeof(BranchPage*));
+			memset(pBlockPages, 0, blockPagesSize * sizeof(BlockPage*));
 
 			ContentPagesCount = 0;
 			VarPagesCount = 0;

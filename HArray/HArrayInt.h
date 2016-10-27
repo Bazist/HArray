@@ -127,6 +127,11 @@ public:
 
 	void init(uint headerBase)
 	{
+		//clear pointers
+		pHeader = 0;
+		pDoublePages = 0;
+		pMultiplyPages = 0;
+		
 		try
 		{
 			HEADER_BASE = headerBase;

@@ -91,7 +91,15 @@ public:
 				uint branchPagesSize,
 				uint blockPagesSize)
 	{
-		memset(this, 0, sizeof(HArrayVarRAM));
+		//clear pointers
+		pHeader = 0;
+		
+		pContentPages = 0;
+		pVarPages = 0;
+		pBranchPages = 0;
+		pBlockPages = 0;
+		
+		freeBranchCells = 0;
 
 		try
 		{

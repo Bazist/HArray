@@ -1,8 +1,10 @@
 #include "stdafx.h"
 #include "HArrayVarRAM.h"
 
-uint32 HArrayVarRAM::getValueByKey(uint32* key,
-								  uint32 keyLen)
+void HArrayVarRAM::delValueByKey(uint32* key,
+								 uint32 keyLen,
+								 uint32 value,
+								 uint32 index)
 {
 	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
@@ -23,7 +25,7 @@ NEXT_KEY_PART:
 		{
 			if((keyLen - keyOffset) != (contentCellType - ONLY_CONTENT_TYPE))
 			{
-				return 0;
+				return;
 			}
 
 			if(contentIndex < maxSafeShort) //content in one page
@@ -31,27 +33,39 @@ NEXT_KEY_PART:
 				for(; keyOffset < keyLen; contentIndex++, keyOffset++)
 				{
 					if(pContentPage->pContent[contentIndex].Value != key[keyOffset])
-						return 0;
+						return;
 				}
 
-				return pContentPage->pContent[contentIndex].Value; //return value
+				//delete value
+				if(pContentPage->pContent[contentIndex].Type == VALUE_TYPE)
+				{
+					pContentPage->pContent[contentIndex].Value = 0;
+				}
+
+				return;
 			}
 			else //content in two pages
 			{
 				for(; keyOffset < keyLen; contentOffset++, keyOffset++)
 				{
 					if(pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF].Value != key[keyOffset])
-						return 0;
+						return;
 				}
 
 				ContentCell& contentCell = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF];
 
-                return contentCell.Value; //return value
+				//delete value
+				if(contentCell.Type == VALUE_TYPE)
+				{
+					contentCell.Value = 0;
+				}
+
+				return;
 			}
 		}
 
 		uint32& keyValue = key[keyOffset];
-		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex].Value;
+		uint32& contentCellValueOrOffset = pContentPage->pContent[contentIndex].Value;
 
 		if(contentCellType == VAR_TYPE) //VAR =====================================================================
 		{
@@ -61,33 +75,33 @@ NEXT_KEY_PART:
 			if(keyOffset < keyLen)
 			{
 				contentCellType = varCell.ContCell.Type; //read from var cell
+				contentCellValueOrOffset = varCell.ContCell.Value;
 
 				if(contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
 				{
-					contentOffset = varCell.ContCell.Value;
+					contentOffset = contentCellValueOrOffset;
 
 					goto NEXT_KEY_PART;
-				}
-				else
-				{
-					contentCellValueOrOffset = varCell.ContCell.Value;
 				}
 			}
 			else
 			{
-                return varCell.ValueContentCell.Value;
+				if(varCell.ValueContentCell.Type == VALUE_TYPE)
+				{
+					varCell.ValueContentCell.Value = 0;
+				}
+
+				return;
 			}
 		}
 		else if(keyOffset == keyLen)
 		{
 			if(contentCellType == VALUE_TYPE)
 			{
-                return contentCellValueOrOffset;
+				contentCellValueOrOffset = 0;
 			}
-			else
-			{
-				return 0;
-			}
+
+			return;
 		}
 
 		if(contentCellType <= MAX_BRANCH_TYPE1) //BRANCH =====================================================================
@@ -109,18 +123,13 @@ NEXT_KEY_PART:
 				}
 			}
 
-			return 0;
+			return;
 		}
 		else if(contentCellType == VALUE_TYPE)
 		{
-			if(keyOffset == keyLen)
-			{
-                return contentCellValueOrOffset;
-			}
-			else
-			{
-				return 0;
-			}
+			contentCellValueOrOffset = 0;
+
+			return;
 		}
 		else if(contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
 		{
@@ -139,7 +148,7 @@ NEXT_KEY_PART:
 
 			if(blockCellType == EMPTY_TYPE)
 			{
-				return 0;
+				return;
 			}
 			else if(blockCellType == CURRENT_VALUE_TYPE) //current value
 			{
@@ -152,7 +161,7 @@ NEXT_KEY_PART:
 				}
 				else
 				{
-					return 0;
+					return;
 				}
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE1) //branch cell
@@ -172,7 +181,7 @@ NEXT_KEY_PART:
 					}
 				}
 
-				return 0;
+				return;
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE2) //branch cell
 			{
@@ -208,7 +217,7 @@ NEXT_KEY_PART:
 					}
 				}
 
-				return 0;
+				return;
 			}
 			else if(blockCell.Type <= MAX_BLOCK_TYPE)
 			{
@@ -220,7 +229,7 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return;
 			}
 		}
 		else if(contentCellType == CURRENT_VALUE_TYPE) //PART OF KEY =========================================================================
@@ -234,10 +243,10 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return;
 			}
 		}
 	}
 
-	return 0;
+	return;
 }

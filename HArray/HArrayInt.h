@@ -20,22 +20,22 @@
 
 struct HeaderCellInt
 {
-	uint Offset;
-	ushort Code;
-	uchar Type;
+	uint32 Offset;
+	ushort16 Code;
+	uchar8 Type;
 };
 
 struct DoubleValueCellInt
 {
-	uint Value1;
-	uint Value2;
-	ushort Code2;
+	uint32 Value1;
+	uint32 Value2;
+	ushort16 Code2;
 };
 
 struct MultiplyValueCellInt
 {
-	uint Value;
-	ushort Code;
+	uint32 Value;
+	ushort16 Code;
 };
 
 class DoublePageInt
@@ -43,7 +43,7 @@ class DoublePageInt
 public:
 	DoublePageInt()
 	{
-		for(uint i=0; i<PAGE_SIZE; i++)
+		for(uint32 i=0; i<PAGE_SIZE; i++)
 		{
 			pValues[i].Code2 = 0;
 		}
@@ -61,7 +61,7 @@ class MultiplyPageInt
 public:
 	MultiplyPageInt()
 	{
-		for(uint i=0; i<PAGE_SIZE; i++)
+		for(uint32 i=0; i<PAGE_SIZE; i++)
 		{
 			pValues[i].Code = 0;
 		}
@@ -98,338 +98,340 @@ public:
 		currFreeCell = 0;
 	}
 
-	uint HEADER_BASE;
-	uint CONTENT_BASE;
+	uint32 HEADER_BASE;
+	uint32 CONTENT_BASE;
 
-	uint HEADER_SIZE;
-	uint BLOCK_SIZE;
+	uint32 HEADER_SIZE;
+	uint32 BLOCK_SIZE;
 
-	uint BLOCK_BITS;
+	uint32 BLOCK_BITS;
 
 	HeaderCellInt* pHeader;
 
 	DoublePageInt** pDoublePages;
 	MultiplyPageInt** pMultiplyPages;
 
-	uint CountDoublePage;
-	uint CountMultiplyPage;
+	uint32 CountDoublePage;
+	uint32 CountMultiplyPage;
 
-	uint maxDoubleOffset;
-	uint maxMultiplyOffset;
+	uint32 maxDoubleOffset;
+	uint32 maxMultiplyOffset;
 
-	ushort lastHeaderCode;
+	ushort16 lastHeaderCode;
 
-	uint indexes[MAX_SHORT];
-	uint values[MAX_SHORT];
+	uint32 indexes[MAX_SHORT];
+	uint32 values[MAX_SHORT];
 
-	uint freeCells[MAX_SHORT];
-	uint currFreeCell;
+	uint32 freeCells[MAX_SHORT];
+	uint32 currFreeCell;
 
-	void init(uint headerBase)
+	void init(uint32 headerBase)
 	{
-		//clear pointers
+        //clear pointers
 		pHeader = 0;
 		pDoublePages = 0;
 		pMultiplyPages = 0;
-		
-		try
-		{
-			HEADER_BASE = headerBase;
-			CONTENT_BASE = 32 - headerBase;
 
-			ulong maxKey = 1;
-			maxKey <<= (headerBase + CONTENT_BASE);
+        try
+        {
+            HEADER_BASE = headerBase;
+            CONTENT_BASE = 32 - headerBase;
 
-			BLOCK_BITS = CONTENT_BASE;
-			HEADER_SIZE = (maxKey >> BLOCK_BITS);
-			BLOCK_SIZE = (maxKey >> headerBase) - 1;
+            ulong64 maxKey = 1;
+            maxKey <<= (headerBase + CONTENT_BASE);
 
-			pHeader = new HeaderCellInt[HEADER_SIZE + 1];
+            BLOCK_BITS = CONTENT_BASE;
+            HEADER_SIZE = (maxKey>>BLOCK_BITS);
+            BLOCK_SIZE = (maxKey>>headerBase) - 1;
 
-			pDoublePages = new DoublePageInt*[INIT_MAX_PAGES];
-			pMultiplyPages = new MultiplyPageInt*[INIT_MAX_PAGES];
+            pHeader = new HeaderCellInt[HEADER_SIZE+1];
 
-			for (uint i = 0; i <= HEADER_SIZE; i++)
-			{
-				pHeader[i].Type = 0;
-			}
+            pDoublePages = new DoublePageInt*[INIT_MAX_PAGES];
+            pMultiplyPages = new MultiplyPageInt*[INIT_MAX_PAGES];
 
-			for (uint i = 0; i < INIT_MAX_PAGES; i++)
-			{
-				pDoublePages[i] = 0;
-				pMultiplyPages[i] = 0;
-			}
+            for(uint32 i=0; i<=HEADER_SIZE; i++)
+            {
+                pHeader[i].Type = 0;
+            }
 
-			pDoublePages[0] = new DoublePageInt();
-			pMultiplyPages[0] = new MultiplyPageInt();
+            for(uint32 i=0; i<INIT_MAX_PAGES; i++)
+            {
+                pDoublePages[i] = 0;
+                pMultiplyPages[i] = 0;
+            }
 
-			CountDoublePage++;
-			CountMultiplyPage++;
-		}
-		catch (...) //maybe out of memory exception
-		{
-			destroy();
+            pDoublePages[0] = new DoublePageInt();
+            pMultiplyPages[0] = new MultiplyPageInt();
 
-			throw;
-		}
+            CountDoublePage++;
+            CountMultiplyPage++;
+        }
+        catch(...)
+        {
+            destroy();
+
+            throw;
+        }
 	}
-		
-	bool insert(uint key, uint value)
+
+	bool insert(uint32 key, uint32 value)
 	{
-		try
-		{
-			uint leftPart = (key >> BLOCK_BITS);
-			uint rightPart = (key&BLOCK_SIZE);
+        try
+        {
+            uint32 leftPart = (key >> BLOCK_BITS);
+            uint32 rightPart = (key & BLOCK_SIZE);
 
-			HeaderCellInt& headerCell = pHeader[leftPart];
+            HeaderCellInt& headerCell = pHeader[leftPart];
 
-			if (headerCell.Type)
-			{
-				//Existing block
-				uint countValues;
+            if(headerCell.Type)
+            {
+                //Existing block
+                uint32 countValues;
 
-				if (headerCell.Type == 1) //with one element in block
-				{
-					if (headerCell.Code == rightPart) //update
-					{
-						headerCell.Offset = value;
-						return false;
-					}
+                if(headerCell.Type == 1) //with one element in block
+                {
+                    if(headerCell.Code == rightPart) //update
+                    {
+                        headerCell.Offset = value;
+                        return false;
+                    }
 
-					//Allocate block
-					if (currFreeCell > 0)
-					{
-						uint blockOffset = freeCells[--currFreeCell];
-						DoublePageInt* pPage = pDoublePages[blockOffset >> 16];
-						DoubleValueCellInt& valueCell = pPage->pValues[blockOffset & 0xFFFF];
+                    //Allocate block
+                    if(currFreeCell > 0)
+                    {
+                        uint32 blockOffset = freeCells[--currFreeCell];
+                        DoublePageInt* pPage = pDoublePages[blockOffset>>16];
+                        DoubleValueCellInt& valueCell = pPage->pValues[blockOffset&0xFFFF];
 
-						valueCell.Value1 = headerCell.Offset;
+                        valueCell.Value1 = headerCell.Offset;
 
-						valueCell.Code2 = rightPart;
-						valueCell.Value2 = value;
+                        valueCell.Code2 = rightPart;
+                        valueCell.Value2 = value;
 
-						headerCell.Offset = blockOffset;
-						headerCell.Type = 2;
+                        headerCell.Offset = blockOffset;
+                        headerCell.Type = 2;
 
-						return true;
-					}
+                        return true;
+                    }
 
-					uint currPage = (maxDoubleOffset >> 16);
-					DoublePageInt* pPage = pDoublePages[currPage];
+                    uint32 currPage = (maxDoubleOffset>>16);
+                    DoublePageInt* pPage = pDoublePages[currPage];
 
-					if (!pPage)
-					{
-						pPage = new DoublePageInt();
-						pDoublePages[currPage] = pPage;
-						CountDoublePage++;
-					}
+                    if(!pPage)
+                    {
+                        pPage = new DoublePageInt();
+                        pDoublePages[currPage] = pPage;
+                        CountDoublePage++;
+                    }
 
-					DoubleValueCellInt& valueCell = pPage->pValues[maxDoubleOffset & 0xFFFF];
+                    DoubleValueCellInt& valueCell = pPage->pValues[maxDoubleOffset&0xFFFF];
 
-					valueCell.Value1 = headerCell.Offset;
+                    valueCell.Value1 = headerCell.Offset;
 
-					valueCell.Code2 = rightPart;
-					valueCell.Value2 = value;
+                    valueCell.Code2 = rightPart;
+                    valueCell.Value2 = value;
 
-					headerCell.Offset = maxDoubleOffset++;
-					headerCell.Type = 2;
+                    headerCell.Offset = maxDoubleOffset++;
+                    headerCell.Type = 2;
 
-					return true;
-				}
-				else if (headerCell.Type == 2) //with two elements in block
-				{
-					uint currPage = (headerCell.Offset >> 16);
-					DoublePageInt* pPage = pDoublePages[currPage];
+                    return true;
+                }
+                else if(headerCell.Type == 2) //with two elements in block
+                {
+                    uint32 currPage = (headerCell.Offset>>16);
+                    DoublePageInt* pPage = pDoublePages[currPage];
 
-					DoubleValueCellInt& valueCell = pPage->pValues[headerCell.Offset & 0xFFFF];
+                    DoubleValueCellInt& valueCell = pPage->pValues[headerCell.Offset&0xFFFF];
 
-					if (headerCell.Code == rightPart)
-					{
-						valueCell.Value1 = value;
-						return false;
-					}
+                    if(headerCell.Code == rightPart)
+                    {
+                        valueCell.Value1 = value;
+                        return false;
+                    }
 
-					if (valueCell.Code2 == rightPart)
-					{
-						valueCell.Value2 = value;
-						return false;
-					}
+                    if(valueCell.Code2 == rightPart)
+                    {
+                        valueCell.Value2 = value;
+                        return false;
+                    }
 
-					indexes[0] = headerCell.Code;
-					values[0] = valueCell.Value1;
+                    indexes[0] = headerCell.Code;
+                    values[0] = valueCell.Value1;
 
-					indexes[1] = valueCell.Code2;
-					values[1] = valueCell.Value2;
+                    indexes[1] = valueCell.Code2;
+                    values[1] = valueCell.Value2;
 
-					indexes[2] = rightPart;
-					values[2] = value;
+                    indexes[2] = rightPart;
+                    values[2] = value;
 
-					countValues = 3;
+                    countValues = 3;
 
-					if (currFreeCell < MAX_SHORT)
-					{
-						freeCells[currFreeCell++] = headerCell.Offset;
-					}
-				}
-				else if (headerCell.Type == 3) //with multiply elements in block
-				{
-					uint offset = headerCell.Offset + rightPart;
+                    if(currFreeCell < MAX_SHORT)
+                    {
+                        freeCells[currFreeCell++] = headerCell.Offset;
+                    }
+                }
+                else if(headerCell.Type == 3) //with multiply elements in block
+                {
+                    uint32 offset = headerCell.Offset+rightPart;
 
-					uint currPage = (offset >> 16);
-					MultiplyPageInt* pPage = pMultiplyPages[currPage];
+                    uint32 currPage = (offset>>16);
+                    MultiplyPageInt* pPage = pMultiplyPages[currPage];
 
-					if (!pPage)
-					{
-						pPage = new MultiplyPageInt();
-						pMultiplyPages[currPage] = pPage;
-						CountMultiplyPage++;
+                    if(!pPage)
+                    {
+                        pPage = new MultiplyPageInt();
+                        pMultiplyPages[currPage] = pPage;
+                        CountMultiplyPage++;
 
-						MultiplyValueCellInt& valueCell = pPage->pValues[offset & 0xFFFF];
-						valueCell.Value = value; //insert
-						valueCell.Code = headerCell.Code;
-						return true;
-					}
+                        MultiplyValueCellInt& valueCell = pPage->pValues[offset&0xFFFF];
+                        valueCell.Value = value; //insert
+                        valueCell.Code = headerCell.Code;
 
-					MultiplyValueCellInt& valueCell = pPage->pValues[offset & 0xFFFF];
+                        return true;
+                    }
 
-					if (valueCell.Code == 0)
-					{
-						valueCell.Value = value; //insert
-						valueCell.Code = headerCell.Code;
-						return true;
-					}
-					else if (valueCell.Code == headerCell.Code)
-					{
-						valueCell.Value = value; //update
-						return false;
-					}
+                    MultiplyValueCellInt& valueCell = pPage->pValues[offset&0xFFFF];
 
-					//Extract block
-					indexes[0] = rightPart;
-					values[0] = value;
+                    if(valueCell.Code==0)
+                    {
+                        valueCell.Value = value; //insert
+                        valueCell.Code = headerCell.Code;
+                        return true;
+                    }
+                    else if(valueCell.Code==headerCell.Code)
+                    {
+                        valueCell.Value = value; //update
+                        return false;
+                    }
 
-					countValues = 1;
+                    //Extract block
+                    indexes[0] = rightPart;
+                    values[0] = value;
 
-					//with calculating MultiplyPageInt
-					for (uint i = 0; i <= BLOCK_SIZE; i++)
-					{
-						uint offset = headerCell.Offset + i;
+                    countValues = 1;
 
-						uint currPage = (offset >> 16);
-						MultiplyPageInt* pPage = pMultiplyPages[currPage];
+                    //with calculating MultiplyPageInt
+                    for(uint32 i=0; i<=BLOCK_SIZE; i++)
+                    {
+                        uint32 offset = headerCell.Offset + i;
 
-						if (pPage)
-						{
-							MultiplyValueCellInt& valueCell = pPage->pValues[offset & 0xFFFF];
+                        uint32 currPage = (offset>>16);
+                        MultiplyPageInt* pPage = pMultiplyPages[currPage];
 
-							if (valueCell.Code == headerCell.Code)
-							{
-								indexes[countValues] = i;
-								values[countValues] = valueCell.Value;
+                        if(pPage)
+                        {
+                            MultiplyValueCellInt& valueCell = pPage->pValues[offset&0xFFFF];
 
-								countValues++;
+                            if(valueCell.Code == headerCell.Code)
+                            {
+                                indexes[countValues] = i;
+                                values[countValues] = valueCell.Value;
 
-								valueCell.Value = 0;
-								valueCell.Code = 0;
-							}
-						}
-					}
-				}
+                                countValues++;
 
-				lastHeaderCode++;
-				if (lastHeaderCode == 0)
-					lastHeaderCode = 1;
+                                valueCell.Value = 0;
+                                valueCell.Code = 0;
+                            }
+                        }
+                    }
+                }
 
-				//Find offset for block
-				uint blockOffset = maxMultiplyOffset;
-				/*
-				if(blockOffset > BLOCK_SIZE)
-				{
-					blockOffset -= BLOCK_SIZE;
-				}
-				*/
+                lastHeaderCode++;
 
-				while (true)
-				{
-					bool isFound = true;
+                if(lastHeaderCode == 0)
+                    lastHeaderCode = 1;
 
-					for (uint i = 0; i < countValues; i++)
-					{
-						uint offset = blockOffset + indexes[i];
+                //Find offset for block
+                uint32 blockOffset = maxMultiplyOffset;
+                /*
+                if(blockOffset > BLOCK_SIZE)
+                {
+                    blockOffset -= BLOCK_SIZE;
+                }
+                */
 
-						uint currPage = (offset >> 16);
-						MultiplyPageInt* pPage = pMultiplyPages[currPage];
+                while(true)
+                {
+                    bool isFound = true;
 
-						if (!pPage)
-						{
-							pPage = new MultiplyPageInt();
-							pMultiplyPages[currPage] = pPage;
-							CountMultiplyPage++;
-						}
+                    for(uint32 i=0; i<countValues; i++)
+                    {
+                        uint32 offset = blockOffset + indexes[i];
 
-						MultiplyValueCellInt& valueCell = pPage->pValues[offset & 0xFFFF];
+                        uint32 currPage = (offset>>16);
+                        MultiplyPageInt* pPage = pMultiplyPages[currPage];
 
-						if (valueCell.Code > 0)
-						{
-							isFound = false;
-							break;
-						}
-					}
+                        if(!pPage)
+                        {
+                            pPage = new MultiplyPageInt();
+                            pMultiplyPages[currPage] = pPage;
+                            CountMultiplyPage++;
+                        }
 
-					if (isFound)
-					{
-						//Allocate block
-						for (uint i = 0; i < countValues; i++)
-						{
-							uint offset = blockOffset + indexes[i];
+                        MultiplyValueCellInt& valueCell = pPage->pValues[offset&0xFFFF];
 
-							uint currPage = (offset >> 16);
-							MultiplyPageInt* pPage = pMultiplyPages[currPage];
-							MultiplyValueCellInt& valueCell = pPage->pValues[offset & 0xFFFF];
+                        if(valueCell.Code > 0)
+                        {
+                            isFound = false;
+                            break;
+                        }
+                    }
 
-							valueCell.Value = values[i]; //insert
-							valueCell.Code = lastHeaderCode;
-						}
+                    if(isFound)
+                    {
+                        //Allocate block
+                        for(uint32 i=0; i<countValues; i++)
+                        {
+                            uint32 offset = blockOffset + indexes[i];
 
-						headerCell.Offset = blockOffset;
-						headerCell.Code = lastHeaderCode;
-						headerCell.Type = 3;
+                            uint32 currPage = (offset>>16);
+                            MultiplyPageInt* pPage = pMultiplyPages[currPage];
+                            MultiplyValueCellInt& valueCell = pPage->pValues[offset&0xFFFF];
 
-						if (blockOffset > maxMultiplyOffset)
-						{
-							maxMultiplyOffset = blockOffset;
-						}
+                            valueCell.Value = values[i]; //insert
+                            valueCell.Code = lastHeaderCode;
+                        }
 
-						break;
-					}
-					else
-					{
-						blockOffset++;
-					}
-				}
-			}
-			else
-			{
-				headerCell.Offset = value;
-				headerCell.Code = rightPart;
-				headerCell.Type = 1;
-			}
+                        headerCell.Offset = blockOffset;
+                        headerCell.Code = lastHeaderCode;
+                        headerCell.Type = 3;
 
-			return true;
+                        if(blockOffset > maxMultiplyOffset)
+                        {
+                            maxMultiplyOffset = blockOffset;
+                        }
+
+                        break;
+                    }
+                    else
+                    {
+                        blockOffset++;
+                    }
+                }
+            }
+            else
+            {
+                headerCell.Offset = value;
+                headerCell.Code = rightPart;
+                headerCell.Type = 1;
+            }
+
+            return true;
 		}
-		catch (...) //maybe out of memory exception
+		catch(...)
 		{
-			destroy();
+            destroy();
 
-			throw;
+            throw;
 		}
 	}
 
-	uint getValueByKey(uint key)
+	uint32 getValueByKey(uint32 key)
 	{
 		HeaderCellInt& headerCell = pHeader[key>>BLOCK_BITS];
-		uint rightPart = (key&BLOCK_SIZE);
-		
+		uint32 rightPart = (key&BLOCK_SIZE);
+
 		switch (headerCell.Type)
 		{
 			case 1:
@@ -462,7 +464,7 @@ public:
 			}
 			case 3:
 			{
-				uint offset = headerCell.Offset + rightPart;
+				uint32 offset = headerCell.Offset + rightPart;
 
 				MultiplyPageInt* pPage = pMultiplyPages[offset>>16];
 				if(pPage)
@@ -483,18 +485,18 @@ public:
 	}
 
 
-	uint getValuesByRange(uint* buffer, 
-						 uint size, 
-						 uint startKey, 
-						 uint endKey)
+	uint32 getValuesByRange(uint32* buffer,
+						 uint32 size,
+						 uint32 startKey,
+						 uint32 endKey)
 	{
-		uint count = 0;
+		uint32 count = 0;
 
-		uint startLeftPart = (startKey>>BLOCK_BITS);
-		uint endLeftPart = (endKey>>BLOCK_BITS);
+		uint32 startLeftPart = (startKey>>BLOCK_BITS);
+		uint32 endLeftPart = (endKey>>BLOCK_BITS);
 
 		//start
-		for(uint currHeader = startLeftPart; currHeader <= endLeftPart; currHeader++)
+		for(uint32 currHeader = startLeftPart; currHeader <= endLeftPart; currHeader++)
 		{
 			HeaderCellInt& headerCell = pHeader[currHeader];
 			if(headerCell.Type == 1)
@@ -504,7 +506,7 @@ public:
 			else if(headerCell.Type == 2)
 			{
 				DoublePageInt* pPage = pDoublePages[headerCell.Offset>>16];
-			
+
 				if(pPage)
 				{
 					DoubleValueCellInt& valueCell = pPage->pValues[headerCell.Offset&0xFFFF];
@@ -522,14 +524,14 @@ public:
 			}
 			else if(headerCell.Type == 3)
 			{
-				uint startBlockOffset = headerCell.Offset;
+				uint32 startBlockOffset = headerCell.Offset;
 
 				if(currHeader == startLeftPart)
 				{
 					startBlockOffset += (startKey&BLOCK_SIZE);
 				}
 
-				uint endBlockOffset = headerCell.Offset;
+				uint32 endBlockOffset = headerCell.Offset;
 
 				if(currHeader == endLeftPart)
 				{
@@ -539,12 +541,12 @@ public:
 				{
 					endBlockOffset += BLOCK_SIZE;
 				}
-				
-				for(uint offset = startBlockOffset; offset <= endBlockOffset; offset++)
+
+				for(uint32 offset = startBlockOffset; offset <= endBlockOffset; offset++)
 				{
-					uint currPage = (offset>>16);
+					uint32 currPage = (offset>>16);
 					MultiplyPageInt* pPage = pMultiplyPages[currPage];
-			
+
 					if(pPage)
 					{
 						MultiplyValueCellInt& valueCell = pPage->pValues[offset&0xFFFF];
@@ -553,7 +555,7 @@ public:
 						{
 							buffer[count++] = valueCell.Value;
 						}
-						
+
 						if(count >= size)
 						{
 							break;
@@ -573,16 +575,16 @@ public:
 		pNewArray->init(HEADER_BASE);
 
 		//copy
-		uint count = 0;
+		uint32 count = 0;
 
-		uint startKey = 0;
-		uint endKey = 0xFFFFFFFF;
+		uint32 startKey = 0;
+		uint32 endKey = 0xFFFFFFFF;
 
-		uint startLeftPart = (startKey>>BLOCK_BITS);
-		uint endLeftPart = (endKey>>BLOCK_BITS);
+		uint32 startLeftPart = (startKey>>BLOCK_BITS);
+		uint32 endLeftPart = (endKey>>BLOCK_BITS);
 
 		//start
-		for(uint currHeader = startLeftPart; currHeader <= endLeftPart; currHeader++)
+		for(uint32 currHeader = startLeftPart; currHeader <= endLeftPart; currHeader++)
 		{
 			/*if(currHeader == 941647)
 			{
@@ -592,24 +594,24 @@ public:
 			HeaderCellInt& headerCell = pHeader[currHeader];
 			if(headerCell.Type == 1)
 			{
-				uint key = (currHeader<<BLOCK_BITS) + headerCell.Code;
-				uint value = headerCell.Offset;
+				uint32 key = (currHeader<<BLOCK_BITS) + headerCell.Code;
+				uint32 value = headerCell.Offset;
 
 				pNewArray->insert(key, value);
 			}
 			else if(headerCell.Type == 2)
 			{
 				DoublePageInt* pPage = pDoublePages[headerCell.Offset>>16];
-			
+
 				if(pPage)
 				{
 					DoubleValueCellInt& valueCell = pPage->pValues[headerCell.Offset&0xFFFF];
 
-					uint key1 = (currHeader<<BLOCK_BITS) + headerCell.Code;
-					uint value1 = valueCell.Value1;
+					uint32 key1 = (currHeader<<BLOCK_BITS) + headerCell.Code;
+					uint32 value1 = valueCell.Value1;
 
-					uint key2 = (currHeader<<BLOCK_BITS) + valueCell.Code2;
-					uint value2 = valueCell.Value2;
+					uint32 key2 = (currHeader<<BLOCK_BITS) + valueCell.Code2;
+					uint32 value2 = valueCell.Value2;
 
 					if(headerCell.Code < valueCell.Code2)
 					{
@@ -625,14 +627,14 @@ public:
 			}
 			else if(headerCell.Type == 3)
 			{
-				uint startBlockOffset = headerCell.Offset;
+				uint32 startBlockOffset = headerCell.Offset;
 
 				if(currHeader == startLeftPart)
 				{
 					startBlockOffset += (startKey&BLOCK_SIZE);
 				}
 
-				uint endBlockOffset = headerCell.Offset;
+				uint32 endBlockOffset = headerCell.Offset;
 
 				if(currHeader == endLeftPart)
 				{
@@ -642,20 +644,20 @@ public:
 				{
 					endBlockOffset += BLOCK_SIZE;
 				}
-				
-				for(uint offset = startBlockOffset, code = 0; offset < endBlockOffset; offset++, code++)
+
+				for(uint32 offset = startBlockOffset, code = 0; offset < endBlockOffset; offset++, code++)
 				{
-					uint currPage = (offset>>16);
+					uint32 currPage = (offset>>16);
 					MultiplyPageInt* pPage = pMultiplyPages[currPage];
-			
+
 					if(pPage)
 					{
 						MultiplyValueCellInt& valueCell = pPage->pValues[offset&0xFFFF];
 
 						if(valueCell.Code==headerCell.Code)
 						{
-							uint key = (currHeader<<BLOCK_BITS) + code;
-							uint value = valueCell.Value;
+							uint32 key = (currHeader<<BLOCK_BITS) + code;
+							uint32 value = valueCell.Value;
 
 							pNewArray->insert(key, value);
 						}
@@ -678,28 +680,28 @@ public:
 		this->maxMultiplyOffset = pNewArray->maxMultiplyOffset;
 
 		this->lastHeaderCode = pNewArray->lastHeaderCode;
-		
+
 		delete pNewArray;
 	}
 
-	uint getKeysAndValuesByRange(uint* buffer, 
-								 uint size, 
-								 uint startKey, 
-								 uint endKey)
+	uint32 getKeysAndValuesByRange(uint32* buffer,
+								 uint32 size,
+								 uint32 startKey,
+								 uint32 endKey)
 	{
-		uint count = 0;
+		uint32 count = 0;
 
-		uint startLeftPart = (startKey>>BLOCK_BITS);
-		uint endLeftPart = (endKey>>BLOCK_BITS);
+		uint32 startLeftPart = (startKey>>BLOCK_BITS);
+		uint32 endLeftPart = (endKey>>BLOCK_BITS);
 
 		//start
-		for(uint currHeader = startLeftPart; currHeader <= endLeftPart; currHeader++)
+		for(uint32 currHeader = startLeftPart; currHeader <= endLeftPart; currHeader++)
 		{
 			HeaderCellInt& headerCell = pHeader[currHeader];
 			if(headerCell.Type == 1)
 			{
-				uint key = (currHeader<<BLOCK_BITS) + headerCell.Code;
-				uint value = headerCell.Offset;
+				uint32 key = (currHeader<<BLOCK_BITS) + headerCell.Code;
+				uint32 value = headerCell.Offset;
 
 				buffer[count++] = key;
 				buffer[count++] = value;
@@ -707,16 +709,16 @@ public:
 			else if(headerCell.Type == 2)
 			{
 				DoublePageInt* pPage = pDoublePages[headerCell.Offset>>16];
-			
+
 				if(pPage)
 				{
 					DoubleValueCellInt& valueCell = pPage->pValues[headerCell.Offset&0xFFFF];
 
-					uint key1 = (currHeader<<BLOCK_BITS) + headerCell.Code;
-					uint value1 = valueCell.Value1;
+					uint32 key1 = (currHeader<<BLOCK_BITS) + headerCell.Code;
+					uint32 value1 = valueCell.Value1;
 
-					uint key2 = (currHeader<<BLOCK_BITS) + valueCell.Code2;
-					uint value2 = valueCell.Value2;
+					uint32 key2 = (currHeader<<BLOCK_BITS) + valueCell.Code2;
+					uint32 value2 = valueCell.Value2;
 
 					if(headerCell.Code < valueCell.Code2)
 					{
@@ -736,14 +738,14 @@ public:
 			}
 			else if(headerCell.Type == 3)
 			{
-				uint startBlockOffset = headerCell.Offset;
+				uint32 startBlockOffset = headerCell.Offset;
 
 				if(currHeader == startLeftPart)
 				{
 					startBlockOffset += (startKey&BLOCK_SIZE);
 				}
 
-				uint endBlockOffset = headerCell.Offset;
+				uint32 endBlockOffset = headerCell.Offset;
 
 				if(currHeader == endLeftPart)
 				{
@@ -753,20 +755,20 @@ public:
 				{
 					endBlockOffset += BLOCK_SIZE;
 				}
-				
-				for(uint offset = startBlockOffset, code = 0; offset <= endBlockOffset; offset++, code++)
+
+				for(uint32 offset = startBlockOffset, code = 0; offset <= endBlockOffset; offset++, code++)
 				{
-					uint currPage = (offset>>16);
+					uint32 currPage = (offset>>16);
 					MultiplyPageInt* pPage = pMultiplyPages[currPage];
-			
+
 					if(pPage)
 					{
 						MultiplyValueCellInt& valueCell = pPage->pValues[offset&0xFFFF];
 
 						if(valueCell.Code==headerCell.Code)
 						{
-							uint key = (currHeader<<BLOCK_BITS) + code;
-							uint value = valueCell.Value;
+							uint32 key = (currHeader<<BLOCK_BITS) + code;
+							uint32 value = valueCell.Value;
 
 							buffer[count++] = key;
 							buffer[count++] = value;
@@ -778,8 +780,8 @@ public:
 
 		return count;
 	}
-	
-	uint getUsedMemory()
+
+	uint32 getUsedMemory()
 	{
 		return sizeof(HArrayInt) + HEADER_SIZE * sizeof(HeaderCellInt) + CountDoublePage * sizeof(DoublePageInt) + CountMultiplyPage * sizeof(MultiplyPageInt);
 	}
@@ -791,24 +793,24 @@ public:
 			delete[] pHeader;
 			pHeader = 0;
 		}
-	
+
 		if(pDoublePages)
 		{
-			for(uint i=0; i<CountDoublePage; i++)
+			for(uint32 i=0; i<CountDoublePage; i++)
 				delete pDoublePages[i];
 
 			delete[] pDoublePages;
 			pDoublePages = 0;
 		}
-		
+
 		if(pMultiplyPages)
 		{
-			for(uint i=0; i<CountMultiplyPage; i++)
+			for(uint32 i=0; i<CountMultiplyPage; i++)
 				delete pMultiplyPages[i];
-	
+
 			delete[] pMultiplyPages;
 			pMultiplyPages = 0;
 		}
 	}
 
-};	
+};

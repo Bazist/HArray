@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "HArrayVarRAM.h"
 
-uint32 HArrayVarRAM::getValueByKey(uint32* key,
-								  uint32 keyLen)
+bool HArrayVarRAM::hasPartKey(uint32* key,
+							  uint32 keyLen)
 {
 	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
@@ -21,32 +21,25 @@ NEXT_KEY_PART:
 
 		if(contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
-			if((keyLen - keyOffset) != (contentCellType - ONLY_CONTENT_TYPE))
-			{
-				return 0;
-			}
-
 			if(contentIndex < maxSafeShort) //content in one page
 			{
 				for(; keyOffset < keyLen; contentIndex++, keyOffset++)
 				{
 					if(pContentPage->pContent[contentIndex].Value != key[keyOffset])
-						return 0;
+						return false;
 				}
 
-				return pContentPage->pContent[contentIndex].Value; //return value
+				return true;
 			}
 			else //content in two pages
 			{
 				for(; keyOffset < keyLen; contentOffset++, keyOffset++)
 				{
 					if(pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF].Value != key[keyOffset])
-						return 0;
+						return false;
 				}
 
-				ContentCell& contentCell = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF];
-
-                return contentCell.Value; //return value
+				return true;
 			}
 		}
 
@@ -61,33 +54,23 @@ NEXT_KEY_PART:
 			if(keyOffset < keyLen)
 			{
 				contentCellType = varCell.ContCell.Type; //read from var cell
+				contentCellValueOrOffset = varCell.ContCell.Value;
 
 				if(contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
 				{
-					contentOffset = varCell.ContCell.Value;
+					contentOffset = contentCellValueOrOffset;
 
 					goto NEXT_KEY_PART;
-				}
-				else
-				{
-					contentCellValueOrOffset = varCell.ContCell.Value;
 				}
 			}
 			else
 			{
-                return varCell.ValueContentCell.Value;
+				return true;
 			}
 		}
 		else if(keyOffset == keyLen)
 		{
-			if(contentCellType == VALUE_TYPE)
-			{
-                return contentCellValueOrOffset;
-			}
-			else
-			{
-				return 0;
-			}
+			return true;
 		}
 
 		if(contentCellType <= MAX_BRANCH_TYPE1) //BRANCH =====================================================================
@@ -109,18 +92,11 @@ NEXT_KEY_PART:
 				}
 			}
 
-			return 0;
+			return false;
 		}
 		else if(contentCellType == VALUE_TYPE)
 		{
-			if(keyOffset == keyLen)
-			{
-                return contentCellValueOrOffset;
-			}
-			else
-			{
-				return 0;
-			}
+			return true;
 		}
 		else if(contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
 		{
@@ -139,7 +115,7 @@ NEXT_KEY_PART:
 
 			if(blockCellType == EMPTY_TYPE)
 			{
-				return 0;
+				return false;
 			}
 			else if(blockCellType == CURRENT_VALUE_TYPE) //current value
 			{
@@ -152,7 +128,7 @@ NEXT_KEY_PART:
 				}
 				else
 				{
-					return 0;
+					return false;
 				}
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE1) //branch cell
@@ -172,7 +148,7 @@ NEXT_KEY_PART:
 					}
 				}
 
-				return 0;
+				return false;
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE2) //branch cell
 			{
@@ -208,7 +184,7 @@ NEXT_KEY_PART:
 					}
 				}
 
-				return 0;
+				return false;
 			}
 			else if(blockCell.Type <= MAX_BLOCK_TYPE)
 			{
@@ -220,7 +196,7 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 		else if(contentCellType == CURRENT_VALUE_TYPE) //PART OF KEY =========================================================================
@@ -234,10 +210,10 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 	}
 
-	return 0;
+	return false;
 }

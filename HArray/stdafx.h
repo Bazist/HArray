@@ -31,17 +31,27 @@
 #include <tchar.h>
 #include <string.h>
 
-#define uint unsigned __int32
-#define ulong unsigned __int64
-#define ushort unsigned __int16
-#define uchar unsigned __int8
-#define ucode unsigned __int8
+#ifdef _WIN32
+#define uint32 unsigned __int32
+#define ulong64 unsigned __int64
+#define ushort16 unsigned __int16
+#define uchar8 unsigned __int8
+#define ucode8 unsigned __int8
+#endif
 
-const uint MAX_SHORT = 65536;
-const uint MAX_CHAR = 256;
-const uint INIT_MAX_PAGES = 1024;
-const uint PAGE_SIZE = MAX_SHORT*2;
-const uchar BLOCK_SIZE = 16;
-const uchar ROW_LEN = 3;
+#ifdef linux
+#define uint32 uint32_t
+#define ulong64 uint64_t
+#define ushort16 uint16_t
+#define uchar8 uint8_t
+#define ucode8 uint8_t
+#endif
+
+const uint32 MAX_SHORT = 65536;
+const uint32 MAX_CHAR = 256;
+const uint32 INIT_MAX_PAGES = 1024;
+const uint32 PAGE_SIZE = MAX_SHORT*2;
+const uchar8 BLOCK_SIZE = 16;
+const uchar8 ROW_LEN = 3;
 
 // TODO: reference additional headers your program requires here

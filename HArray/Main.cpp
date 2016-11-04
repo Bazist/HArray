@@ -21,18 +21,23 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
-#include <iostream>
 #include <map>
-#include <unordered_map>
-#include <windows.h>
 #include "HArrayInt.h"
 #include "HArrayVarRAM.h"
 
 using namespace std;
 
+uint32 totalHArrayTime = 0;
+uint32 totalMapTime = 0;
+
+clock_t msclock()
+{
+	return (ulong64)clock() * 1000 / CLOCKS_PER_SEC; //in ms
+}
+
 //==== HArrayInt - Int Keys ===========================================================================================
 
-void testHArrayInt(uint* keys, uint countKeys)
+void testHArrayInt(uint32* keys, uint32 countKeys)
 {
 	printf("HArrayInt => ");
 
@@ -43,21 +48,23 @@ void testHArrayInt(uint* keys, uint countKeys)
 
 	//INSERT ===========================================
 
-	start = clock();
+	start = msclock();
 
 	for (int i = 0; i < countKeys; i++)
 	{
 		ha.insert(keys[i], keys[i]);
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Insert: %d msec, ", (finish - start));
 
-	//SEARCH ===========================================
-	start = clock();
+	totalHArrayTime += (finish - start);
 
-	for (uint i = 0; i < countKeys; i++)
+	//SEARCH ===========================================
+	start = msclock();
+
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		if (ha.getValueByKey(keys[i]) != keys[i])
 		{
@@ -66,40 +73,44 @@ void testHArrayInt(uint* keys, uint countKeys)
 		}
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Search: %d msec.\n", (finish - start));
+
+	totalHArrayTime += (finish - start);
 
 	//ha.print();
 
 	ha.destroy();
 }
 
-void testStdMapInt(uint* keys, uint countKeys)
+void testStdMapInt(uint32* keys, uint32 countKeys)
 {
 	printf("std::map => ");
 
-	std::map<uint, uint> mymap;
+	std::map<uint32, uint32> mymap;
 
 	clock_t start, finish;
 
 	//INSERT ===========================================
 
-	start = clock();
+	start = msclock();
 
 	for (int i = 0; i < countKeys; i++)
 	{
 		mymap[keys[i]] = keys[i];
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Insert: %d msec, ", (finish - start));
 
-	//SEARCH ===========================================
-	start = clock();
+	totalMapTime += (finish - start);
 
-	for (uint i = 0; i < countKeys; i++)
+	//SEARCH ===========================================
+	start = msclock();
+
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		if (mymap[keys[i]] != keys[i])
 		{
@@ -108,48 +119,50 @@ void testStdMapInt(uint* keys, uint countKeys)
 		}
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Search: %d msec.\n", (finish - start));
+
+	totalMapTime += (finish - start);
 
 	//ha.print();
 }
 
-void fillSeqInts(uint* keys, uint countKeys)
+void fillSeqInts(uint32* keys, uint32 countKeys)
 {
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		keys[i] = i;
 	}
 }
 
-void fillRandInts(uint* keys, uint countKeys)
+void fillRandInts(uint32* keys, uint32 countKeys)
 {
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		keys[i] = rand();
 	}
 }
 
-void fillPeriodInts(uint* keys, uint countKeys)
+void fillPeriodInts(uint32* keys, uint32 countKeys)
 {
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		keys[i] = i * 17;
 	}
 }
 
-void HArrayInt_VS_StdMap_IntKey(uint startOnAmount, uint stepOfAmount, uint stopOnAmount)
+void HArrayInt_VS_StdMap_IntKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
 {
 	printf("=== HArrayInt VS std::map<int,int> testing ===\n");
 
-	uint* intKeys = new uint[stopOnAmount];
+	uint32* intKeys = new uint32[stopOnAmount];
 
 	fillSeqInts(intKeys, stopOnAmount);
 
-	for (uint countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
+	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
-		printf("Insert/Search %u SEQUENCE keys (%u bytes each) ...\n", countKeys, sizeof(uint));
+		printf("Insert/Search %u SEQUENCE keys (%u bytes each) ...\n", countKeys, sizeof(uint32));
 		testHArrayInt(intKeys, countKeys);
 		testStdMapInt(intKeys, countKeys);
 		printf("\n");
@@ -157,9 +170,9 @@ void HArrayInt_VS_StdMap_IntKey(uint startOnAmount, uint stepOfAmount, uint stop
 
 	fillRandInts(intKeys, stopOnAmount);
 
-	for (uint countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
+	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
-		printf("Insert/Search %u RANDOM keys (%u bytes each) ...\n", countKeys, sizeof(uint));
+		printf("Insert/Search %u RANDOM keys (%u bytes each) ...\n", countKeys, sizeof(uint32));
 		testHArrayInt(intKeys, countKeys);
 		testStdMapInt(intKeys, countKeys);
 		printf("\n");
@@ -167,9 +180,9 @@ void HArrayInt_VS_StdMap_IntKey(uint startOnAmount, uint stepOfAmount, uint stop
 
 	fillPeriodInts(intKeys, stopOnAmount);
 
-	for (uint countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
+	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
-		printf("Insert/Search %u PERIOD keys (%u bytes each) ...\n", countKeys, sizeof(uint));
+		printf("Insert/Search %u PERIOD keys (%u bytes each) ...\n", countKeys, sizeof(uint32));
 		testHArrayInt(intKeys, countKeys);
 		testStdMapInt(intKeys, countKeys);
 		printf("\n");
@@ -180,17 +193,17 @@ void HArrayInt_VS_StdMap_IntKey(uint startOnAmount, uint stepOfAmount, uint stop
 
 //==== HArrayVarRAM - Binary Keys ===========================================================================================
 
-const uint BIN_KEY_LEN = 4;
+const uint32 BIN_KEY_LEN = 4;
 
 struct BinKey
 {
 public:
-	uint Data[BIN_KEY_LEN]; //16 bytes max
+	uint32 Data[BIN_KEY_LEN]; //16 bytes max
 };
 
 bool operator<(const BinKey& a, const BinKey& b)
 {
-	for (uint i = 0; i < BIN_KEY_LEN; i++)
+	for (uint32 i = 0; i < BIN_KEY_LEN; i++)
 	{
 		if (a.Data[i] == b.Data[i])
 			continue;
@@ -201,7 +214,7 @@ bool operator<(const BinKey& a, const BinKey& b)
 	return false;
 }
 
-void testHArrayBin(BinKey* keys, uint countKeys)
+void testHArrayBin(BinKey* keys, uint32 countKeys)
 {
 	printf("HArrayVarRAM => ");
 
@@ -212,63 +225,85 @@ void testHArrayBin(BinKey* keys, uint countKeys)
 
 	//INSERT ===========================================
 
-	start = clock();
+	start = msclock();
 
-	for (uint i = 0; i < countKeys; i++)
+	/*
+	if(countKeys == 7000000)
 	{
-		ha.insert(keys[i].Data, sizeof(BinKey), keys[i].Data[0]);
+	//6750000 - 6800000
+	countKeys = 6778843;
+	}
+	*/
+
+	for (uint32 i = 0; i < countKeys; i++)
+	{
+		/*
+		if(i==6778842)
+		printf("%u\n", i);
+
+		if(i==6778843)
+		printf("%u\n", i);
+		*/
+
+		ha.insert((uint32*)keys[i].Data, sizeof(BinKey), keys[i].Data[0]);
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Insert: %d msec, ", (finish - start));
 
-	//SEARCH ===========================================
-	start = clock();
+	totalHArrayTime += (finish - start);
 
-	for (uint i = 0; i < countKeys; i++)
+	//SEARCH ===========================================
+	start = msclock();
+
+	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (ha.getValueByKey(keys[i].Data, sizeof(BinKey)) != keys[i].Data[0])
+		if (ha.getValueByKey((uint32*)keys[i].Data, sizeof(BinKey)) != keys[i].Data[0])
 		{
 			printf("Error\n");
 			break;
 		}
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Search: %d msec.\n", (finish - start));
+
+	totalHArrayTime += (finish - start);
 
 	//ha.print();
 
 	ha.destroy();
 }
 
-void testStdMapBin(BinKey* keys, uint countKeys)
+void testStdMapBin(BinKey* keys, uint32 countKeys)
 {
 	printf("std::map => ");
 
-	std::map<BinKey, uint> mymap;
+	std::map<BinKey, uint32> mymap;
 
 	clock_t start, finish;
 
 	//INSERT ===========================================
 
-	start = clock();
+	start = msclock();
 
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		mymap[keys[i]] = keys[i].Data[0];
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Insert: %d msec, ", (finish - start));
 
-	//SEARCH ===========================================
-	start = clock();
+	totalMapTime += (finish - start);
 
-	for (uint i = 0; i < countKeys; i++)
+	//SEARCH ===========================================
+	start = msclock();
+
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		if (mymap[keys[i]] != keys[i].Data[0])
 		{
@@ -277,18 +312,20 @@ void testStdMapBin(BinKey* keys, uint countKeys)
 		}
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Search: %d msec.\n", (finish - start));
+
+	totalMapTime += (finish - start);
 
 	//ha.print();
 }
 
-void fillSeqBins(BinKey* keys, uint countKeys)
+void fillSeqBins(BinKey* keys, uint32 countKeys)
 {
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
-		for (uint j = 0; j < BIN_KEY_LEN - 1; j++)
+		for (uint32 j = 0; j < BIN_KEY_LEN - 1; j++)
 		{
 			keys[i].Data[j] = 0;
 		}
@@ -297,29 +334,29 @@ void fillSeqBins(BinKey* keys, uint countKeys)
 	}
 }
 
-void fillRandBins(BinKey* keys, uint countKeys)
+void fillRandBins(BinKey* keys, uint32 countKeys)
 {
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
-		for (uint j = 0; j < BIN_KEY_LEN; j++)
+		for (uint32 j = 0; j < BIN_KEY_LEN; j++)
 		{
-			keys[i].Data[j] = (ulong)rand() * (ulong)rand();
+			keys[i].Data[j] = (uint32)rand() * (uint32)rand();
 		}
 	}
 }
 
-void fillPeriodBins(BinKey* keys, uint countKeys)
+void fillPeriodBins(BinKey* keys, uint32 countKeys)
 {
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
-		for (uint j = 0; j < BIN_KEY_LEN; j++)
+		for (uint32 j = 0; j < BIN_KEY_LEN; j++)
 		{
 			keys[i].Data[j] = i * 17;
 		}
 	}
 }
 
-void HArrayVarRAM_VS_StdMap_BinKey(uint startOnAmount, uint stepOfAmount, uint stopOnAmount)
+void HArrayVarRAM_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
 {
 	printf("=== HArrayVarRAM VS std::map<BinKey,int> testing ===\n");
 
@@ -327,7 +364,7 @@ void HArrayVarRAM_VS_StdMap_BinKey(uint startOnAmount, uint stepOfAmount, uint s
 
 	fillSeqBins(binKeys, stopOnAmount);
 
-	for (uint countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
+	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
 		printf("Insert/Search %u SEQUENCE keys (%u bytes each) ...\n", countKeys, sizeof(BinKey));
 		testHArrayBin(binKeys, countKeys);
@@ -337,7 +374,7 @@ void HArrayVarRAM_VS_StdMap_BinKey(uint startOnAmount, uint stepOfAmount, uint s
 
 	fillRandBins(binKeys, stopOnAmount);
 
-	for (uint countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
+	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
 		printf("Insert/Search %u RANDOM keys (%u bytes each) ...\n", countKeys, sizeof(BinKey));
 		testHArrayBin(binKeys, countKeys);
@@ -347,7 +384,7 @@ void HArrayVarRAM_VS_StdMap_BinKey(uint startOnAmount, uint stepOfAmount, uint s
 
 	fillPeriodBins(binKeys, stopOnAmount);
 
-	for (uint countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
+	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
 		printf("Insert/Search %u PERIOD keys (%u bytes each) ...\n", countKeys, sizeof(BinKey));
 		testHArrayBin(binKeys, countKeys);
@@ -380,17 +417,17 @@ static const char alphanum[] =
 
 void fillRand(char *str, const int len)
 {
-	uint i = 0;
+	uint32 i = 0;
 
 	for (; i < len - 1; i++)
 	{
-		str[i] = alphanum[rand() % (sizeof(alphanum) - 1)];
+		str[i] = alphanum[rand() % (sizeof(alphanum)-1)];
 	}
 
 	str[i] = 0;
 }
 
-void testHArrayStr(StrKey* keys, uint countKeys)
+void testHArrayStr(StrKey* keys, uint32 countKeys)
 {
 	printf("HArrayVarRAM => ");
 
@@ -401,63 +438,69 @@ void testHArrayStr(StrKey* keys, uint countKeys)
 
 	//INSERT ===========================================
 
-	start = clock();
+	start = msclock();
 
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
-		ha.insert((uint*)keys[i].Data, sizeof(StrKey), keys[i].Data[0]);
+		ha.insert((uint32*)keys[i].Data, sizeof(StrKey), keys[i].Data[0]);
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Insert: %d msec, ", (finish - start));
 
-	//SEARCH ===========================================
-	start = clock();
+	totalHArrayTime += (finish - start);
 
-	for (uint i = 0; i < countKeys; i++)
+	//SEARCH ===========================================
+	start = msclock();
+
+	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (ha.getValueByKey((uint*)keys[i].Data, sizeof(StrKey)) != keys[i].Data[0])
+		if (ha.getValueByKey((uint32*)keys[i].Data, sizeof(StrKey)) != keys[i].Data[0])
 		{
 			printf("Error\n");
 			break;
 		}
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Search: %d msec.\n", (finish - start));
+
+	totalHArrayTime += (finish - start);
 
 	//ha.print();
 
 	ha.destroy();
 }
 
-void testStdMapStr(StrKey* keys, uint countKeys)
+void testStdMapStr(StrKey* keys, uint32 countKeys)
 {
 	printf("std::map => ");
 
-	std::map<StrKey, uint> mymap;
+	std::map<StrKey, uint32> mymap;
 
 	clock_t start, finish;
 
 	//INSERT ===========================================
 
-	start = clock();
+	start = msclock();
 
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		mymap[keys[i]] = keys[i].Data[0];
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Insert: %d msec, ", (finish - start));
 
-	//SEARCH ===========================================
-	start = clock();
+	totalMapTime += (finish - start);
 
-	for (uint i = 0; i < countKeys; i++)
+	//SEARCH ===========================================
+	start = msclock();
+
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		if (mymap[keys[i]] != keys[i].Data[0])
 		{
@@ -466,18 +509,20 @@ void testStdMapStr(StrKey* keys, uint countKeys)
 		}
 	}
 
-	finish = clock();
+	finish = msclock();
 
 	printf("Search: %d msec.\n", (finish - start));
+
+	totalMapTime += (finish - start);
 
 	//ha.print();
 }
 
-void fillSeqStrs(StrKey* keys, uint countKeys)
+void fillSeqStrs(StrKey* keys, uint32 countKeys)
 {
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
-		for (uint j = 0; j < STR_KEY_LEN - 8; j++)
+		for (uint32 j = 0; j < STR_KEY_LEN - 8; j++)
 		{
 			keys[i].Data[j] = '0';
 		}
@@ -486,15 +531,15 @@ void fillSeqStrs(StrKey* keys, uint countKeys)
 	}
 }
 
-void fillRandStrs(StrKey* keys, uint countKeys)
+void fillRandStrs(StrKey* keys, uint32 countKeys)
 {
-	for (uint i = 0; i < countKeys; i++)
+	for (uint32 i = 0; i < countKeys; i++)
 	{
 		fillRand(keys[i].Data, STR_KEY_LEN);
 	}
 }
 
-void HArrayVarRAM_VS_StdMap_StrKey(uint startOnAmount, uint stepOfAmount, uint stopOnAmount)
+void HArrayVarRAM_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
 {
 	printf("=== HArrayVarRAM VS std::map<StrKey,int> testing ===\n");
 
@@ -502,7 +547,7 @@ void HArrayVarRAM_VS_StdMap_StrKey(uint startOnAmount, uint stepOfAmount, uint s
 
 	fillSeqStrs(strKeys, stopOnAmount);
 
-	for (uint countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
+	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
 		printf("Insert/Search %u SIMILAR keys (%u bytes each) ...\n", countKeys, sizeof(StrKey));
 		testHArrayStr(strKeys, countKeys);
@@ -512,7 +557,7 @@ void HArrayVarRAM_VS_StdMap_StrKey(uint startOnAmount, uint stepOfAmount, uint s
 
 	fillRandStrs(strKeys, stopOnAmount);
 
-	for (uint countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
+	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
 		printf("Insert/Search %u RANDOM keys (%u bytes each) ...\n", countKeys, sizeof(StrKey));
 		testHArrayStr(strKeys, countKeys);
@@ -523,21 +568,23 @@ void HArrayVarRAM_VS_StdMap_StrKey(uint startOnAmount, uint stepOfAmount, uint s
 	delete[] strKeys;
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main()
 {
-	HArrayInt_VS_StdMap_IntKey(1000000,   //start
-							   2000000,   //step
-							   10000000); //stop
+	//printf("%u\n", ONLY_CONTENT_TYPE);
+
+	//HArrayInt_VS_StdMap_IntKey(1000000,   //start
+	//			   2000000,   //step
+	//			   10000000); //stop
 
 	HArrayVarRAM_VS_StdMap_BinKey(1000000,   //start
 								  2000000,   //step
 								  10000000); //stop
 
-	HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
-									1000000,   //step
-									3000000); //stop
+	//HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
+	//	1000000,   //step
+	//	3000000);  //stop
 
-	system("pause");
+	printf("COEF: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 
 	return 0;
 };

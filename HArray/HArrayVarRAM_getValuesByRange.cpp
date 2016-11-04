@@ -1,37 +1,19 @@
-/*
-# Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
-# This file is part of VyMa\Trie.
-#
-# VyMa\Trie is free software : you can redistribute it and / or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# Vyma\Trie is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "HArrayVarRAM.h"
 
-void HArrayVarRAM::getValuesByRangeFromBlock(uint** values, 
-										uint& count,
-										uint size,
-										uint contentOffset,
-										uint keyOffset,
-										uint blockOffset,
-										uint* minKey,
-										uint* maxKey)
+void HArrayVarRAM::getValuesByRangeFromBlock(uint32** values,
+										uint32& count,
+										uint32 size,
+										uint32 contentOffset,
+										uint32 keyOffset,
+										uint32 blockOffset,
+										uint32* minKey,
+										uint32* maxKey)
 {
 	//printf("getValuesByRangeFromBlock count=%d size=%d contentOffset=%d keyOffset=%d blockOffset=%d\n", count, size, contentOffset, keyOffset, blockOffset);
 
-	uint maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
-	for(uint offset = blockOffset; offset < maxOffset; offset++)
+	uint32 maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
+	for(uint32 offset = blockOffset; offset < maxOffset; offset++)
 	{
 		if(count == size && values)
 			return;
@@ -39,7 +21,7 @@ void HArrayVarRAM::getValuesByRangeFromBlock(uint** values,
 		BlockPage* pBlockPage = pBlockPages[offset >> 16];
 		BlockCell& blockCell = pBlockPage->pBlock[offset & 0xFFFF];
 
-		uchar& blockCellType = blockCell.Type;
+		uchar8& blockCellType = blockCell.Type;
 
 		if(blockCellType == EMPTY_TYPE)
 		{
@@ -47,11 +29,11 @@ void HArrayVarRAM::getValuesByRangeFromBlock(uint** values,
 		}
 		else if(blockCellType == CURRENT_VALUE_TYPE) //current value
 		{
-			uint& keyValue = blockCell.ValueOrOffset;
+			uint32& keyValue = blockCell.ValueOrOffset;
 
-			uint* subMinKey = 0;
-			uint* subMaxKey = 0;
-			
+			uint32* subMinKey = 0;
+			uint32* subMaxKey = 0;
+
 			if (minKey)
 			{
 				if(keyValue < minKey[keyOffset])
@@ -76,13 +58,13 @@ void HArrayVarRAM::getValuesByRangeFromBlock(uint** values,
 			BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
 
 			//try find value in the list
-			for(uint i=0; i<blockCellType; i++)
+			for(uint32 i=0; i<blockCellType; i++)
 			{
-				uint& keyValue = branchCell1.Values[i];
+				uint32& keyValue = branchCell1.Values[i];
 
-				uint* subMinKey = 0;
-				uint* subMaxKey = 0;
-			
+				uint32* subMinKey = 0;
+				uint32* subMaxKey = 0;
+
 				if (minKey)
 				{
 					if(keyValue < minKey[keyOffset])
@@ -108,13 +90,13 @@ void HArrayVarRAM::getValuesByRangeFromBlock(uint** values,
 			BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
 
 			//try find value in the list
-			for(uint i=0; i < BRANCH_ENGINE_SIZE; i++)
+			for(uint32 i=0; i < BRANCH_ENGINE_SIZE; i++)
 			{
-				uint& keyValue = branchCell1.Values[i];
+				uint32& keyValue = branchCell1.Values[i];
 
-				uint* subMinKey = 0;
-				uint* subMaxKey = 0;
-			
+				uint32* subMinKey = 0;
+				uint32* subMaxKey = 0;
+
 				if (minKey)
 				{
 					if(keyValue < minKey[keyOffset])
@@ -138,15 +120,15 @@ void HArrayVarRAM::getValuesByRangeFromBlock(uint** values,
 			BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 
 			//try find value in the list
-			uint countValues = blockCellType - MAX_BRANCH_TYPE1;
+			uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
 
-			for(uint i=0; i<countValues; i++)
+			for(uint32 i=0; i<countValues; i++)
 			{
-				uint& keyValue = branchCell2.Values[i];
+				uint32& keyValue = branchCell2.Values[i];
 
-				uint* subMinKey = 0;
-				uint* subMaxKey = 0;
-			
+				uint32* subMinKey = 0;
+				uint32* subMaxKey = 0;
+
 				if (minKey)
 				{
 					if(keyValue < minKey[keyOffset])
@@ -169,30 +151,30 @@ void HArrayVarRAM::getValuesByRangeFromBlock(uint** values,
 		else if(blockCell.Type <= MAX_BLOCK_TYPE)
 		{
 			//go to block
-			getValuesByRangeFromBlock(values, 
+			getValuesByRangeFromBlock(values,
 									  count,
 									  size,
 									  contentOffset,
 									  keyOffset,
 									  blockCell.Offset,
-									  minKey, 
+									  minKey,
 									  maxKey);
 		}
 	}
 }
 
-void HArrayVarRAM::getValuesByRange(uint** values, 
-							uint& count,
-							uint size,
-							uint keyOffset, 
-							uint contentOffset,
-							uint* minKey,
-							uint* maxKey)
+void HArrayVarRAM::getValuesByRange(uint32** values,
+							uint32& count,
+							uint32 size,
+							uint32 keyOffset,
+							uint32 contentOffset,
+							uint32* minKey,
+							uint32* maxKey)
 {
 	//printf("getValuesByRange count=%d size=%d contentOffset=%d keyOffset=%d\n", count, size, contentOffset, keyOffset);
-	
+
 	//!!! change
-	uint KeyLen = 0;
+	uint32 KeyLen = 0;
 
 	for(; keyOffset <= KeyLen; keyOffset++, contentOffset++)
 	{
@@ -200,10 +182,10 @@ void HArrayVarRAM::getValuesByRange(uint** values,
 			return;
 
 		ContentPage* pContentPage = pContentPages[contentOffset>>16];
-		ushort contentIndex = contentOffset&0xFFFF;
-		
-		uint& contentCellValueOrOffset = pContentPage->pContent[contentIndex].Value;
-		uchar& contentCellType = pContentPage->pContent[contentIndex].Type; //move to type part
+		ushort16 contentIndex = contentOffset&0xFFFF;
+
+		uint32& contentCellValueOrOffset = pContentPage->pContent[contentIndex].Value;
+		uchar8& contentCellType = pContentPage->pContent[contentIndex].Type; //move to type part
 
 		if(contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
@@ -211,8 +193,8 @@ void HArrayVarRAM::getValuesByRange(uint** values,
 			{
 				for(; keyOffset < KeyLen; keyOffset++, contentOffset++)
 				{
-					uint& keyValue = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF].Value;
-				
+					uint32& keyValue = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF].Value;
+
 					if (minKey)
 					{
 						if(keyValue > minKey[keyOffset])
@@ -251,13 +233,13 @@ void HArrayVarRAM::getValuesByRange(uint** values,
 			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
 
 			//check other
-			for(uint i = 0; i<contentCellType; i++) //from 1
+			for(uint32 i = 0; i<contentCellType; i++) //from 1
 			{
-				uint& keyValue = branchCell.Values[i];
+				uint32& keyValue = branchCell.Values[i];
 
-				uint* subMinKey = 0;
-				uint* subMaxKey = 0;
-				
+				uint32* subMinKey = 0;
+				uint32* subMaxKey = 0;
+
 				if (minKey)
 				{
 					if(keyValue < minKey[keyOffset])
@@ -295,7 +277,7 @@ void HArrayVarRAM::getValuesByRange(uint** values,
 		}
 		else if(contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
 		{
-			getValuesByRangeFromBlock(values, 
+			getValuesByRangeFromBlock(values,
 									  count,
 									  size,
 									  contentOffset,
@@ -308,7 +290,7 @@ void HArrayVarRAM::getValuesByRange(uint** values,
 		}
 		else if(contentCellType == CURRENT_VALUE_TYPE)
 		{
-			uint& keyValue = contentCellValueOrOffset;
+			uint32& keyValue = contentCellValueOrOffset;
 
 			if (minKey && keyValue < minKey[keyOffset])
 				return;
@@ -320,32 +302,32 @@ void HArrayVarRAM::getValuesByRange(uint** values,
 }
 
 
-uint HArrayVarRAM::getValuesByRange(uint** values, 
-								uint size, 
-								uint* minKey, 
-								uint* maxKey)
+uint32 HArrayVarRAM::getValuesByRange(uint32** values,
+								uint32 size,
+								uint32* minKey,
+								uint32* maxKey)
 {
-	uint count = 0;
-	uint startHeader = minKey[0] >> HeaderBits;
-	uint endHeader = maxKey[0] >> HeaderBits;
+	uint32 count = 0;
+	uint32 startHeader = minKey[0] >> HeaderBits;
+	uint32 endHeader = maxKey[0] >> HeaderBits;
 
 	//start range
 	if(startHeader < endHeader)
 	{
-		uint contentOffset = pHeader[startHeader];
+		uint32 contentOffset = pHeader[startHeader];
 		if(contentOffset)
 		{
 			getValuesByRange(values, count, size, 0, contentOffset, minKey, 0);
 		}
 
 		//middle range
-		for(uint currKey = startHeader + 1; currKey < endHeader; currKey++)
+		for(uint32 currKey = startHeader + 1; currKey < endHeader; currKey++)
 		{
 			if(count == size)
 				return count;
 
 			contentOffset = pHeader[currKey];
-		
+
 			if(contentOffset)
 			{
 				getValuesByRange(values, count, size, 0, contentOffset, 0, 0);
@@ -361,12 +343,12 @@ uint HArrayVarRAM::getValuesByRange(uint** values,
 	}
 	else
 	{
-		uint contentOffset = pHeader[startHeader];
+		uint32 contentOffset = pHeader[startHeader];
 		if(contentOffset)
 		{
 			getValuesByRange(values, count, size, 0, contentOffset, minKey, maxKey);
 		}
 	}
-	
+
 	return count;
 }

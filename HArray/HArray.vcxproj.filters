@@ -41,13 +41,16 @@
     <ClCompile Include="HArrayVarRAM_getValuesByRange.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_getValuesByTemplate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HArrayVarRAM_insert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_getKeyTailByHeadKeyAndValue.cpp">
+    <ClCompile Include="HArrayVarRAM_delValueByKey.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HArrayVarRAM_hasPartKey.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HArrayVarRAM_scanKeysAndValues.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

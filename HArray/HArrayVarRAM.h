@@ -75,12 +75,12 @@ public:
 	{
         //clear pointers
 		pHeader = 0;
-		
+
 		pContentPages = 0;
 		pVarPages = 0;
 		pBranchPages = 0;
 		pBlockPages = 0;
-		
+
 		freeBranchCells = 0;
 
         try
@@ -239,8 +239,11 @@ public:
 
 	void clear()
 	{
+        uint32 headerBase = this->HeaderBase;
+
 		destroy();
-		init(24);
+
+		init(headerBase);
 	}
 
 	//types: 0-empty, 1..4 branches, 5 value, 6..9 blocks offset, 10 empty branch, 11 value

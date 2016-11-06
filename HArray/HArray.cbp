@@ -32,7 +32,18 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="main.cpp" />
+		<Unit filename="HArrayFixBase.h" />
+		<Unit filename="HArrayInt.h" />
+		<Unit filename="HArrayVarRAM.h" />
+		<Unit filename="HArrayVarRAM_delValueByKey.cpp" />
+		<Unit filename="HArrayVarRAM_getKeysAndValuesByRange.cpp" />
+		<Unit filename="HArrayVarRAM_getValueByKey.cpp" />
+		<Unit filename="HArrayVarRAM_getValuesByRange.cpp" />
+		<Unit filename="HArrayVarRAM_hasPartKey.cpp" />
+		<Unit filename="HArrayVarRAM_insert.cpp" />
+		<Unit filename="HArrayVarRAM_scanKeysAndValues.cpp" />
+		<Unit filename="Main.cpp" />
+		<Unit filename="stdafx.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

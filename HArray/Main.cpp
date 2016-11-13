@@ -214,7 +214,20 @@ bool operator<(const BinKey& a, const BinKey& b)
 	return false;
 }
 
-void testHArrayBin(BinKey* keys, uint32 countKeys)
+void shuffleBins(BinKey* keys, uint32 countKeys)
+{
+	for (uint32 i = 0; i < countKeys; i++)
+	{
+		uint32 idx1 = rand() % countKeys;
+		uint32 idx2 = rand() % countKeys;
+
+		BinKey tempKey = keys[idx1];
+		keys[idx1] = keys[idx2];
+		keys[idx2] = tempKey;
+	}
+}
+
+void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 {
 	printf("HArrayVarRAM => ");
 
@@ -222,6 +235,11 @@ void testHArrayBin(BinKey* keys, uint32 countKeys)
 	ha.init(26);
 
 	clock_t start, finish;
+
+	if (shuffle)
+	{
+		shuffleBins(keys, countKeys);
+	}
 
 	//INSERT ===========================================
 
@@ -254,6 +272,11 @@ void testHArrayBin(BinKey* keys, uint32 countKeys)
 
 	totalHArrayTime += (finish - start);
 
+	if (shuffle)
+	{
+		shuffleBins(keys, countKeys);
+	}
+
 	//SEARCH ===========================================
 	start = msclock();
 
@@ -274,18 +297,23 @@ void testHArrayBin(BinKey* keys, uint32 countKeys)
 
 	//ha.print();
 
-	ha.printMemory();
+	//ha.printMemory();
 
 	ha.destroy();
 }
 
-void testStdMapBin(BinKey* keys, uint32 countKeys)
+void testStdMapBin(BinKey* keys, uint32 countKeys, bool shuffle)
 {
 	printf("std::map => ");
 
 	std::map<BinKey, uint32> mymap;
 
 	clock_t start, finish;
+
+	if (shuffle)
+	{
+		shuffleBins(keys, countKeys);
+	}
 
 	//INSERT ===========================================
 
@@ -301,6 +329,11 @@ void testStdMapBin(BinKey* keys, uint32 countKeys)
 	printf("Insert: %d msec, ", (finish - start));
 
 	totalMapTime += (finish - start);
+
+	if (shuffle)
+	{
+		shuffleBins(keys, countKeys);
+	}
 
 	//SEARCH ===========================================
 	start = msclock();
@@ -342,7 +375,7 @@ void fillRandBins(BinKey* keys, uint32 countKeys)
 	{
 		for (uint32 j = 0; j < BIN_KEY_LEN; j++)
 		{
-			keys[i].Data[j] = (uint32)rand() + (uint32)rand();
+			keys[i].Data[j] = (uint32)rand() * (uint32)rand();
 		}
 	}
 }
@@ -358,7 +391,7 @@ void fillPeriodBins(BinKey* keys, uint32 countKeys)
 	}
 }
 
-void HArrayVarRAM_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
+void HArrayVarRAM_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount, bool shuffle = false)
 {
 	printf("=== HArrayVarRAM VS std::map<BinKey,int> testing ===\n");
 
@@ -369,8 +402,8 @@ void HArrayVarRAM_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
 		printf("Insert/Search %u SEQUENCE keys (%u bytes each) ...\n", countKeys, sizeof(BinKey));
-		testHArrayBin(binKeys, countKeys);
-		testStdMapBin(binKeys, countKeys);
+		testHArrayBin(binKeys, countKeys, shuffle);
+		testStdMapBin(binKeys, countKeys, shuffle);
 		printf("\n");
 	}
 
@@ -379,8 +412,8 @@ void HArrayVarRAM_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
 		printf("Insert/Search %u RANDOM keys (%u bytes each) ...\n", countKeys, sizeof(BinKey));
-		testHArrayBin(binKeys, countKeys);
-		testStdMapBin(binKeys, countKeys);
+		testHArrayBin(binKeys, countKeys, shuffle);
+		testStdMapBin(binKeys, countKeys, shuffle);
 		printf("\n");
 	}
 
@@ -389,8 +422,8 @@ void HArrayVarRAM_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
 		printf("Insert/Search %u PERIOD keys (%u bytes each) ...\n", countKeys, sizeof(BinKey));
-		testHArrayBin(binKeys, countKeys);
-		testStdMapBin(binKeys, countKeys);
+		testHArrayBin(binKeys, countKeys, shuffle);
+		testStdMapBin(binKeys, countKeys, shuffle);
 		printf("\n");
 	}
 
@@ -572,19 +605,18 @@ void HArrayVarRAM_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 
 int main()
 {
-	//printf("%u\n", ONLY_CONTENT_TYPE);
+	HArrayInt_VS_StdMap_IntKey(1000000,   //start
+							   2000000,   //step
+							   10000000); //stop
 
-	//HArrayInt_VS_StdMap_IntKey(1000000,   //start
-	//			   2000000,   //step
-	//			   10000000); //stop
-
-	HArrayVarRAM_VS_StdMap_BinKey(10000000,   //start
+	HArrayVarRAM_VS_StdMap_BinKey(1000000,   //start
 								  2000000,   //step
-								  10000000); //stop
+								  10000000,  //stop
+								  true); //shuffle
 
-	//HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
-	//	1000000,   //step
-	//	3000000);  //stop
+	HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
+							  	  1000000,   //step
+							  	  3000000);  //stop
 
 	printf("COEF: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 

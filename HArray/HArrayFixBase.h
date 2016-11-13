@@ -25,7 +25,7 @@
 
 #include "stdafx.h"
 
-//#define _RELEASE 0x1234567
+#define _RELEASE 0x1234567
 
 const uint32 REPOSITORY_VERSION = 1;
 
@@ -48,13 +48,13 @@ const uchar8 MIN_BRANCH_TYPE1 = 1;
 const uchar8 MAX_BRANCH_TYPE1 = BRANCH_ENGINE_SIZE;
 const uchar8 MIN_BRANCH_TYPE2 = BRANCH_ENGINE_SIZE + 1;
 const uchar8 MAX_BRANCH_TYPE2 = BRANCH_ENGINE_SIZE * 2;
-const uchar8 MIN_BLOCK_TYPE = 50;
+const uchar8 MIN_BLOCK_TYPE = MAX_BRANCH_TYPE2 + 1;
 const uchar8 MAX_BLOCK_TYPE = MIN_BLOCK_TYPE + (32 / BLOCK_ENGINE_STEP) - 1;
-const uchar8 VAR_TYPE = 125; //for var value
-const uchar8 CONTINUE_VAR_TYPE = 126; //for continue var value
-const uchar8 CURRENT_VALUE_TYPE = 127;
-const uchar8 VALUE_TYPE = 128;
-const uchar8 ONLY_CONTENT_TYPE = 129;
+const uchar8 VAR_TYPE = MAX_BLOCK_TYPE + 1; //for var value
+const uchar8 CONTINUE_VAR_TYPE = VAR_TYPE + 1; //for continue var value
+const uchar8 CURRENT_VALUE_TYPE = CONTINUE_VAR_TYPE + 1;
+const uchar8 VALUE_TYPE = CURRENT_VALUE_TYPE + 1;
+const uchar8 ONLY_CONTENT_TYPE = VALUE_TYPE + 1;
 
 typedef bool HARRAY_ITEM_VISIT_FUNC(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
 

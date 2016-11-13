@@ -274,6 +274,8 @@ void testHArrayBin(BinKey* keys, uint32 countKeys)
 
 	//ha.print();
 
+	ha.printMemory();
+
 	ha.destroy();
 }
 
@@ -340,7 +342,7 @@ void fillRandBins(BinKey* keys, uint32 countKeys)
 	{
 		for (uint32 j = 0; j < BIN_KEY_LEN; j++)
 		{
-			keys[i].Data[j] = (uint32)rand() * (uint32)rand();
+			keys[i].Data[j] = (uint32)rand() + (uint32)rand();
 		}
 	}
 }
@@ -576,7 +578,7 @@ int main()
 	//			   2000000,   //step
 	//			   10000000); //stop
 
-	HArrayVarRAM_VS_StdMap_BinKey(1000000,   //start
+	HArrayVarRAM_VS_StdMap_BinKey(10000000,   //start
 								  2000000,   //step
 								  10000000); //stop
 

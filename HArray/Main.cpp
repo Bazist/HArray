@@ -612,7 +612,7 @@ int main()
 	HArrayVarRAM_VS_StdMap_BinKey(1000000,   //start
 								  2000000,   //step
 								  10000000,  //stop
-								  true); //shuffle
+								  true); 	 //shuffle
 
 	HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
 							  	  1000000,   //step

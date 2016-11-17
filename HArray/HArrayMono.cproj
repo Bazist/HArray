@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BA1894A5-969E-498D-99E4-B38D97FAFB1E}</ProjectGuid>
+    <Compiler>
+      <Compiler ctype="GppCompiler" />
+    </Compiler>
+    <Language>CPP</Language>
+    <Target>Bin</Target>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug</OutputPath>
+    <Externalconsole>true</Externalconsole>
+    <OutputName>HArrayMono</OutputName>
+    <CompileTarget>Bin</CompileTarget>
+    <DefineSymbols>DEBUG MONODEVELOP</DefineSymbols>
+    <SourceDirectory>.</SourceDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release</OutputPath>
+    <Externalconsole>true</Externalconsole>
+    <OutputName>HArrayMono</OutputName>
+    <CompileTarget>Bin</CompileTarget>
+    <OptimizationLevel>3</OptimizationLevel>
+    <DefineSymbols>MONODEVELOP</DefineSymbols>
+    <SourceDirectory>.</SourceDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="HArrayFixBase.h" />
+    <None Include="HArrayInt.h" />
+    <None Include="HArrayVarRAM.h" />
+    <None Include="stdafx.h" />
+    <None Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="HArrayVarRAM_delValueByKey.cpp" />
+    <Compile Include="HArrayVarRAM_getKeysAndValuesByRange.cpp" />
+    <Compile Include="HArrayVarRAM_getValueByKey.cpp" />
+    <Compile Include="HArrayVarRAM_getValuesByRange.cpp" />
+    <Compile Include="HArrayVarRAM_hasPartKey.cpp" />
+    <Compile Include="HArrayVarRAM_insert.cpp" />
+    <Compile Include="HArrayVarRAM_scanKeysAndValues.cpp" />
+    <Compile Include="Main.cpp" />
+  </ItemGroup>
+</Project>

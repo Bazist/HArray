@@ -245,24 +245,8 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	start = msclock();
 
-	/*
-	if(countKeys == 7000000)
-	{
-	//6750000 - 6800000
-	countKeys = 6778843;
-	}
-	*/
-
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		/*
-		if(i==6778842)
-		printf("%u\n", i);
-
-		if(i==6778843)
-		printf("%u\n", i);
-		*/
-
 		ha.insert((uint32*)keys[i].Data, sizeof(BinKey), keys[i].Data[0]);
 	}
 

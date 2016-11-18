@@ -140,27 +140,23 @@ struct VarCell
 	ContentCell ContCell;
 };
 
-class ContentPage
+struct ContentPage
 {
-public:
 	ContentCell pContent[MAX_SHORT];
 };
 
-class VarPage
+struct VarPage
 {
-public:
 	VarCell pVar[MAX_SHORT];
 };
 
-class BranchPage
+struct BranchPage
 {
-public:
 	BranchCell pBranch[MAX_SHORT];
 };
 
-class BlockPage
+struct BlockPage
 {
-public:
 	BlockPage()
 	{
 		for (uint32 i = 0; i < MAX_SHORT; i++)
@@ -170,4 +166,25 @@ public:
 	}
 
 	BlockCell pBlock[MAX_SHORT];
+};
+
+struct CompactPage
+{
+	CompactPage()
+	{
+		for (uint32 i = 0; i < MAX_CHAR; i++)
+		{
+			Values[i] = 0;
+			Offsets[i] = 0;
+		}
+
+		Count = 0;
+	}
+
+	uint32 Values[MAX_CHAR];
+	uint32 Offsets[MAX_CHAR];
+
+	uint32 Count;
+
+	CompactPage* pNextPage;
 };

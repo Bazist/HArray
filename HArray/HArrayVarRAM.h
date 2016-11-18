@@ -366,6 +366,10 @@ public:
 				uint32 keyLen,
 				uint32 value);
 
+	//COMPACT =========================================================================================================
+	bool scanBlocks(uint32 blockOffset, CompactPage* pCompactPage);
+	void compact();
+
 	//GET =============================================================================================================
 
 	uint32 getValueByKey(uint32* key,

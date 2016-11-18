@@ -44,5 +44,6 @@
     <Compile Include="HArrayVarRAM_insert.cpp" />
     <Compile Include="HArrayVarRAM_scanKeysAndValues.cpp" />
     <Compile Include="Main.cpp" />
+    <Compile Include="HArrayVarRAM_compact.cpp" />
   </ItemGroup>
 </Project>

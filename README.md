@@ -4,6 +4,9 @@
 
 **HArrayVarRAM** - Key\Value In Memory structure for keys with variety size
 
+**Result of Benchmarks**:
+https://github.com/Bazist/HArray/blob/master/HArray/HArray_Benchmarks_Ubuntu.txt
+
 **More benchmarks**:
 http://wiki.pikosec.com/index.php?title=VymaDB:Benchmarks
 

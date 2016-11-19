@@ -127,17 +127,28 @@ public:
                 tempCaptions[i] = 0;
             }
 
-			tempCaptions[MOVES_LEVEL1_STAT] = "Moves Level1";
-            tempCaptions[MOVES_LEVEL2_STAT] = "Moves Level2";
-            tempCaptions[MOVES_LEVEL3_STAT] = "Moves Level3";
-            tempCaptions[MOVES_LEVEL4_STAT] = "Moves Level4";
-            tempCaptions[MOVES_LEVEL5_STAT] = "Moves Level5";
-            tempCaptions[MOVES_LEVEL6_STAT] = "Moves Level6";
-            tempCaptions[MOVES_LEVEL7_STAT] = "Moves Level7";
-			tempCaptions[MOVES_LEVEL8_STAT] = "Moves Level8";
-			tempCaptions[SHORT_WAY_STAT] = "Short way";
-			tempCaptions[LONG_WAY_STAT] = "Long way";
-			tempCaptions[CONTENT_BRANCH_STAT] = "Content branch";
+            tempCaptions[0] = "Moves Level1";
+            tempCaptions[1] = "Moves Level2";
+            tempCaptions[2] = "Moves Level3";
+            tempCaptions[3] = "Moves Level4";
+            tempCaptions[4] = "Amount Blocks";
+            tempCaptions[5] = "Fill Blocks 1..64";
+            tempCaptions[6] = "Fill Blocks 64..128";
+            tempCaptions[7] = "Fill Blocks 128..192";
+            tempCaptions[8] = "Fill Blocks 192..256";
+            tempCaptions[9] = "Next blocks";
+            tempCaptions[10] = "Short way";
+            tempCaptions[11] = "Long way";
+            tempCaptions[12] = "CURRENT_VALUE_TYPE";
+            tempCaptions[13] = "ONLY_CONTENT_TYPE ";
+            tempCaptions[14] = "MAX_BRANCH_TYPE1  ";
+            tempCaptions[15] = "MAX_BLOCK_TYPE    ";
+            tempCaptions[16] = "Fill Blocks 1..16";
+            tempCaptions[17] = "Fill Blocks 16..32";
+            tempCaptions[18] = "Fill Blocks 32..48";
+            tempCaptions[19] = "Fill Blocks 48..64";
+            tempCaptions[20] = "Fill Blocks 1..8";
+            tempCaptions[21] = "Next Block Level 3";
 
             #endif
 
@@ -242,22 +253,6 @@ public:
 		printf("Branch size: %d\n", getBranchSize());
 		printf("Block size: %d\n", getBlockSize());
 		printf("Total size: %d\n", getTotalMemory());
-	}
-
-	void printStat()
-	{
-		#ifndef _RELEASE
-
-		printf("=================== STAT =========================\n");
-		for (uint32 i = 0; i<COUNT_TEMPS; i++)
-		{
-			if (tempCaptions[i])
-			{
-				printf("%s => %u\n", tempCaptions[i], tempValues[i]);
-			}
-		}
-
-		#endif
 	}
 
 	void clear()

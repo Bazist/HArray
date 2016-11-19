@@ -49,10 +49,6 @@ uint32 HArrayVarRAM::insert(uint32* key,
 
 		if (!contentOffset)
 		{
-			#ifndef _RELEASE
-			tempValues[SHORT_WAY_STAT]++;
-			#endif
-
 			pHeader[headerOffset] = lastContentOffset;
 
 			ContentPage* pContentPage = pContentPages[lastContentOffset >> 16];
@@ -92,11 +88,15 @@ uint32 HArrayVarRAM::insert(uint32* key,
 
 				return 0;
 			}
+
+#ifndef _RELEASE
+			tempValues[10]++;
+#endif
 		}
 
-		#ifndef _RELEASE
-		tempValues[LONG_WAY_STAT]++;
-		#endif
+#ifndef _RELEASE
+		tempValues[11]++;
+#endif
 
 		//TWO KEYS =============================================================================================
 	NEXT_KEY_PART:
@@ -108,6 +108,10 @@ uint32 HArrayVarRAM::insert(uint32* key,
 
 		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================
 		{
+#ifndef _RELEASE
+			tempValues[13]++;
+#endif
+
 			uint32 originKeyLen = keyOffset + contentCellType - ONLY_CONTENT_TYPE;
 
 			if (contentIndex < maxSafeShort) //content in one page
@@ -118,10 +122,6 @@ uint32 HArrayVarRAM::insert(uint32* key,
 
 					if (contentCell.Value != key[keyOffset])
 					{
-						#ifndef _RELEASE
-						tempValues[CONTENT_BRANCH_STAT]++;
-						#endif
-
 						//create branch
 						contentCell.Type = MIN_BRANCH_TYPE1 + 1;
 
@@ -256,10 +256,6 @@ uint32 HArrayVarRAM::insert(uint32* key,
 
 					if (pContentPage->pContent[contentIndex].Value != key[keyOffset])
 					{
-						#ifndef _RELEASE
-						tempValues[CONTENT_BRANCH_STAT]++;
-						#endif
-
 						//create branch
 						pContentPage->pContent[contentIndex].Type = MIN_BRANCH_TYPE1 + 1;
 
@@ -511,6 +507,10 @@ uint32 HArrayVarRAM::insert(uint32* key,
 
 		if (contentCellType <= MAX_BRANCH_TYPE1) //BRANCH =====================================================================
 		{
+#ifndef _RELEASE
+			tempValues[14]++;
+#endif
+
 			BranchPage* pBranchPage = pBranchPages[contentCellValueOrOffset >> 16];
 			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
 
@@ -538,11 +538,6 @@ uint32 HArrayVarRAM::insert(uint32* key,
 			}
 			else
 			{
-				#ifndef _RELEASE
-				tempValues[CONTENT_BRANCH_STAT]--;
-				tempValues[MOVES_LEVEL1_STAT]++;
-				#endif
-
 				//EXTRACT BRANCH AND CREATE BLOCK =========================================================
 				uchar8 idxKeyValue = 0;
 				uchar8 currContentCellType = MIN_BLOCK_TYPE;
@@ -681,16 +676,22 @@ uint32 HArrayVarRAM::insert(uint32* key,
 				}
 
 				lastBlockOffset += BLOCK_ENGINE_SIZE;
-				
+
+#ifndef _RELEASE
+				tempValues[4]++;
+#endif
+
 				goto FILL_KEY;
 			}
 		}
 		else if (contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
 		{
-			#ifndef _RELEASE
-			uint32 level = 1;
-			#endif
-			
+#ifndef _RELEASE
+			tempValues[15]++;
+#endif
+
+			//uint32 level = 1;
+
 			uchar8 idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 
 			uint32 startOffset = contentCellValueOrOffset;
@@ -889,38 +890,15 @@ uint32 HArrayVarRAM::insert(uint32* key,
 					else
 					{
 						//CREATE NEXT BLOCK ==========================================================
-						#ifndef _RELEASE
-						switch (level)
+#ifndef _RELEASE
+						tempValues[9]++;
+
+						/*if(level >= 3)
 						{
-							case 1:
-								tempValues[MOVES_LEVEL1_STAT]++;
-								break;
-							case 2:
-								tempValues[MOVES_LEVEL2_STAT]++;
-								break;
-							case 3:
-								tempValues[MOVES_LEVEL3_STAT]++;
-								break;
-							case 4:
-								tempValues[MOVES_LEVEL4_STAT]++;
-								break;
-							case 5:
-								tempValues[MOVES_LEVEL5_STAT]++;
-								break;
-							case 6:
-								tempValues[MOVES_LEVEL6_STAT]++;
-								break;
-							case 7:
-								tempValues[MOVES_LEVEL7_STAT]++;
-								break;
-							case 8:
-								tempValues[MOVES_LEVEL8_STAT]++;
-								break;
-							default:
-								break;
-						}
-						#endif
-						
+							tempValues[21]++;
+						}*/
+#endif
+
 						const ushort16 branchesSize = BRANCH_ENGINE_SIZE * 2;
 						const ushort16 countCell = branchesSize + 1;
 
@@ -1126,6 +1104,10 @@ uint32 HArrayVarRAM::insert(uint32* key,
 
 						lastBlockOffset += BLOCK_ENGINE_SIZE;
 
+#ifndef _RELEASE
+						tempValues[4]++;
+#endif
+
 						goto FILL_KEY;
 					}
 				}
@@ -1135,16 +1117,18 @@ uint32 HArrayVarRAM::insert(uint32* key,
 					idxKeyValue = (blockCell.Type - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 					startOffset = blockCell.Offset;
 
-					#ifndef _RELEASE
-					level++;
-					#endif
-					
+					//level++;
+
 					goto NEXT_BLOCK;
 				}
 			}
 		}
 		else if (contentCellType == CURRENT_VALUE_TYPE) //PART OF KEY =========================================================================
 		{
+#ifndef _RELEASE
+			tempValues[12]++;
+#endif
+
 			if (contentCellValueOrOffset == keyValue)
 			{
 				contentOffset++;

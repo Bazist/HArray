@@ -49,7 +49,7 @@
 
 const uint32 MAX_SHORT = 65536;
 const uint32 MAX_CHAR = 256;
-const uint32 INIT_MAX_PAGES = 1024;
+const uint32 INIT_MAX_PAGES = 16;
 const uint32 PAGE_SIZE = MAX_SHORT*2;
 const uchar8 BLOCK_SIZE = 16;
 const uchar8 ROW_LEN = 3;

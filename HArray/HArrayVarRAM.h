@@ -366,6 +366,24 @@ public:
 				uint32 keyLen,
 				uint32 value);
 
+	//COMPACT =========================================================================================================
+	void calcOptimalBlockSize(CompactPage* pCompactPage,
+							uint32& bits,
+							uint32& offset,
+							uchar8 contentCellType);
+
+	void insertBlockValue(BlockPage** pNewBlockPages,
+		 				  	uint32& newBlockPagesCount,
+			  				uint32& newLastBlockOffset,
+			  				uchar8& contentCellType,
+			  				uint32& contentCellValue,
+			  				uint32 value,
+			  				uint32 offset);
+
+	bool scanBlocks(uint32 blockOffset, CompactPage* pCompactPage);
+
+	void compact();
+
 	//GET =============================================================================================================
 
 	uint32 getValueByKey(uint32* key,

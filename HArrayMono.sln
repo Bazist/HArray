@@ -1,0 +1,17 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{2857B73E-F847-4B02-9238-064979017E93}") = "HArray", "HArray\HArrayMono.cproj", "{BA1894A5-969E-498D-99E4-B38D97FAFB1E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA1894A5-969E-498D-99E4-B38D97FAFB1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA1894A5-969E-498D-99E4-B38D97FAFB1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA1894A5-969E-498D-99E4-B38D97FAFB1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA1894A5-969E-498D-99E4-B38D97FAFB1E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

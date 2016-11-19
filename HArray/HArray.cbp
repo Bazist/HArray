@@ -35,6 +35,7 @@
 		<Unit filename="HArrayFixBase.h" />
 		<Unit filename="HArrayInt.h" />
 		<Unit filename="HArrayVarRAM.h" />
+		<Unit filename="HArrayVarRAM_compact.cpp" />
 		<Unit filename="HArrayVarRAM_delValueByKey.cpp" />
 		<Unit filename="HArrayVarRAM_getKeysAndValuesByRange.cpp" />
 		<Unit filename="HArrayVarRAM_getValueByKey.cpp" />

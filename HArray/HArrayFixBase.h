@@ -56,6 +56,18 @@ const uchar8 CURRENT_VALUE_TYPE = CONTINUE_VAR_TYPE + 1;
 const uchar8 VALUE_TYPE = CURRENT_VALUE_TYPE + 1;
 const uchar8 ONLY_CONTENT_TYPE = VALUE_TYPE + 1;
 
+const uchar8 MOVES_LEVEL1_STAT = 0;
+const uchar8 MOVES_LEVEL2_STAT = 1;
+const uchar8 MOVES_LEVEL3_STAT = 2;
+const uchar8 MOVES_LEVEL4_STAT = 3;
+const uchar8 MOVES_LEVEL5_STAT = 4;
+const uchar8 MOVES_LEVEL6_STAT = 5;
+const uchar8 MOVES_LEVEL7_STAT = 6;
+const uchar8 MOVES_LEVEL8_STAT = 7;
+const uchar8 SHORT_WAY_STAT = 8;
+const uchar8 LONG_WAY_STAT = 9;
+const uchar8 CONTENT_BRANCH_STAT = 10;
+
 typedef bool HARRAY_ITEM_VISIT_FUNC(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
 
 struct HArrayFixBaseInfo

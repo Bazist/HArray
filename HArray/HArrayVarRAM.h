@@ -53,7 +53,7 @@ public:
 	uint32 BranchPagesSize;
 	uint32 BlockPagesSize;
 
-	uint32* pHeader;
+	HeaderCell* pHeader;
 
 	/*uint32* pActiveContent;
 	ContentTypeCell* pActiveContentType;
@@ -113,10 +113,10 @@ public:
 
             MAX_SAFE_SHORT = MAX_SHORT - ValueLen - 1;
 
-            pHeader = new uint32[HeaderSize];
+            pHeader = new HeaderCell[HeaderSize];
             for(uint32 i=0; i<HeaderSize; i++)
             {
-                pHeader[i] = 0;
+                pHeader[i].Type = 0;
             }
 
             #ifndef _RELEASE

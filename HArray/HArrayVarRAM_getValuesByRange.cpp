@@ -326,13 +326,14 @@ uint32 HArrayVarRAM::getValuesByRange(uint32** values,
 								uint32* maxKey)
 {
 	uint32 count = 0;
+
 	uint32 startHeader = minKey[0] >> HeaderBits;
 	uint32 endHeader = maxKey[0] >> HeaderBits;
 
 	//start range
 	if(startHeader < endHeader)
 	{
-		uint32 contentOffset = pHeader[startHeader];
+		uint32 contentOffset = pHeader[startHeader].Value;
 		if(contentOffset)
 		{
 			getValuesByRange(values, count, size, 0, contentOffset, minKey, 0);
@@ -344,7 +345,7 @@ uint32 HArrayVarRAM::getValuesByRange(uint32** values,
 			if(count == size)
 				return count;
 
-			contentOffset = pHeader[currKey];
+			contentOffset = pHeader[currKey].Value;
 
 			if(contentOffset)
 			{
@@ -353,7 +354,7 @@ uint32 HArrayVarRAM::getValuesByRange(uint32** values,
 		}
 
 		//end range
-		contentOffset = pHeader[endHeader];
+		contentOffset = pHeader[endHeader].Value;
 		if(contentOffset)
 		{
 			getValuesByRange(values, count, size, 0, contentOffset, 0, maxKey);
@@ -361,7 +362,7 @@ uint32 HArrayVarRAM::getValuesByRange(uint32** values,
 	}
 	else
 	{
-		uint32 contentOffset = pHeader[startHeader];
+		uint32 contentOffset = pHeader[startHeader].Value;
 		if(contentOffset)
 		{
 			getValuesByRange(values, count, size, 0, contentOffset, minKey, maxKey);

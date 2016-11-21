@@ -54,7 +54,8 @@ const uchar8 VAR_TYPE = MAX_BLOCK_TYPE + 1; //for var value
 const uchar8 CONTINUE_VAR_TYPE = VAR_TYPE + 1; //for continue var value
 const uchar8 CURRENT_VALUE_TYPE = CONTINUE_VAR_TYPE + 1;
 const uchar8 VALUE_TYPE = CURRENT_VALUE_TYPE + 1;
-const uchar8 ONLY_CONTENT_TYPE = VALUE_TYPE + 1;
+const uchar8 HEADER_JUMP_TYPE = VALUE_TYPE + 1;
+const uchar8 ONLY_CONTENT_TYPE = HEADER_JUMP_TYPE + 1;
 
 const uchar8 MOVES_LEVEL1_STAT = 0;
 const uchar8 MOVES_LEVEL2_STAT = 1;
@@ -141,6 +142,12 @@ struct BlockCell
 };
 
 struct ContentCell
+{
+	uchar8 Type;
+	uint32 Value;
+};
+
+struct HeaderCell
 {
 	uchar8 Type;
 	uint32 Value;

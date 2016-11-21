@@ -45,15 +45,16 @@ uint32 HArrayVarRAM::insert(uint32* key,
 		uint32 contentOffset = 0;
 
 		uint32 headerOffset = key[0] >> HeaderBits;
-		contentOffset = pHeader[headerOffset];
+		HeaderCell& headerCell = pHeader[headerOffset];
 
-		if (!contentOffset)
+		if (!headerCell.Type)
 		{
 			#ifndef _RELEASE
 			tempValues[SHORT_WAY_STAT]++;
 			#endif
 
-			pHeader[headerOffset] = lastContentOffset;
+			headerCell.Type = HEADER_JUMP_TYPE;
+			headerCell.Value = lastContentOffset;
 
 			ContentPage* pContentPage = pContentPages[lastContentOffset >> 16];
 			uint32 contentIndex = lastContentOffset & 0xFFFF;
@@ -93,6 +94,8 @@ uint32 HArrayVarRAM::insert(uint32* key,
 				return 0;
 			}
 		}
+
+		contentOffset = headerCell.Value;
 
 		#ifndef _RELEASE
 		tempValues[LONG_WAY_STAT]++;

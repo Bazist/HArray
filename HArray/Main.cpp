@@ -25,10 +25,11 @@
 #include "HArrayInt.h"
 #include "HArrayVarRAM.h"
 
-#define SEQUENCE_TESTS
+//#define SEQUENCE_TESTS
 #define RANDOM_TESTS
-#define PERIOD_TESTS
+//#define PERIOD_TESTS
 //#define DENSE_HASH_MAP_TESTS //ucomment if you install google::dense_hash_map
+//#define STD_MAP_TESTS
 
 #ifdef DENSE_HASH_MAP_TESTS
 #include <google/dense_hash_map>
@@ -100,6 +101,8 @@ void testHArrayInt(uint32* keys, uint32 countKeys)
 
 void testStdMapInt(uint32* keys, uint32 countKeys)
 {
+	#ifdef STD_MAP_TESTS
+	
 	printf("std::map => ");
 
 	std::map<uint32, uint32> mymap;
@@ -140,6 +143,8 @@ void testStdMapInt(uint32* keys, uint32 countKeys)
 	totalMapTime += (finish - start);
 
 	//ha.print();
+
+	#endif
 }
 
 void testDenseHashMapInt(uint32* keys, uint32 countKeys)
@@ -389,6 +394,8 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 void testStdMapBin(BinKey* keys, uint32 countKeys, bool shuffle)
 {
+	#ifdef STD_MAP_TESTS
+
 	printf("std::map => ");
 
 	std::map<BinKey, uint32> mymap;
@@ -439,6 +446,8 @@ void testStdMapBin(BinKey* keys, uint32 countKeys, bool shuffle)
 	totalMapTime += (finish - start);
 
 	//ha.print();
+
+	#endif
 }
 
 void testDenseHashMapBin(BinKey* keys, uint32 countKeys, bool shuffle)
@@ -697,6 +706,8 @@ void testHArrayStr(StrKey* keys, uint32 countKeys)
 
 void testStdMapStr(StrKey* keys, uint32 countKeys)
 {
+	#ifdef STD_MAP_TESTS
+
 	printf("std::map => ");
 
 	std::map<StrKey, uint32> mymap;
@@ -737,6 +748,8 @@ void testStdMapStr(StrKey* keys, uint32 countKeys)
 	totalMapTime += (finish - start);
 
 	//ha.print();
+
+	#endif
 }
 
 void testDenseHashMapStr(StrKey* keys, uint32 countKeys)
@@ -873,19 +886,19 @@ void dense_fake()
 
 int main()
 {
-	HArrayInt_VS_StdMap_IntKey(1000000,   //start
-							   2000000,   //step
-							   10000000); //stop
+	//HArrayInt_VS_StdMap_IntKey(1000000,   //start
+	//						   2000000,   //step
+	//						   10000000); //stop
 
 
-	HArrayVarRAM_VS_StdMap_BinKey(1000000,   //start
+	HArrayVarRAM_VS_StdMap_BinKey(10000000,   //start
 								  2000000,   //step
 								  10000000,  //stop
 								  false); 	 //shuffle
 	
-	HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
-							  	  1000000,   //step
-							  	  1000000);  //stop
+	//HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
+	//						  	  1000000,   //step
+	//						  	  1000000);  //stop
 
 	printf("COEF Map VS HArray: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 

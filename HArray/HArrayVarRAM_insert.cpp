@@ -47,56 +47,104 @@ uint32 HArrayVarRAM::insert(uint32* key,
 		uint32 headerOffset = key[0] >> HeaderBits;
 		HeaderCell& headerCell = pHeader[headerOffset];
 
-		if (!headerCell.Type)
+		switch (headerCell.Type)
 		{
-			#ifndef _RELEASE
-			tempValues[SHORT_WAY_STAT]++;
-			#endif
-
-			headerCell.Type = HEADER_JUMP_TYPE;
-			headerCell.Value = lastContentOffset;
-
-			ContentPage* pContentPage = pContentPages[lastContentOffset >> 16];
-			uint32 contentIndex = lastContentOffset & 0xFFFF;
-
-			pContentPage->pContent[contentIndex].Type = (ONLY_CONTENT_TYPE + keyLen);
-
-			if (contentIndex < maxSafeShort) //content in one page
+			case EMPTY_TYPE:
 			{
-				//fill key
-				for (; keyOffset < keyLen; contentIndex++, keyOffset++, lastContentOffset++)
+#ifndef _RELEASE
+				tempValues[SHORT_WAY_STAT]++;
+#endif
+
+				headerCell.Type = HEADER_JUMP_TYPE;
+				headerCell.Value = lastContentOffset;
+
+				ContentPage* pContentPage = pContentPages[lastContentOffset >> 16];
+				uint32 contentIndex = lastContentOffset & 0xFFFF;
+
+				pContentPage->pContent[contentIndex].Type = (ONLY_CONTENT_TYPE + keyLen);
+
+				if (contentIndex < maxSafeShort) //content in one page
 				{
-					pContentPage->pContent[contentIndex].Value = key[keyOffset];
+					//fill key
+					for (; keyOffset < keyLen; contentIndex++, keyOffset++, lastContentOffset++)
+					{
+						pContentPage->pContent[contentIndex].Value = key[keyOffset];
+					}
+
+					pContentPage->pContent[contentIndex].Type = VALUE_TYPE;
+					pContentPage->pContent[contentIndex].Value = value;
+
+					lastContentOffset++;
+
+					return 0;
 				}
-
-				pContentPage->pContent[contentIndex].Type = VALUE_TYPE;
-				pContentPage->pContent[contentIndex].Value = value;
-
-				lastContentOffset++;
-
-				return 0;
-			}
-			else
-			{
-				for (; keyOffset < keyLen; lastContentOffset++, keyOffset++)
+				else
 				{
+					for (; keyOffset < keyLen; lastContentOffset++, keyOffset++)
+					{
+						pContentPage = pContentPages[lastContentOffset >> 16];
+						pContentPage->pContent[lastContentOffset & 0xFFFF].Value = key[keyOffset];
+					}
+
 					pContentPage = pContentPages[lastContentOffset >> 16];
-					pContentPage->pContent[lastContentOffset & 0xFFFF].Value = key[keyOffset];
+
+					pContentPage->pContent[lastContentOffset & 0xFFFF].Type = VALUE_TYPE;
+					pContentPage->pContent[lastContentOffset & 0xFFFF].Value = value;
+
+					lastContentOffset++;
+
+					return 0;
+				}
+			}
+			case HEADER_JUMP_TYPE:
+			{
+				contentOffset = headerCell.Value;
+				
+				break;
+			}
+			case HEADER_BRANCH_TYPE:
+			{
+				HeaderBranchCell& headerBranchCell = pHeaderBranchPages[headerCell.Value >> 16]->pHeaderBranch[headerCell.Value & 0xFFFF];
+				
+				if (headerBranchCell.HeaderOffset)
+				{
+					contentOffset = headerBranchCell.HeaderOffset;
+				}
+				else
+				{
+					headerBranchCell.HeaderOffset = lastContentOffset;
+
+					goto FILL_KEY2;
 				}
 
-				pContentPage = pContentPages[lastContentOffset >> 16];
+				break;
+			}
+			default: //create branch
+			{
+				HeaderBranchPage* pHeaderBranchPage = pHeaderBranchPages[lastHeaderBranchOffset >> 16];
+				if (!pHeaderBranchPage)
+				{
+					pHeaderBranchPage = new HeaderBranchPage();
+					pHeaderBranchPages[HeaderBranchPagesCount++] = pHeaderBranchPage;
 
-				pContentPage->pContent[lastContentOffset & 0xFFFF].Type = VALUE_TYPE;
-				pContentPage->pContent[lastContentOffset & 0xFFFF].Value = value;
+					if (HeaderBranchPagesCount == HeaderBranchPagesSize)
+					{
+						reallocateHeaderBranchPages();
+					}
+				}
 
-				lastContentOffset++;
+				HeaderBranchCell& headerBranchCell = pHeaderBranchPage->pHeaderBranch[lastHeaderBranchOffset & 0xFFFF];
+				headerBranchCell.HeaderOffset = lastContentOffset;
+				headerBranchCell.ParentIDs[0] = headerCell.Type << 2 >> 2;
+				headerBranchCell.Offsets[0] = headerCell.Value;
 
-				return 0;
+				headerCell.Type = HEADER_BRANCH_TYPE;
+				headerCell.Value = lastBranchOffset++;
+
+				goto FILL_KEY2;
 			}
 		}
-
-		contentOffset = headerCell.Value;
-
+		
 		#ifndef _RELEASE
 		tempValues[LONG_WAY_STAT]++;
 		#endif
@@ -1195,6 +1243,150 @@ uint32 HArrayVarRAM::insert(uint32* key,
 				pBranchCell->Offsets[1] = lastContentOffset;
 
 				goto FILL_KEY;
+			}
+		}
+		else if (contentCellType <= MAX_HEADER_BLOCK_TYPE) //HEADER BLOCK ==========================================================
+		{
+			uchar8 parentID = contentCellValueOrOffset >> 24; //0..63
+			uint32 headerBaseOffset = contentCellValueOrOffset & 0xFFFFFF;
+
+			uint32 headerOffset = 0;
+
+			switch (contentCellType - MIN_HEADER_BLOCK_TYPE)
+			{
+				default:
+				break;
+			};
+
+			HeaderCell& headerCell = pHeader[headerBaseOffset + headerOffset];
+
+			switch (headerCell.Type)
+			{
+				case EMPTY_TYPE: //fill header cell
+				{
+					headerCell.Type = HEADER_CURRENT_VALUE_TYPE << 6 | parentID;
+					headerCell.Value = lastContentOffset;
+
+					goto FILL_KEY2;
+				}
+				case HEADER_JUMP_TYPE: //create header branch
+				{
+					HeaderBranchPage* pHeaderBranchPage = pHeaderBranchPages[lastHeaderBranchOffset >> 16];
+					if (!pHeaderBranchPage)
+					{
+						pHeaderBranchPage = new HeaderBranchPage();
+						pHeaderBranchPages[HeaderBranchPagesCount++] = pHeaderBranchPage;
+
+						if (HeaderBranchPagesCount == HeaderBranchPagesSize)
+						{
+							reallocateHeaderBranchPages();
+						}
+					}
+
+					HeaderBranchCell& headerBranchCell = pHeaderBranchPage->pHeaderBranch[lastHeaderBranchOffset & 0xFFFF];
+					headerBranchCell.HeaderOffset = headerCell.Value;
+
+					headerBranchCell.ParentIDs[0] = parentID;
+					headerBranchCell.Offsets[0] = lastContentOffset;
+
+					headerCell.Type = HEADER_BRANCH_TYPE;
+					headerCell.Value = lastBranchOffset++;
+
+					goto FILL_KEY2;
+				}
+				case HEADER_BRANCH_TYPE: //header branch, check
+				{
+					HeaderBranchCell* pHeaderBranchCell = &pHeaderBranchPages[headerCell.Value >> 16]->pHeaderBranch[lastHeaderBranchOffset & 0xFFFF];
+
+					while(true)
+					{
+						for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+						{
+							if (pHeaderBranchCell->ParentIDs[i] == parentID) //exists way, continue
+							{
+								contentOffset = pHeaderBranchCell->Offsets[i];
+
+								goto NEXT_KEY_PART;
+							}
+							else if (pHeaderBranchCell->ParentIDs[i] == 0) //new way
+							{
+								pHeaderBranchCell->ParentIDs[i] = parentID;
+								pHeaderBranchCell->Offsets[i] = lastContentOffset;
+
+								goto FILL_KEY2;
+							}
+						}
+
+						if (pHeaderBranchCell->pNextHeaderBranhCell)
+						{
+							pHeaderBranchCell = pHeaderBranchCell->pNextHeaderBranhCell;
+						}
+						else
+						{
+							break;
+						}
+					} 
+
+					//create new branch
+					HeaderBranchPage* pHeaderBranchPage = pHeaderBranchPages[lastHeaderBranchOffset >> 16];
+					if (!pHeaderBranchPage)
+					{
+						pHeaderBranchPage = new HeaderBranchPage();
+						pHeaderBranchPages[HeaderBranchPagesCount++] = pHeaderBranchPage;
+
+						if (HeaderBranchPagesCount == HeaderBranchPagesSize)
+						{
+							reallocateHeaderBranchPages();
+						}
+					}
+
+					pHeaderBranchCell->pNextHeaderBranhCell = &pHeaderBranchPage->pHeaderBranch[lastHeaderBranchOffset & 0xFFFF];
+					
+					pHeaderBranchCell->pNextHeaderBranhCell->ParentIDs[0] = parentID;
+					pHeaderBranchCell->pNextHeaderBranhCell->Offsets[0] = lastContentOffset;
+
+					goto FILL_KEY2;
+				}
+				default: //HEADER_CURRENT_VALUE_TYPE
+				{
+					uchar8 currParentID = headerCell.Type << 2 >> 2;
+
+					if (parentID == currParentID) //our header cell, continue
+					{
+						contentOffset = headerCell.Value;
+						
+						goto NEXT_KEY_PART;
+					}
+					else //create header branch
+					{
+						HeaderBranchPage* pHeaderBranchPage = pHeaderBranchPages[lastHeaderBranchOffset >> 16];
+						if (!pHeaderBranchPage)
+						{
+							pHeaderBranchPage = new HeaderBranchPage();
+							pHeaderBranchPages[HeaderBranchPagesCount++] = pHeaderBranchPage;
+
+							if (HeaderBranchPagesCount == HeaderBranchPagesSize)
+							{
+								reallocateHeaderBranchPages();
+							}
+						}
+
+						HeaderBranchCell& headerBranchCell = pHeaderBranchPage->pHeaderBranch[lastHeaderBranchOffset & 0xFFFF];
+						
+						//existing
+						headerBranchCell.ParentIDs[0] = currParentID;
+						headerBranchCell.Offsets[0] = headerCell.Value;
+
+						//our new
+						headerBranchCell.ParentIDs[1] = parentID;
+						headerBranchCell.Offsets[1] = lastContentOffset;
+
+						headerCell.Type = HEADER_BRANCH_TYPE;
+						headerCell.Value = lastBranchOffset++;
+
+						goto FILL_KEY2;
+					}
+				}
 			}
 		}
 

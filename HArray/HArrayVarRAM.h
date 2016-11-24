@@ -30,11 +30,13 @@ class HArrayVarRAM
 public:
 	HArrayVarRAM()
 	{
+		pHeaderBranchPages = 0;
 		pContentPages = 0;
 		pVarPages = 0;
 		pBranchPages = 0;
 		pBlockPages = 0;
 
+		HeaderBranchPagesCount = 0;
 		ContentPagesCount = 0;
 		VarPagesCount = 0;
 		BranchPagesCount = 0;
@@ -43,11 +45,13 @@ public:
 
 	char Name[256];
 
+	uint32 HeaderBranchPagesCount;
 	uint32 ContentPagesCount;
 	uint32 VarPagesCount;
 	uint32 BranchPagesCount;
 	uint32 BlockPagesCount;
 
+	uint32 HeaderBranchPagesSize;
 	uint32 ContentPagesSize;
 	uint32 VarPagesSize;
 	uint32 BranchPagesSize;
@@ -60,6 +64,7 @@ public:
 	BranchCell* pActiveBranch;
 	BlockCell* pActiveBlock;*/
 
+	HeaderBranchPage** pHeaderBranchPages;
 	ContentPage** pContentPages;
 	VarPage** pVarPages;
 	BranchPage** pBranchPages;
@@ -73,6 +78,7 @@ public:
 	uint32 countFreeBranchCell;
 
 	uint32 ValueLen;
+	uint32 NewParentID;
 
 	uint32 MAX_SAFE_SHORT;
 
@@ -82,10 +88,12 @@ public:
 			 INIT_MAX_PAGES,
 			 INIT_MAX_PAGES,
 			 INIT_MAX_PAGES,
+			 INIT_MAX_PAGES,
 			 INIT_MAX_PAGES);
 	}
 
 	void init(uchar8 headerBase,
+			  uint32 headerBranchPagesSize,
 			  uint32 contentPagesSize,
 			  uint32 varPagesSize,
 			  uint32 branchPagesSize,
@@ -94,6 +102,9 @@ public:
         //clear pointers
 		pHeader = 0;
 
+		NewParentID = 0;
+
+		pHeaderBranchPages = 0;
 		pContentPages = 0;
 		pVarPages = 0;
 		pBranchPages = 0;
@@ -114,12 +125,12 @@ public:
             MAX_SAFE_SHORT = MAX_SHORT - ValueLen - 1;
 
             pHeader = new HeaderCell[HeaderSize];
-            for(uint32 i=0; i<HeaderSize; i++)
+            for(uint32 i=0; i < HeaderSize; i++)
             {
                 pHeader[i].Type = 0;
             }
 
-            #ifndef _RELEASE
+			#ifndef _RELEASE
 
             for(uint32 i=0; i<COUNT_TEMPS; i++)
             {
@@ -141,26 +152,31 @@ public:
 
             #endif
 
+			pHeaderBranchPages = new HeaderBranchPage*[headerBranchPagesSize];
             pContentPages = new ContentPage*[contentPagesSize];
             pVarPages = new VarPage*[varPagesSize];
             pBranchPages = new BranchPage*[branchPagesSize];
             pBlockPages = new BlockPage*[blockPagesSize];
 
+			memset(pHeaderBranchPages, 0, headerBranchPagesSize * sizeof(HeaderBranchPage*));
             memset(pContentPages, 0, contentPagesSize * sizeof(ContentPage*));
 			memset(pVarPages, 0, varPagesSize * sizeof(VarPage*));
    			memset(pBranchPages, 0, branchPagesSize * sizeof(BranchPage*));
 			memset(pBlockPages, 0, blockPagesSize * sizeof(BlockPage*));
 
+			HeaderBranchPagesCount = 0;
             ContentPagesCount = 0;
             VarPagesCount = 0;
             BranchPagesCount = 0;
             BlockPagesCount = 0;
 
+			HeaderBranchPagesSize = INIT_MAX_PAGES;
             ContentPagesSize = INIT_MAX_PAGES;
             VarPagesSize = INIT_MAX_PAGES;
             BranchPagesSize = INIT_MAX_PAGES;
             BlockPagesSize = INIT_MAX_PAGES;
 
+			lastHeaderBranchOffset = 0;
             lastContentOffset = 1;
             lastVarOffset = 0;
             lastBranchOffset = 0;
@@ -176,6 +192,7 @@ public:
 		}
 	}
 
+	uint32 lastHeaderBranchOffset;
 	uint32 lastContentOffset;
 	uint32 lastVarOffset;
 	uint32 lastBranchOffset;
@@ -183,7 +200,8 @@ public:
 
 	uint32 getHash()
 	{
-		return lastContentOffset +
+		return lastHeaderBranchOffset +
+			   lastContentOffset +
 			   lastVarOffset +
 			   lastBranchOffset +
 			   lastBlockOffset;
@@ -192,6 +210,11 @@ public:
 	uint32 getHeaderSize()
 	{
 		return HeaderSize * sizeof(uint32);
+	}
+
+	uint32 getHeaderBranchSize()
+	{
+		return HeaderBranchPagesSize * sizeof(uint32);
 	}
 
 	uint32 getContentSize()
@@ -217,6 +240,7 @@ public:
 	uint32 getUsedMemory()
 	{
 		return	getHeaderSize() +
+				getHeaderBranchSize() +
 				getContentSize() +
 				getVarSize() +
 				getBranchSize() +
@@ -226,6 +250,7 @@ public:
 	uint32 getTotalMemory()
 	{
 		return	getHeaderSize() +
+				getHeaderBranchSize() +
 				getContentSize() +
 				getVarSize() +
 				getBranchSize() +
@@ -297,6 +322,28 @@ public:
 		pContentPages = pTempContentPages;
 
 		ContentPagesSize = newSizeContentPages;
+	}
+
+	void reallocateHeaderBranchPages()
+	{
+		uint32 newSizeHeaderBranchPages = HeaderBranchPagesSize * 2;
+		HeaderBranchPage** pTempHeaderBranchPages = new HeaderBranchPage*[newSizeHeaderBranchPages];
+
+		uint32 j = 0;
+		for (; j < HeaderBranchPagesSize; j++)
+		{
+			pTempHeaderBranchPages[j] = pHeaderBranchPages[j];
+		}
+
+		for (; j < newSizeHeaderBranchPages; j++)
+		{
+			pTempHeaderBranchPages[j] = 0;
+		}
+
+		delete[] pHeaderBranchPages;
+		pHeaderBranchPages = pTempHeaderBranchPages;
+
+		HeaderBranchPagesSize = newSizeHeaderBranchPages;
 	}
 
 	void reallocateVarPages()
@@ -474,6 +521,17 @@ public:
 		{
 			delete[] pHeader;
 			pHeader = 0;
+		}
+
+		if (pHeaderBranchPages)
+		{
+			for (uint32 i = 0; i<HeaderBranchPagesCount; i++)
+			{
+				delete pHeaderBranchPages[i];
+			}
+
+			delete[] pHeaderBranchPages;
+			pHeaderBranchPages = 0;
 		}
 
 		if(pContentPages)

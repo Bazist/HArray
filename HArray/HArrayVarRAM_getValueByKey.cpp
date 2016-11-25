@@ -29,7 +29,7 @@ uint32 HArrayVarRAM::getValueByKey(uint32* key,
 
 	if(headerCell.Type)
 	{
-		uint32 contentOffset = headerCell.Value;
+		uint32 contentOffset = headerCell.Offset;
 
 		uint32 keyOffset = 0;
 

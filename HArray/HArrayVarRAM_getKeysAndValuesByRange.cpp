@@ -452,7 +452,7 @@ uint32 HArrayVarRAM::getKeysAndValuesByRange(	HArrayFixPair* pairs,
 	//start range
 	if(startHeader < endHeader)
 	{
-		uint32 contentOffset = pHeader[startHeader].Value;
+		uint32 contentOffset = pHeader[startHeader].Offset;
 		if(contentOffset)
 		{
 			getKeysAndValuesByRange(pairs, count, size, 0, contentOffset, minKey, 0);
@@ -464,7 +464,7 @@ uint32 HArrayVarRAM::getKeysAndValuesByRange(	HArrayFixPair* pairs,
 			if(count == size)
 				return count;
 
-			contentOffset = pHeader[currKey].Value;
+			contentOffset = pHeader[currKey].Offset;
 
 			if(contentOffset)
 			{
@@ -473,7 +473,7 @@ uint32 HArrayVarRAM::getKeysAndValuesByRange(	HArrayFixPair* pairs,
 		}
 
 		//end range
-		contentOffset = pHeader[endHeader].Value;
+		contentOffset = pHeader[endHeader].Offset;
 		if(contentOffset)
 		{
 			getKeysAndValuesByRange(pairs, count, size, 0, contentOffset, 0, maxKey);
@@ -481,7 +481,7 @@ uint32 HArrayVarRAM::getKeysAndValuesByRange(	HArrayFixPair* pairs,
 	}
 	else
 	{
-		uint32 contentOffset = pHeader[startHeader].Value;
+		uint32 contentOffset = pHeader[startHeader].Offset;
 		if(contentOffset)
 		{
 			getKeysAndValuesByRange(pairs, count, size, 0, contentOffset, minKey, maxKey);

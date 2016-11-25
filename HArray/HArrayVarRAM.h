@@ -419,10 +419,11 @@ public:
 				uint32 value);
 
 	//COMPACT =========================================================================================================
-	void calcOptimalBlockSize(CompactPage* pCompactPage,
-							uint32& bits,
-							uint32& offset,
-							uchar8 contentCellType);
+	bool finHeaderBlockPlace(CompactPage* pRootCompactPage,
+							uint32& headerBlockType,
+							uint32& baseHeaderOffset,
+						    uint32& leftOffset,
+						    uint32& rightOffset);
 
 	void insertBlockValue(BlockPage** pNewBlockPages,
 		 				  	uint32& newBlockPagesCount,

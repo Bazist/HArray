@@ -229,7 +229,7 @@ uint32 HArrayVarRAM::scanKeysAndValues(uint32* key,
 	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
-	uint32 contentOffset = pHeader[key[0]>>HeaderBits].Value;
+	uint32 contentOffset = pHeader[key[0]>>HeaderBits].Offset;
 
 	if(contentOffset)
 	{

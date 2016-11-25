@@ -19,14 +19,6 @@
 #include "stdafx.h"
 #include "HArrayVarRAM.h"
 
-void HArrayVarRAM::calcOptimalBlockSize(CompactPage* pCompactPage,
-										uint32& bits,
-										uint32& offset,
-										uchar8 contentCellType)
-{
-	
-}
-
 void HArrayVarRAM::insertBlockValue(BlockPage** pNewBlockPages,
 	 							  	uint32& newBlockPagesCount,
 					  				uint32& newLastBlockOffset,
@@ -538,20 +530,73 @@ bool HArrayVarRAM::scanBlocks(uint32 blockOffset, CompactPage* pCompactPage)
 	return isOneBlock;
 }
 
+bool HArrayVarRAM::finHeaderBlockPlace(CompactPage* pRootCompactPage,
+									   uint32& headerBlockType,
+									   uint32& baseHeaderOffset,
+									   uint32& leftShift,
+									   uint32& rightShift)
+{
+	headerBlockType = MIN_HEADER_BLOCK_TYPE;
+
+	//1. Try found without any fails
+	for(uint32 bits = 8; bits <= 20; bits+=4)
+	{
+		for(leftShift = 0; leftShift < 32 - bits; leftShift++, headerBlockType++) //0..71
+		{
+			rightShift = 32 - bits;
+
+			uint32 headerBlockSize = 1 << bits;
+
+			for(baseHeaderOffset = 0; baseHeaderOffset < HeaderSize - headerBlockSize; baseHeaderOffset++)
+			{
+				CompactPage* pCompactPage = pRootCompactPage;
+
+				do
+				{
+					//insert values
+					for (uint32 i = 0; i < pCompactPage->Count; i++)
+					{
+						uint32 headerOffset = pCompactPage->Values[i] << leftShift >> rightShift;
+
+						HeaderCell& headerCell = pHeader[baseHeaderOffset + headerOffset];
+
+						if(headerCell.Type != EMPTY_TYPE)
+						{
+							goto NOT_FOUND;
+						}
+					}
+
+					pCompactPage = pCompactPage->pNextPage;
+				}
+				while (pCompactPage);
+
+				return true; //found !
+
+				NOT_FOUND:;			
+			}
+		}
+	}
+
+	return false;
+}
+
 bool HArrayVarRAM::allocateHeaderBlock(uint32 blockOffset, ContentCell& contentCell)
 {
 	//1. Scan blocks
 	CompactPage* pCompactPage = new CompactPage();
 	scanBlocks(blockOffset, pCompactPage);
-	
-	uint32 baseHeaderOffset = 0;
-	
-	uint32 rightShift = 0;
-	uint32 leftShift = 0;
+
+	uint32 headerBlockType;
+	uint32 baseHeaderOffset;
+	uint32 rightShift;
+	uint32 leftShift;
+
+	//2. Find good place for header block
+	finHeaderBlockPlace(pCompactPage, headerBlockType, baseHeaderOffset, leftShift, rightShift);
 
 	uchar8 parentID = NewParentID++;
 
-	//2. Write block values
+	//3. Write block values
 	while (pCompactPage)
 	{
 		//insert values
@@ -561,18 +606,114 @@ bool HArrayVarRAM::allocateHeaderBlock(uint32 blockOffset, ContentCell& contentC
 
 			HeaderCell& headerCell = pHeader[baseHeaderOffset + headerOffset];
 
-			switch(headerCell.Type)
+			switch (headerCell.Type)
 			{
-				case EMPTY_TYPE:
+				case EMPTY_TYPE: //fill header cell
 				{
 					headerCell.Type = HEADER_CURRENT_VALUE_TYPE << 6 | parentID;
 					headerCell.Offset = pCompactPage->Offsets[i];
+				}
+				case HEADER_JUMP_TYPE: //create header branch
+				{
+					HeaderBranchPage* pHeaderBranchPage = pHeaderBranchPages[lastHeaderBranchOffset >> 16];
+					if (!pHeaderBranchPage)
+					{
+						pHeaderBranchPage = new HeaderBranchPage();
+						pHeaderBranchPages[HeaderBranchPagesCount++] = pHeaderBranchPage;
 
-					break;
+						if (HeaderBranchPagesCount == HeaderBranchPagesSize)
+						{
+							reallocateHeaderBranchPages();
+						}
+					}
+
+					HeaderBranchCell& headerBranchCell = pHeaderBranchPage->pHeaderBranch[lastHeaderBranchOffset & 0xFFFF];
+					headerBranchCell.HeaderOffset = headerCell.Offset;
+
+					headerBranchCell.ParentIDs[0] = parentID;
+					headerBranchCell.Offsets[0] = pCompactPage->Offsets[i];
+
+					headerCell.Type = HEADER_BRANCH_TYPE;
+					headerCell.Offset = lastBranchOffset++;
+				}
+				case HEADER_BRANCH_TYPE: //header branch, check
+				{
+					HeaderBranchPage* pHeaderBranchPage;
+					HeaderBranchCell* pHeaderBranchCell = &pHeaderBranchPages[headerCell.Offset >> 16]->pHeaderBranch[headerCell.Offset & 0xFFFF];
+
+					while(true)
+					{
+						for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+						{
+							if (pHeaderBranchCell->ParentIDs[i] == 0) //new way
+							{
+								pHeaderBranchCell->ParentIDs[i] = parentID;
+								pHeaderBranchCell->Offsets[i] = pCompactPage->Offsets[i];
+
+								goto FOUND_SLOT;
+							}
+						}
+
+						if (pHeaderBranchCell->pNextHeaderBranhCell)
+						{
+							pHeaderBranchCell = pHeaderBranchCell->pNextHeaderBranhCell;
+						}
+						else
+						{
+							break;
+						}
+					} 
+
+					//create new branch
+					pHeaderBranchPage = pHeaderBranchPages[lastHeaderBranchOffset >> 16];
+					if (!pHeaderBranchPage)
+					{
+						pHeaderBranchPage = new HeaderBranchPage();
+						pHeaderBranchPages[HeaderBranchPagesCount++] = pHeaderBranchPage;
+
+						if (HeaderBranchPagesCount == HeaderBranchPagesSize)
+						{
+							reallocateHeaderBranchPages();
+						}
+					}
+
+					pHeaderBranchCell->pNextHeaderBranhCell = &pHeaderBranchPage->pHeaderBranch[lastHeaderBranchOffset & 0xFFFF];
+					
+					pHeaderBranchCell->pNextHeaderBranhCell->ParentIDs[0] = parentID;
+					pHeaderBranchCell->pNextHeaderBranhCell->Offsets[0] = pCompactPage->Offsets[i];
+
+					FOUND_SLOT:;
+				}
+				default: //HEADER_CURRENT_VALUE_TYPE
+				{
+					uchar8 currParentID = headerCell.Type << 2 >> 2;
+
+					HeaderBranchPage* pHeaderBranchPage = pHeaderBranchPages[lastHeaderBranchOffset >> 16];
+					if (!pHeaderBranchPage)
+					{
+						pHeaderBranchPage = new HeaderBranchPage();
+						pHeaderBranchPages[HeaderBranchPagesCount++] = pHeaderBranchPage;
+
+						if (HeaderBranchPagesCount == HeaderBranchPagesSize)
+						{
+							reallocateHeaderBranchPages();
+						}
+					}
+
+					HeaderBranchCell& headerBranchCell = pHeaderBranchPage->pHeaderBranch[lastHeaderBranchOffset & 0xFFFF];
+						
+					//existing
+					headerBranchCell.ParentIDs[0] = currParentID;
+					headerBranchCell.Offsets[0] = headerCell.Offset;
+
+					//our new
+					headerBranchCell.ParentIDs[1] = parentID;
+					headerBranchCell.Offsets[1] = lastContentOffset;
+
+					headerCell.Type = HEADER_BRANCH_TYPE;
+					headerCell.Offset = lastBranchOffset++;
 				}
 			}
-
-
 		}
 
 		//delete compact page
@@ -580,8 +721,15 @@ bool HArrayVarRAM::allocateHeaderBlock(uint32 blockOffset, ContentCell& contentC
 
 		delete pCompactPage;
 
-		pCompactPage = pCompactPage->pNextPage;
+		pCompactPage = pNextCompactPage;
 	}
+
+	//4. Set content cell
+	contentCell.Type = headerBlockType;
+	contentCell.Value = baseHeaderOffset;
+
+	//5. Remove old header blocks
+
 }
 
 void HArrayVarRAM::compact()
@@ -643,10 +791,12 @@ void HArrayVarRAM::compact()
 				uint32 bits = 0;
 				uint32 offset = 0;
 
+				/*
 				calcOptimalBlockSize(pCompactPage,
 									 bits,
 									 offset,
 									 pContentCell->Type);
+				*/
 
 				pContentCell->Value = newLastBlockOffset;
 

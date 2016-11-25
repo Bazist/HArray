@@ -47,6 +47,10 @@ uint32 HArrayVarRAM::insert(uint32* key,
 		uint32 headerOffset = key[0] >> HeaderBits;
 		HeaderCell& headerCell = pHeader[headerOffset];
 
+		ContentPage* pContentPage;
+		uint32 contentIndex;
+		uchar8 contentCellType;
+		
 		switch (headerCell.Type)
 		{
 			case EMPTY_TYPE:
@@ -121,6 +125,7 @@ uint32 HArrayVarRAM::insert(uint32* key,
 			}
 			default: //create branch
 			{
+				/*
 				HeaderBranchPage* pHeaderBranchPage = pHeaderBranchPages[lastHeaderBranchOffset >> 16];
 				if (!pHeaderBranchPage)
 				{
@@ -142,9 +147,10 @@ uint32 HArrayVarRAM::insert(uint32* key,
 				headerCell.Value = lastBranchOffset++;
 
 				goto FILL_KEY2;
+				*/
 			}
 		}
-		
+
 		#ifndef _RELEASE
 		tempValues[LONG_WAY_STAT]++;
 		#endif
@@ -152,10 +158,10 @@ uint32 HArrayVarRAM::insert(uint32* key,
 		//TWO KEYS =============================================================================================
 	NEXT_KEY_PART:
 
-		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
-		uint32 contentIndex = contentOffset & 0xFFFF;
+		pContentPage = pContentPages[contentOffset >> 16];
+		contentIndex = contentOffset & 0xFFFF;
 
-		uchar8 contentCellType = pContentPage->pContent[contentIndex].Type;
+		contentCellType = pContentPage->pContent[contentIndex].Type;
 
 		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================
 		{

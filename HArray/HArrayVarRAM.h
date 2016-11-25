@@ -433,6 +433,7 @@ public:
 			  				uint32 offset);
 
 	bool scanBlocks(uint32 blockOffset, CompactPage* pCompactPage);
+	bool allocateHeaderBlock(uint32 blockOffset, ContentCell& contentCell);
 
 	void compact();
 

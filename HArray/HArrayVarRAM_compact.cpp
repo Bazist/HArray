@@ -538,6 +538,52 @@ bool HArrayVarRAM::scanBlocks(uint32 blockOffset, CompactPage* pCompactPage)
 	return isOneBlock;
 }
 
+bool HArrayVarRAM::allocateHeaderBlock(uint32 blockOffset, ContentCell& contentCell)
+{
+	//1. Scan blocks
+	CompactPage* pCompactPage = new CompactPage();
+	scanBlocks(blockOffset, pCompactPage);
+	
+	uint32 baseHeaderOffset = 0;
+	
+	uint32 rightShift = 0;
+	uint32 leftShift = 0;
+
+	uchar8 parentID = NewParentID++;
+
+	//2. Write block values
+	while (pCompactPage)
+	{
+		//insert values
+		for (uint32 i = 0; i < pCompactPage->Count; i++)
+		{
+			uint32 headerOffset = pCompactPage->Values[i] << leftShift >> rightShift;
+
+			HeaderCell& headerCell = pHeader[baseHeaderOffset + headerOffset];
+
+			switch(headerCell.Type)
+			{
+				case EMPTY_TYPE:
+				{
+					headerCell.Type = HEADER_CURRENT_VALUE_TYPE << 6 | parentID;
+					headerCell.Offset = pCompactPage->Offsets[i];
+
+					break;
+				}
+			}
+
+
+		}
+
+		//delete compact page
+		CompactPage* pNextCompactPage = pCompactPage->pNextPage;
+
+		delete pCompactPage;
+
+		pCompactPage = pCompactPage->pNextPage;
+	}
+}
+
 void HArrayVarRAM::compact()
 {
 	CompactPage* pCompactPage = 0;

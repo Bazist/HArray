@@ -12,4 +12,7 @@ http://wiki.pikosec.com/index.php?title=VymaDB:Benchmarks
 
 Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 
+**More functionality**
+![alt tag](https://s16.postimg.org/z5mh3nngl/Vyma_Trie.png)
+
 ## ENJOY

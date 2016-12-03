@@ -10,6 +10,10 @@ https://github.com/Bazist/HArray/blob/master/HArray/HArray_Benchmarks_Ubuntu.txt
 **More benchmarks**:
 http://wiki.pikosec.com/index.php?title=VymaDB:Benchmarks
 
+**Compare functionality**
+
+![alt tag](https://s16.postimg.org/z5mh3nngl/Vyma_Trie.png)
+
 Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 
 ## ENJOY

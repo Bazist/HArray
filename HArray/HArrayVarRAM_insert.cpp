@@ -742,10 +742,8 @@ uint32 HArrayVarRAM::insert(uint32* key,
 		}
 		else if (contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
 		{
-			#ifndef _RELEASE
 			uint32 level = 1;
-			#endif
-			
+
 			uchar8 idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 
 			uint32 startOffset = contentCellValueOrOffset;
@@ -975,7 +973,15 @@ uint32 HArrayVarRAM::insert(uint32* key,
 								break;
 						}
 						#endif
-						
+
+						if(level == 3) //max depth
+						{
+							if(allocateHeaderBlock(keyValue, lastContentOffset, pContentCell))
+							{
+								return 333; //goto FILL_KEY2;
+							}
+						}
+											
 						const ushort16 branchesSize = BRANCH_ENGINE_SIZE * 2;
 						const ushort16 countCell = branchesSize + 1;
 
@@ -1190,10 +1196,8 @@ uint32 HArrayVarRAM::insert(uint32* key,
 					idxKeyValue = (blockCell.Type - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 					startOffset = blockCell.Offset;
 
-					#ifndef _RELEASE
 					level++;
-					#endif
-					
+
 					goto NEXT_BLOCK;
 				}
 			}

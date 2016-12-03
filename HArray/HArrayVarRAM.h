@@ -420,23 +420,18 @@ public:
 
 	//COMPACT =========================================================================================================
 	bool finHeaderBlockPlace(CompactPage* pRootCompactPage,
+							uint32 count,
+							uchar8 parentID,
 							uint32& headerBlockType,
 							uint32& baseHeaderOffset,
 						    uint32& leftOffset,
 						    uint32& rightOffset);
 
-	void insertBlockValue(BlockPage** pNewBlockPages,
-		 				  	uint32& newBlockPagesCount,
-			  				uint32& newLastBlockOffset,
-			  				uchar8& contentCellType,
-			  				uint32& contentCellValue,
-			  				uint32 value,
-			  				uint32 offset);
+	CompactPage* scanBlocks(uint32& count, uint32 blockOffset, CompactPage* pCompactPage);
 
-	bool scanBlocks(uint32 blockOffset, CompactPage* pCompactPage);
-	bool allocateHeaderBlock(uint32 blockOffset, ContentCell& contentCell);
-
-	void compact();
+	bool allocateHeaderBlock(uint32 keyValue,
+							 uint32 keyOffset,
+							 ContentCell* pContentCell);
 
 	//GET =============================================================================================================
 

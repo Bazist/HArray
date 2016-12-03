@@ -18,6 +18,7 @@
     <CompileTarget>Bin</CompileTarget>
     <DefineSymbols>DEBUG MONODEVELOP</DefineSymbols>
     <SourceDirectory>.</SourceDirectory>
+    <ExtraCompilerArguments>-std=gnu++11</ExtraCompilerArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release</OutputPath>
@@ -27,6 +28,7 @@
     <OptimizationLevel>3</OptimizationLevel>
     <DefineSymbols>MONODEVELOP</DefineSymbols>
     <SourceDirectory>.</SourceDirectory>
+    <ExtraCompilerArguments>-std=gnu++11</ExtraCompilerArguments>
   </PropertyGroup>
   <ItemGroup>
     <None Include="HArrayFixBase.h" />

@@ -1,148 +1,202 @@
-=== HArrayInt VS std::map<int,int> testing ===
+slavik@slavik-HP-250-G5-Notebook-PC:~$ /home/slavik/Documents/harray/HArray/bin/Release/HArrayMono
+=== HArrayInt VS google::dense_hash_map<int,int> VS std::map<int,int> VS std::ordinary_map<int,int> testing===
 Insert/Search 1000000 SEQUENCE keys (4 bytes each) ...
-HArrayInt => Insert: 31 msec, Search: 14 msec.
-std::map => Insert: 312 msec, Search: 128 msec.
+HArrayInt => Insert: 12 msec, Search: 2 msec.
+google::dense_hash_map => Insert: 15 msec, Search: 3 msec.
+std::map => Insert: 299 msec, Search: 166 msec.
+std::unordered_map => Insert: 67 msec, Search: 11 msec.
 
 Insert/Search 3000000 SEQUENCE keys (4 bytes each) ...
-HArrayInt => Insert: 58 msec, Search: 23 msec.
-std::map => Insert: 957 msec, Search: 389 msec.
+HArrayInt => Insert: 34 msec, Search: 7 msec.
+google::dense_hash_map => Insert: 51 msec, Search: 8 msec.
+std::map => Insert: 1070 msec, Search: 609 msec.
+std::unordered_map => Insert: 207 msec, Search: 34 msec.
 
 Insert/Search 5000000 SEQUENCE keys (4 bytes each) ...
-HArrayInt => Insert: 111 msec, Search: 37 msec.
-std::map => Insert: 1751 msec, Search: 640 msec.
+HArrayInt => Insert: 57 msec, Search: 12 msec.
+google::dense_hash_map => Insert: 93 msec, Search: 13 msec.
+std::map => Insert: 1880 msec, Search: 1085 msec.
+std::unordered_map => Insert: 368 msec, Search: 56 msec.
 
 Insert/Search 7000000 SEQUENCE keys (4 bytes each) ...
-HArrayInt => Insert: 144 msec, Search: 78 msec.
-std::map => Insert: 2385 msec, Search: 918 msec.
+HArrayInt => Insert: 64 msec, Search: 17 msec.
+google::dense_hash_map => Insert: 105 msec, Search: 18 msec.
+std::map => Insert: 2715 msec, Search: 1564 msec.
+std::unordered_map => Insert: 469 msec, Search: 79 msec.
 
 Insert/Search 9000000 SEQUENCE keys (4 bytes each) ...
-HArrayInt => Insert: 215 msec, Search: 73 msec.
-std::map => Insert: 3129 msec, Search: 1278 msec.
+HArrayInt => Insert: 103 msec, Search: 22 msec.
+google::dense_hash_map => Insert: 180 msec, Search: 24 msec.
+std::map => Insert: 3593 msec, Search: 2059 msec.
+std::unordered_map => Insert: 692 msec, Search: 101 msec.
 
 Insert/Search 1000000 RANDOM keys (4 bytes each) ...
-HArrayInt => Insert: 14 msec, Search: 9 msec.
-std::map => Insert: 277 msec, Search: 246 msec.
+HArrayInt => Insert: 16 msec, Search: 14 msec.
+google::dense_hash_map => Insert: 56 msec, Search: 25 msec.
+std::map => Insert: 926 msec, Search: 928 msec.
+std::unordered_map => Insert: 596 msec, Search: 113 msec.
 
 Insert/Search 3000000 RANDOM keys (4 bytes each) ...
-HArrayInt => Insert: 40 msec, Search: 30 msec.
-std::map => Insert: 892 msec, Search: 1066 msec.
+HArrayInt => Insert: 54 msec, Search: 52 msec.
+google::dense_hash_map => Insert: 198 msec, Search: 72 msec.
+std::map => Insert: 3760 msec, Search: 3579 msec.
+std::unordered_map => Insert: 2260 msec, Search: 344 msec.
 
 Insert/Search 5000000 RANDOM keys (4 bytes each) ...
-HArrayInt => Insert: 112 msec, Search: 55 msec.
-std::map => Insert: 1378 msec, Search: 1578 msec.
+HArrayInt => Insert: 99 msec, Search: 96 msec.
+google::dense_hash_map => Insert: 354 msec, Search: 111 msec.
+std::map => Insert: 6922 msec, Search: 6696 msec.
+std::unordered_map => Insert: 4062 msec, Search: 499 msec.
 
 Insert/Search 7000000 RANDOM keys (4 bytes each) ...
-HArrayInt => Insert: 94 msec, Search: 82 msec.
-std::map => Insert: 1992 msec, Search: 1975 msec.
+HArrayInt => Insert: 148 msec, Search: 149 msec.
+google::dense_hash_map => Insert: 429 msec, Search: 177 msec.
+std::map => Insert: 10442 msec, Search: 10079 msec.
+std::unordered_map => Insert: 5468 msec, Search: 852 msec.
 
 Insert/Search 9000000 RANDOM keys (4 bytes each) ...
-HArrayInt => Insert: 185 msec, Search: 103 msec.
-std::map => Insert: 2563 msec, Search: 3032 msec.
+HArrayInt => Insert: 207 msec, Search: 207 msec.
+google::dense_hash_map => Insert: 682 msec, Search: 259 msec.
+std::map => Insert: 14069 msec, Search: 13655 msec.
+std::unordered_map => Insert: 8057 msec, Search: 908 msec.
 
 Insert/Search 1000000 PERIOD keys (4 bytes each) ...
-HArrayInt => Insert: 33 msec, Search: 9 msec.
-std::map => Insert: 301 msec, Search: 117 msec.
+HArrayInt => Insert: 12 msec, Search: 3 msec.
+google::dense_hash_map => Insert: 28 msec, Search: 9 msec.
+std::map => Insert: 315 msec, Search: 172 msec.
+std::unordered_map => Insert: 77 msec, Search: 16 msec.
 
 Insert/Search 3000000 PERIOD keys (4 bytes each) ...
-HArrayInt => Insert: 109 msec, Search: 43 msec.
-std::map => Insert: 1147 msec, Search: 391 msec.
+HArrayInt => Insert: 43 msec, Search: 7 msec.
+google::dense_hash_map => Insert: 94 msec, Search: 26 msec.
+std::map => Insert: 1058 msec, Search: 602 msec.
+std::unordered_map => Insert: 251 msec, Search: 47 msec.
 
 Insert/Search 5000000 PERIOD keys (4 bytes each) ...
-HArrayInt => Insert: 199 msec, Search: 69 msec.
-std::map => Insert: 1654 msec, Search: 640 msec.
+HArrayInt => Insert: 73 msec, Search: 12 msec.
+google::dense_hash_map => Insert: 165 msec, Search: 44 msec.
+std::map => Insert: 1879 msec, Search: 1087 msec.
+std::unordered_map => Insert: 458 msec, Search: 76 msec.
 
 Insert/Search 7000000 PERIOD keys (4 bytes each) ...
-HArrayInt => Insert: 215 msec, Search: 69 msec.
-std::map => Insert: 2357 msec, Search: 915 msec.
+HArrayInt => Insert: 87 msec, Search: 18 msec.
+google::dense_hash_map => Insert: 195 msec, Search: 66 msec.
+std::map => Insert: 2715 msec, Search: 1561 msec.
+std::unordered_map => Insert: 570 msec, Search: 108 msec.
 
 Insert/Search 9000000 PERIOD keys (4 bytes each) ...
-HArrayInt => Insert: 254 msec, Search: 74 msec.
-std::map => Insert: 3051 msec, Search: 1207 msec.
+HArrayInt => Insert: 130 msec, Search: 24 msec.
+google::dense_hash_map => Insert: 310 msec, Search: 80 msec.
+std::map => Insert: 3575 msec, Search: 2049 msec.
+std::unordered_map => Insert: 865 msec, Search: 140 msec.
 
-=== HArrayVarRAM VS std::map<BinKey,int> testing ===
+=== HArrayVarRAM VS google::dense_hash_map<BinKey, int> VS std::map<BinKey,int> VS std::ordinary_map<BinKey,int> testing ===
 Insert/Search 1000000 SEQUENCE keys (16 bytes each) ...
-HArrayVarRAM => Insert: 168 msec, Search: 98 msec.
-std::map => Insert: 401 msec, Search: 215 msec.
+HArrayVarRAM => Insert: 950 msec, Search: 50 msec.
+google::dense_hash_map => Insert: 37 msec, Search: 5 msec.
+std::map => Insert: 384 msec, Search: 226 msec.
+std::unordered_map => Insert: 67 msec, Search: 12 msec.
 
 Insert/Search 3000000 SEQUENCE keys (16 bytes each) ...
-HArrayVarRAM => Insert: 459 msec, Search: 449 msec.
-std::map => Insert: 1355 msec, Search: 646 msec.
+HArrayVarRAM => Insert: 1141 msec, Search: 159 msec.
+google::dense_hash_map => Insert: 118 msec, Search: 16 msec.
+std::map => Insert: 1287 msec, Search: 746 msec.
+std::unordered_map => Insert: 215 msec, Search: 35 msec.
 
 Insert/Search 5000000 SEQUENCE keys (16 bytes each) ...
-HArrayVarRAM => Insert: 925 msec, Search: 797 msec.
-std::map => Insert: 2176 msec, Search: 1128 msec.
+HArrayVarRAM => Insert: 1279 msec, Search: 286 msec.
+google::dense_hash_map => Insert: 215 msec, Search: 27 msec.
+std::map => Insert: 2183 msec, Search: 1276 msec.
+std::unordered_map => Insert: 376 msec, Search: 60 msec.
 
 Insert/Search 7000000 SEQUENCE keys (16 bytes each) ...
-HArrayVarRAM => Insert: 1206 msec, Search: 1037 msec.
-std::map => Insert: 3290 msec, Search: 1511 msec.
+HArrayVarRAM => Insert: 1430 msec, Search: 422 msec.
+google::dense_hash_map => Insert: 238 msec, Search: 37 msec.
+std::map => Insert: 3191 msec, Search: 1831 msec.
+std::unordered_map => Insert: 485 msec, Search: 82 msec.
 
 Insert/Search 9000000 SEQUENCE keys (16 bytes each) ...
-HArrayVarRAM => Insert: 1954 msec, Search: 1570 msec.
-std::map => Insert: 4046 msec, Search: 2139 msec.
+HArrayVarRAM => Insert: 1801 msec, Search: 866 msec.
+google::dense_hash_map => Insert: 649 msec, Search: 52 msec.
+std::map => Insert: 4068 msec, Search: 2297 msec.
+std::unordered_map => Insert: 708 msec, Search: 106 msec.
 
 Insert/Search 1000000 RANDOM keys (16 bytes each) ...
-HArrayVarRAM => Insert: 111 msec, Search: 90 msec.
-std::map => Insert: 1154 msec, Search: 975 msec.
+HArrayVarRAM => Insert: 80 msec, Search: 64 msec.
+google::dense_hash_map => Insert: 99 msec, Search: 46 msec.
+std::map => Insert: 873 msec, Search: 847 msec.
+std::unordered_map => Insert: 548 msec, Search: 120 msec.
 
 Insert/Search 3000000 RANDOM keys (16 bytes each) ...
-HArrayVarRAM => Insert: 375 msec, Search: 346 msec.
-std::map => Insert: 4077 msec, Search: 3759 msec.
+HArrayVarRAM => Insert: 212 msec, Search: 153 msec.
+google::dense_hash_map => Insert: 340 msec, Search: 139 msec.
+std::map => Insert: 3495 msec, Search: 3421 msec.
+std::unordered_map => Insert: 2207 msec, Search: 374 msec.
 
 Insert/Search 5000000 RANDOM keys (16 bytes each) ...
-HArrayVarRAM => Insert: 757 msec, Search: 873 msec.
-std::map => Insert: 7647 msec, Search: 6960 msec.
+HArrayVarRAM => Insert: 372 msec, Search: 274 msec.
+google::dense_hash_map => Insert: 608 msec, Search: 223 msec.
+std::map => Insert: 6665 msec, Search: 6429 msec.
+std::unordered_map => Insert: 4170 msec, Search: 626 msec.
 
 Insert/Search 7000000 RANDOM keys (16 bytes each) ...
-HArrayVarRAM => Insert: 1199 msec, Search: 1148 msec.
-std::map => Insert: 11236 msec, Search: 10399 msec.
+HArrayVarRAM => Insert: 547 msec, Search: 403 msec.
+google::dense_hash_map => Insert: 762 msec, Search: 345 msec.
+std::map => Insert: 10091 msec, Search: 9725 msec.
+std::unordered_map => Insert: 5523 msec, Search: 970 msec.
 
 Insert/Search 9000000 RANDOM keys (16 bytes each) ...
-HArrayVarRAM => Insert: 1707 msec, Search: 1883 msec.
-std::map => Insert: 15255 msec, Search: 14836 msec.
+HArrayVarRAM => Insert: 741 msec, Search: 564 msec.
+google::dense_hash_map => Insert: 1263 msec, Search: 398 msec.
+std::map => Insert: 13874 msec, Search: 13262 msec.
+std::unordered_map => Insert: 8205 msec, Search: 1062 msec.
 
 Insert/Search 1000000 PERIOD keys (16 bytes each) ...
-HArrayVarRAM => Insert: 52 msec, Search: 35 msec.
-std::map => Insert: 334 msec, Search: 184 msec.
+HArrayVarRAM => Insert: 21 msec, Search: 14 msec.
+google::dense_hash_map => Insert: 63 msec, Search: 18 msec.
+std::map => Insert: 322 msec, Search: 181 msec.
+std::unordered_map => Insert: 78 msec, Search: 17 msec.
 
 Insert/Search 3000000 PERIOD keys (16 bytes each) ...
-HArrayVarRAM => Insert: 145 msec, Search: 108 msec.
-std::map => Insert: 1060 msec, Search: 463 msec.
+HArrayVarRAM => Insert: 88 msec, Search: 42 msec.
+google::dense_hash_map => Insert: 207 msec, Search: 54 msec.
+std::map => Insert: 1188 msec, Search: 664 msec.
+std::unordered_map => Insert: 265 msec, Search: 53 msec.
 
 Insert/Search 5000000 PERIOD keys (16 bytes each) ...
-HArrayVarRAM => Insert: 222 msec, Search: 159 msec.
-std::map => Insert: 1746 msec, Search: 812 msec.
+HArrayVarRAM => Insert: 147 msec, Search: 70 msec.
+google::dense_hash_map => Insert: 367 msec, Search: 90 msec.
+std::map => Insert: 2118 msec, Search: 1200 msec.
+std::unordered_map => Insert: 551 msec, Search: 139 msec.
 
 Insert/Search 7000000 PERIOD keys (16 bytes each) ...
-HArrayVarRAM => Insert: 320 msec, Search: 206 msec.
-std::map => Insert: 2501 msec, Search: 1139 msec.
+HArrayVarRAM => Insert: 254 msec, Search: 113 msec.
+google::dense_hash_map => Insert: 712 msec, Search: 203 msec.
+std::map => Insert: 3471 msec, Search: 1864 msec.
+std::unordered_map => Insert: 885 msec, Search: 196 msec.
 
 Insert/Search 9000000 PERIOD keys (16 bytes each) ...
-HArrayVarRAM => Insert: 537 msec, Search: 288 msec.
-std::map => Insert: 3119 msec, Search: 1558 msec.
+HArrayVarRAM => Insert: 328 msec, Search: 144 msec.
+google::dense_hash_map => Insert: 1061 msec, Search: 178 msec.
+std::map => Insert: 4120 msec, Search: 2257 msec.
+std::unordered_map => Insert: 896 msec, Search: 149 msec.
 
-=== HArrayVarRAM VS std::map<StrKey,int> testing ===
-Insert/Search 1000000 SIMILAR keys (64 bytes each) ...
-HArrayVarRAM => Insert: 410 msec, Search: 428 msec.
-std::map => Insert: 2542 msec, Search: 2441 msec.
+=== HArrayVarRAM VS google::dense_hash_map<StrKey, int> VS std::map<StrKey,int> VS std::ordinary_map<StrKey,int> testing ===
+Insert/Search 10000000 SIMILAR keys (64 bytes each) ...
+HArrayVarRAM => Insert: 5089 msec, Search: 6133 msec.
+google::dense_hash_map => Insert: 9766 msec, Error
+Search: 0 msec.
+std::map => Insert: 24008 msec, Search: 24472 msec.
+std::unordered_map => Insert: 5262 msec, Search: 525 msec.
 
-Insert/Search 2000000 SIMILAR keys (64 bytes each) ...
-HArrayVarRAM => Insert: 911 msec, Search: 1038 msec.
-std::map => Insert: 5415 msec, Search: 5154 msec.
+Insert/Search 10000000 RANDOM keys (64 bytes each) ...
+HArrayVarRAM => Insert: 5900 msec, Search: 5985 msec.
+google::dense_hash_map => Insert: 4282 msec, Error
+Search: 0 msec.
+std::map => Insert: 20201 msec, Search: 20421 msec.
+std::unordered_map => Insert: 5335 msec, Search: 527 msec.
 
-Insert/Search 3000000 SIMILAR keys (64 bytes each) ...
-HArrayVarRAM => Insert: 1494 msec, Search: 1711 msec.
-std::map => Insert: 9292 msec, Search: 8358 msec.
+COEF Map VS HArray: 7.75
+COEF Unordered Map VS HArray: 1.81
+COEF Dense VS HArray: 0.70
 
-Insert/Search 1000000 RANDOM keys (64 bytes each) ...
-HArrayVarRAM => Insert: 351 msec, Search: 355 msec.
-std::map => Insert: 1381 msec, Search: 1175 msec.
-
-Insert/Search 2000000 RANDOM keys (64 bytes each) ...
-HArrayVarRAM => Insert: 975 msec, Search: 905 msec.
-std::map => Insert: 3118 msec, Search: 2826 msec.
-
-Insert/Search 3000000 RANDOM keys (64 bytes each) ...
-HArrayVarRAM => Insert: 1591 msec, Search: 1404 msec.
-std::map => Insert: 5226 msec, Search: 4802 msec.
-
-Press any key to continue . . .

@@ -974,13 +974,13 @@ uint32 HArrayVarRAM::insert(uint32* key,
 						}
 						#endif
 
-						if(level == 3) //max depth
-						{
-							if(allocateHeaderBlock(keyValue, lastContentOffset, pContentCell))
-							{
-								return 333; //goto FILL_KEY2;
-							}
-						}
+						//if(level == 3) //max depth
+						//{
+						//	if(allocateHeaderBlock(keyValue, lastContentOffset, pContentCell))
+						//	{
+						//		return 333; //goto FILL_KEY2;
+						//	}
+						//}
 											
 						const ushort16 branchesSize = BRANCH_ENGINE_SIZE * 2;
 						const ushort16 countCell = branchesSize + 1;

@@ -25,7 +25,7 @@
 
 #include "stdafx.h"
 
-//#define _RELEASE 0x1234567
+#define _RELEASE 0x1234567
 
 const uint32 REPOSITORY_VERSION = 1;
 

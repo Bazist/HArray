@@ -29,7 +29,7 @@
 #define SEQUENCE_TESTS
 #define RANDOM_TESTS
 #define PERIOD_TESTS
-#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
+//#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
 #define STD_MAP_TESTS
 #define STD_UNORDERED_MAP_TESTS
 //#define PRINT_STAT
@@ -723,36 +723,12 @@ void HArrayVarRAM_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 
 const char STR_KEY_LEN = 64;
 
-struct StrKey
-{
-public:
-	char Data[STR_KEY_LEN]; //64 bytes max
-
-	bool operator==(const StrKey &other) const
-  	{ 
-  		return strcmp(Data, other.Data) == 0;
-  	}
-};
-
-struct StrKeyHasher
-{
-  std::size_t operator()(const StrKey& k) const
-  {
-    return std::tr1::hash<const char*>()(k.Data);
-  }
-};
-
-bool operator<(const StrKey& a, const StrKey& b)
-{
-	return (strcmp(a.Data, b.Data) < 0);
-}
-
 static const char alphanum[] =
 "0123456789"
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 "abcdefghijklmnopqrstuvwxyz";
 
-void fillRand(char *str, const int len)
+void fillRand(char* str, const int len)
 {
 	uint32 i = 0;
 
@@ -764,7 +740,7 @@ void fillRand(char *str, const int len)
 	str[i] = 0;
 }
 
-void testHArrayStr(StrKey* keys, uint32 countKeys)
+void testHArrayStr(std::string* keys, uint32 countKeys)
 {
 	printf("HArrayVarRAM => ");
 
@@ -779,7 +755,9 @@ void testHArrayStr(StrKey* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		ha.insert((uint32*)keys[i].Data, sizeof(StrKey), keys[i].Data[0]);
+		const char* str = keys[i].c_str();
+
+		ha.insert((uint32*)str, STR_KEY_LEN, str[0]);
 	}
 
 	finish = msclock();
@@ -793,7 +771,9 @@ void testHArrayStr(StrKey* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (ha.getValueByKey((uint32*)keys[i].Data, sizeof(StrKey)) != keys[i].Data[0])
+		const char* str = keys[i].c_str();
+
+		if (ha.getValueByKey((uint32*)str, STR_KEY_LEN) != str[0])
 		{
 			printf("Error\n");
 			break;
@@ -817,13 +797,13 @@ void testHArrayStr(StrKey* keys, uint32 countKeys)
 	ha.destroy();
 }
 
-void testStdMapStr(StrKey* keys, uint32 countKeys)
+void testStdMapStr(std::string* keys, uint32 countKeys)
 {
 	#ifdef STD_MAP_TESTS
 
 	printf("std::map => ");
 
-	std::map<StrKey, uint32> mymap;
+	std::map<std::string, uint32> mymap;
 
 	clock_t start, finish;
 
@@ -833,7 +813,8 @@ void testStdMapStr(StrKey* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		mymap[keys[i]] = keys[i].Data[0];
+		const char* str = keys[i].c_str();
+		mymap[keys[i]] = str[0];
 	}
 
 	finish = msclock();
@@ -847,7 +828,8 @@ void testStdMapStr(StrKey* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (mymap[keys[i]] != keys[i].Data[0])
+		const char* str = keys[i].c_str();
+		if (mymap[keys[i]] != str[0])
 		{
 			printf("Error\n");
 			break;
@@ -865,18 +847,15 @@ void testStdMapStr(StrKey* keys, uint32 countKeys)
 	#endif
 }
 
-void testDenseHashMapStr(StrKey* keys, uint32 countKeys)
+void testDenseHashMapStr(std::string* keys, uint32 countKeys)
 {
 	#ifdef DENSE_HASH_MAP_TESTS
 
 	printf("google::dense_hash_map => ");
 
-	google::dense_hash_map<StrKey, uint32, StrKeyHasher> mymap;
+	google::dense_hash_map<std::string, uint32> mymap;
 
-	StrKey emptyKey;
-	memset(&emptyKey, 0, sizeof(StrKey));
-
-	mymap.set_empty_key(emptyKey);
+	mymap.set_empty_key(NULL);
 
 	clock_t start, finish;
 
@@ -886,7 +865,8 @@ void testDenseHashMapStr(StrKey* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		mymap[keys[i]] = keys[i].Data[0];
+		const char* str = keys[i].c_str();
+		mymap[keys[i]] = str[0];
 	}
 
 	finish = msclock();
@@ -900,7 +880,9 @@ void testDenseHashMapStr(StrKey* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (mymap[keys[i]] != keys[i].Data[0])
+		const char* str = keys[i].c_str();
+
+		if (mymap[keys[i]] != str[0])
 		{
 			printf("Error\n");
 			break;
@@ -918,13 +900,13 @@ void testDenseHashMapStr(StrKey* keys, uint32 countKeys)
 	//ha.print();
 }
 
-void testStdUnorderedMapStr(StrKey* keys, uint32 countKeys)
+void testStdUnorderedMapStr(std::string* keys, uint32 countKeys)
 {
 	#ifdef STD_UNORDERED_MAP_TESTS
 
 	printf("std::unordered_map => ");
 
-	std::unordered_map<StrKey, uint32, StrKeyHasher> mymap;
+	std::unordered_map<std::string, uint32> mymap;
 
 	clock_t start, finish;
 
@@ -934,7 +916,9 @@ void testStdUnorderedMapStr(StrKey* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		mymap[keys[i]] = keys[i].Data[0];
+		const char* str = keys[i].c_str();
+
+		mymap[keys[i]] = str[0];
 	}
 
 	finish = msclock();
@@ -948,7 +932,9 @@ void testStdUnorderedMapStr(StrKey* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (mymap[keys[i]] != keys[i].Data[0])
+		const char* str = keys[i].c_str();
+
+		if (mymap[keys[i]] != str[0])
 		{
 			printf("Error\n");
 			break;
@@ -966,24 +952,32 @@ void testStdUnorderedMapStr(StrKey* keys, uint32 countKeys)
 	//ha.print();
 }
 
-void fillSeqStrs(StrKey* keys, uint32 countKeys)
+void fillSeqStrs(std::string* keys, uint32 countKeys)
 {
+	char key[STR_KEY_LEN + 1];
+
 	for (uint32 i = 0; i < countKeys; i++)
 	{
 		for (uint32 j = 0; j < STR_KEY_LEN - 8; j++)
 		{
-			keys[i].Data[j] = '0';
+			key[j] = '0';
 		}
 
-		fillRand(keys[i].Data + (STR_KEY_LEN - 8), 8);
+		fillRand(key + (STR_KEY_LEN - 8), 8);
+
+		keys[i] = key;
 	}
 }
 
-void fillRandStrs(StrKey* keys, uint32 countKeys)
+void fillRandStrs(std::string* keys, uint32 countKeys)
 {
+	char key[STR_KEY_LEN + 1];
+
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		fillRand(keys[i].Data, STR_KEY_LEN);
+		fillRand(key, STR_KEY_LEN);
+
+		keys[i] = key;
 	}
 }
 
@@ -991,7 +985,7 @@ void HArrayVarRAM_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 {
 	printf("=== HArrayVarRAM VS google::dense_hash_map<StrKey, int> VS std::map<StrKey,int> VS std::ordinary_map<StrKey,int> testing ===\n");
 
-	StrKey* strKeys = new StrKey[stopOnAmount];
+	std::string* strKeys = new std::string[stopOnAmount];
 
 	#ifdef SEQUENCE_TESTS
 
@@ -999,7 +993,7 @@ void HArrayVarRAM_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 
 	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
-		printf("Insert/Search %u SIMILAR keys (%u bytes each) ...\n", countKeys, sizeof(StrKey));
+		printf("Insert/Search %u SIMILAR keys (%u bytes each) ...\n", countKeys, STR_KEY_LEN);
 		testHArrayStr(strKeys, countKeys);
 		testDenseHashMapStr(strKeys, countKeys);
 		testStdMapStr(strKeys, countKeys);
@@ -1015,7 +1009,7 @@ void HArrayVarRAM_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 
 	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
-		printf("Insert/Search %u RANDOM keys (%u bytes each) ...\n", countKeys, sizeof(StrKey));
+		printf("Insert/Search %u RANDOM keys (%u bytes each) ...\n", countKeys, STR_KEY_LEN);
 		testHArrayStr(strKeys, countKeys);
 		testDenseHashMapStr(strKeys, countKeys);
 		testStdMapStr(strKeys, countKeys);
@@ -1048,34 +1042,6 @@ void dense_fake()
 
 int main()
 {
-	/*
-	uint32 key[4];
-	key[0] = 0;
-	key[1] = 0;
-	key[2] = 0;
-
-	HArrayVarRAM ha;
-	ha.init(24);
-
-	clock_t start, finish;
-
-	//INSERT ===========================================
-
-	start = msclock();
-
-	for(key[3] = 0; key[3] < 10000000; key[3]++)
-	{
-		if(ha.insert(key, 16, 1) == 333) break;
-	}
-
-	finish = msclock();
-
-	printf("Insert: %d msec, ", (finish - start));
-
-
-	return 0;
-	*/
-
 	HArrayInt_VS_StdMap_IntKey(1000000,   //start
 							   2000000,   //step
 							   10000000); //stop
@@ -1086,9 +1052,9 @@ int main()
 								  10000000,  //stop
 								  false); 	 //shuffle
 	
-	HArrayVarRAM_VS_StdMap_StrKey(10000000,   //start
+	HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
 							  	  1000000,   //step
-							  	  10000000);  //stop
+							  	  3000000);  //stop
 
 	printf("COEF Map VS HArray: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 	printf("COEF Unordered Map VS HArray: %.2f\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);

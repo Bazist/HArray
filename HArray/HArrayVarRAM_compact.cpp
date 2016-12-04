@@ -212,6 +212,8 @@ bool HArrayVarRAM::allocateHeaderBlock(uint32 keyValue,
 									   uint32 keyOffset,
 									   ContentCell* pContentCell)
 {
+	return false;
+
 	//1. Scan blocks
 	CompactPage* pCompactPage = new CompactPage();
 
@@ -223,7 +225,7 @@ bool HArrayVarRAM::allocateHeaderBlock(uint32 keyValue,
 
 	scanBlocks(count, pContentCell->Value, pCompactPage);
 
-	return false;
+	//return false;
 
 	uint32 headerBlockType;
 	uint32 baseHeaderOffset;

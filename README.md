@@ -26,6 +26,7 @@
 ![alt tag](https://s15.postimg.org/gzww2zhor/i_Core5.png)
 
 **Note**: All results in tables below in milliseconds. In green color best results.
+SEQUENCE cases always illustrate Worst Case for VyMa/Trie algorithm.
 
 ------------------
 

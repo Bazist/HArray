@@ -6,7 +6,7 @@
 
 ------------------
 
-## Why we love Trie ? Because it has much more functionality and stability than Hashtables and much more faster that Binary Trees. Let's compare properties:
+## Why we love Trie ? Because it has much more functionality and stability than Hashtables and much more faster than Binary Trees. Let's compare properties:
 
 ![alt tag](https://s16.postimg.org/6zis60mol/functionality.png)
 

@@ -31,7 +31,7 @@
 #define PERIOD_TESTS
 
 #define HARRAY_TESTS
-//#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
+#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
 #define STD_MAP_TESTS
 #define STD_UNORDERED_MAP_TESTS
 //#define PRINT_MEM
@@ -994,7 +994,7 @@ void fillRandStrs(std::string* keys, uint32 countKeys)
 
 void HArrayVarRAM_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
 {
-	printf("=== HArrayVarRAM VS google::dense_hash_map<StrKey, int> VS std::map<StrKey,int> VS std::ordinary_map<StrKey,int> testing ===\n");
+	printf("=== HArrayVarRAM VS google::dense_hash_map<StrKey, int> VS std::map<std::string,int> VS std::ordinary_map<std::string,int> testing ===\n");
 
 	std::string* strKeys = new std::string[stopOnAmount];
 

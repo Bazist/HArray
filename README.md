@@ -30,13 +30,17 @@
 ## PART 1, Size of key is 32 bits (4 bytes)
 
 What is *SEQUENCE* key generation ?
+
 Keys such as: 0,1,2,3,4,5 etc.
 
 What is *RANDOM* key generation ?
+
 Keys such as: 33246, 878878,13241334,3987654633,67,342424242 etc.
+
 (used rand() function)
 
 What is *PERIOD* key generation ?
+
 Keys such as: 0, 17, 289, 4913, 83521 ... N * 17 etc.
 
 ![alt tag](https://s16.postimg.org/j96eaew9h/insert_seq_32bits.png)
@@ -56,25 +60,41 @@ Keys such as: 0, 17, 289, 4913, 83521 ... N * 17 etc.
 ## PART 2, Size of key is 128 bits (16 bytes)
 
 What is *SEQUENCE* key generation ?
+
 Keys such as (one number in brackets = 4 bytes): 
+
 [0 0 0 1]
+
 [0 0 0 2]
+
 [0 0 0 3]
+
 etc.
 
 What is *RANDOM* key generation ?
-Keys such as (one number in brackets = Unsigned Integer = 4 bytes): 
+
+Keys such as (one number in brackets = Unsigned Integer = 4 bytes):
+
 [33246 878878 13241334 3987654634]
+
 [468900044 222345566 789 2334555]
+
 [231 735353535 867980433 7664234]
+
 etc.
 
 What is *PERIOD* key generation ?
-Keys such as (one number in brackets = Unsigned Integer = 4 bytes): 
+
+Keys such as (one number in brackets = Unsigned Integer = 4 bytes):
+
 [0 0 0 0]
+
 [17 17 17 17]
+
 [289 289 289 289]
+
 [4913 4913 4913 4913]
+
 etc.
 
 ![alt tag](https://s16.postimg.org/txa59968l/insert_seq_128bits.png)
@@ -94,17 +114,27 @@ etc.
 ## PART 3, Size of key is 64 chars (64 bytes)
 
 What is *SIMILAR* key generation ?
+
 Keys such as strings:
+
 [000000000000000000000000000000000000000000000000000000005u2iOpq]
+
 [00000000000000000000000000000000000000000000000000000000t92hUGs]
+
 [00000000000000000000000000000000000000000000000000000000MuiSf9l]
+
 etc.
 
 What is *RANDOM* key generation ?
+
 Keys such as strings:
+
 [hd9sfdjj5JjsdfnbmituyUiegThsssOpklruYYwgdfshfj994gshspPReu2iOpq]
+
 [uKJkj12DkLSljd43djfjlLLss43kjks9sEOWPjfdjfkjJJHEYWQQfjsfdk2hUGs]
+
 [UDFdjjfsjhsjhdleE0E9j7sfL5MBNwMZZas22gwwrHHJhfsjsfsJqqJhfhsf95l]
+
 etc.
 
 ![alt tag](https://s16.postimg.org/bvr0bgc7p/insert_similar_64chars.png)
@@ -126,4 +156,5 @@ http://wiki.pikosec.com/index.php?title=VymaDB:Benchmarks
 ------------------
 Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 
+------------------
 ## ENJOY

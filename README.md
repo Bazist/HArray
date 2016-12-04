@@ -19,11 +19,13 @@
 | Param     | Value    |
 | --------|---------|
 | OS  | Ubuntu 16.1   |
-| Processor | iCore 5 6400U |
+| Processor | Intel(R) Core(TM) i5-6200U CPU @ 2.30 GHz 2.40 GHz |
 | RAM | 8 GB |
 | SSD | 256 GB |
 
 ![alt tag](https://s15.postimg.org/gzww2zhor/i_Core5.png)
+
+**Note**: All results in tables below in milliseconds. In green color best results.
 
 ------------------
 

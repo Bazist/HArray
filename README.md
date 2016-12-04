@@ -4,20 +4,28 @@
 
 **HArrayVarRAM** - Key\Value In Memory structure for keys with variety size
 
+------------------
+
 ## Why we love Trie ? Because it has much more functionality and stability than Hashtables and much more faster that Binary Trees. Let's compare properties:
 
 ![alt tag](https://s16.postimg.org/6zis60mol/functionality.png)
+
+------------------
 
 ## Result of Benchmarks
 
 **Configuration**
 
-OS: Ubuntu 16.1
-Processor: iCore 5 6400U
-RAM: 8 GB
-HDD: SSD 256 GB
+| Param     | Value    |
+| --------|---------|
+| OS  | Ubuntu 16.1   |
+| Processor | iCore 5 6400U |
+| RAM | 8 GB |
+| SSD | 256 GB |
 
 ![alt tag](https://s15.postimg.org/gzww2zhor/i_Core5.png)
+
+------------------
 
 ## PART 1, Size of key is 32 bits (4 bytes)
 
@@ -42,6 +50,8 @@ Keys such as: 0, 17, 289, 4913, 83521 ... N * 17 etc.
 ![alt tag](https://s16.postimg.org/akenp8r85/insert_period_32bits.png)
 
 ![alt tag](https://s16.postimg.org/q3gp03owl/lookup_period_32bits.png)
+
+------------------
 
 ## PART 2, Size of key is 128 bits (16 bytes)
 
@@ -79,6 +89,8 @@ etc.
 
 ![alt tag](https://s16.postimg.org/r70tc29jp/lookup_period_128bits.png)
 
+------------------
+
 ## PART 3, Size of key is 64 chars (64 bytes)
 
 What is *SIMILAR* key generation ?
@@ -103,12 +115,15 @@ etc.
 
 ![alt tag](https://s16.postimg.org/fkgpaxm8l/lookup_rand_64chars.png)
 
+------------------
+
 **Code of benchmarks**
 https://github.com/Bazist/HArray/blob/master/HArray/Main.cpp
 
 **More result of benchmarks**:
 http://wiki.pikosec.com/index.php?title=VymaDB:Benchmarks
 
+------------------
 Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 
 ## ENJOY

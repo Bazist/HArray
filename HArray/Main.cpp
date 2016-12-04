@@ -29,11 +29,13 @@
 #define SEQUENCE_TESTS
 #define RANDOM_TESTS
 #define PERIOD_TESTS
+
+#define HARRAY_TESTS
 //#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
 #define STD_MAP_TESTS
 #define STD_UNORDERED_MAP_TESTS
+//#define PRINT_MEM
 //#define PRINT_STAT
-
 
 #ifdef DENSE_HASH_MAP_TESTS
 #include <google/dense_hash_map>
@@ -52,13 +54,12 @@ clock_t msclock()
 }
 
 
-//#define PRINT_MEM
-//#define PRINT_STAT
-
 //==== HArrayInt - Int Keys ===========================================================================================
 
 void testHArrayInt(uint32* keys, uint32 countKeys)
 {
+	#ifdef HARRAY_TESTS
+
 	printf("HArrayInt => ");
 
 	HArrayInt ha;
@@ -102,6 +103,8 @@ void testHArrayInt(uint32* keys, uint32 countKeys)
 	//ha.print();
 
 	ha.destroy();
+
+	#endif
 }
 
 void testStdMapInt(uint32* keys, uint32 countKeys)
@@ -388,6 +391,8 @@ void shuffleBins(BinKey* keys, uint32 countKeys)
 
 void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 {
+	#ifdef HARRAY_TESTS
+
 	printf("HArrayVarRAM => ");
 
 	HArrayVarRAM ha;
@@ -447,6 +452,8 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 	#endif
 
 	ha.destroy();
+
+	#endif
 }
 
 void testStdMapBin(BinKey* keys, uint32 countKeys, bool shuffle)
@@ -742,6 +749,8 @@ void fillRand(char* str, const int len)
 
 void testHArrayStr(std::string* keys, uint32 countKeys)
 {
+	#ifdef HARRAY_TESTS
+
 	printf("HArrayVarRAM => ");
 
 	HArrayVarRAM ha;
@@ -795,6 +804,8 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 	#endif
 
 	ha.destroy();
+
+	#endif
 }
 
 void testStdMapStr(std::string* keys, uint32 countKeys)
@@ -855,7 +866,7 @@ void testDenseHashMapStr(std::string* keys, uint32 countKeys)
 
 	google::dense_hash_map<std::string, uint32> mymap;
 
-	mymap.set_empty_key(NULL);
+	mymap.set_empty_key("");
 
 	clock_t start, finish;
 

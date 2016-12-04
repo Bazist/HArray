@@ -31,6 +31,7 @@
 
 What is *SEQUENCE* key generation ?
 <br>Keys such as: 0,1,2,3,4,5 etc.
+
 <br>What is *RANDOM* key generation ?
 <br>Keys such as: 33246, 878878,13241334,3987654633,67,342424242 etc.
 <br>(used rand() function)

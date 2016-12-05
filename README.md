@@ -12,6 +12,12 @@
 
 ------------------
 
+## Trie ? I heard about Trees and Hastables but don't know anything about Trie
+
+# [Explain me as for Beginners](https://github.com/Bazist/HArray/edit/master/Trie_for_Beginners.md)
+
+------------------
+
 ## Result of Benchmarks
 
 **Configuration**

@@ -25,8 +25,7 @@
 
 ![alt tag](https://s15.postimg.org/gzww2zhor/i_Core5.png)
 
-**Note**: All results in tables below in milliseconds. In green color best results.
-SEQUENCE cases always illustrate Worst Case for VyMa/Trie algorithm.
+**Notes**: All results in tables below in milliseconds. In green color best results. In each benchmark Value size is constant and equals 4 bytes. SEQUENCE cases always illustrate Worst Case for VyMa/Trie algorithm.
 
 ------------------
 
@@ -98,9 +97,9 @@ What is *PERIOD* key generation ?
 
 What is *SIMILAR* key generation ?
 <br>Keys such as strings:
-<br>[000000000000000000000000000000000000000000000000000000005u2iOpq]
-<br>[00000000000000000000000000000000000000000000000000000000t92hUGs]
-<br>[00000000000000000000000000000000000000000000000000000000MuiSf9l]
+<br>[0000000000000000000000000000000000000000000000000000000t5u2iOpq]
+<br>[0000000000000000000000000000000000000000000000000000000lt92hUGs]
+<br>[0000000000000000000000000000000000000000000000000000000JMuiSf9l]
 <br>etc.
 
 What is *RANDOM* key generation ?
@@ -123,7 +122,7 @@ What is *RANDOM* key generation ?
 **Code of benchmarks**
 https://github.com/Bazist/HArray/blob/master/HArray/Main.cpp
 
-**More result of benchmarks**:
+**More results of benchmarks**:
 http://wiki.pikosec.com/index.php?title=VymaDB:Benchmarks
 
 ------------------

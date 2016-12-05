@@ -25,7 +25,7 @@
 
 ![alt tag](https://s15.postimg.org/gzww2zhor/i_Core5.png)
 
-**Notes**: All results in tables below in milliseconds. In green color best results. In each benchmark Value size is constant and equals 4 bytes. SEQUENCE cases always illustrate Worst Case for VyMa/Trie algorithm.
+**Notes**: All results in tables below in milliseconds. In green color best results. In each benchmark Value size is 4 bytes (emulates a memory pointer on Value object). SEQUENCE cases always illustrate Worst Case for VyMa/Trie algorithm.
 
 ------------------
 

@@ -1,3 +1,34 @@
+![alt tag](https://s16.postimg.org/d9tremns5/keys.png)
+![alt tag](https://s16.postimg.org/x35v7c15x/inside_binary_tree.png)
+![alt tag](https://s16.postimg.org/6tksojf8l/inside_hashtable.png)
+![alt tag](https://s16.postimg.org/uw1mjevvp/inside_trie.png)
+![alt tag](https://s16.postimg.org/wmknkwdet/new_key.png)
+![alt tag](https://s16.postimg.org/uglrcnkkl/insert_new_key_binary_tree.png)
+![alt tag](https://s16.postimg.org/4wjh67z6t/insert_new_key_hashtable.png)
+![alt tag](https://s16.postimg.org/4ii56mf39/insert_new_key_trie.png)
+![alt tag](https://s16.postimg.org/j0fcem6ed/lookup_new_key_binary_tree.png)
+![alt tag](https://s16.postimg.org/nxswzq8dh/lookup_new_key_hashtable.png)
+![alt tag](https://s16.postimg.org/ua829kbfp/lookup_new_key_trie.png)
+![alt tag](https://s16.postimg.org/uygwsia5h/scan_range_from_to.png)
+![alt tag](https://s16.postimg.org/63xeyfpb9/scan_range_binary_tree.png)
+![alt tag](https://s16.postimg.org/vlfti171h/scan_range_hashtable.png)
+![alt tag](https://s16.postimg.org/jv1w0ne91/scan_range_trie.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Probably, this is most optimized Trie structure in the World ! Thats all what you need know about this project :)
 
 **HArrayInt** - Key\Value In Memory structure for 32bit keys

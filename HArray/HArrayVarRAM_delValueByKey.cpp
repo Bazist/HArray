@@ -27,7 +27,18 @@ void HArrayVarRAM::delValueByKey(uint32* key,
 	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
-	uint32 contentOffset = pHeader[key[0]>>HeaderBits].Offset;
+	uint32 headerOffset;
+
+	if (!normalizeFunc)
+	{
+		headerOffset = key[0] >> HeaderBits;
+	}
+	else
+	{
+		headerOffset = (*normalizeFunc)(key);
+	}
+
+	uint32 contentOffset = pHeader[headerOffset].Offset;
 
 	if(contentOffset)
 	{

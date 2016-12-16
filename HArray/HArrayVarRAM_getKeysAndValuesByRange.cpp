@@ -37,7 +37,8 @@ void HArrayVarRAM::sortLastItem(HArrayFixPair* pairs,
 		uint32 idx = count - 2;
 		HArrayFixPair& prevItem = pairs[idx];
 
-		if(lastItem.compareTo(prevItem) == 1)
+		if((*compareFunc)(lastItem.Key, lastItem.KeyLen,
+					      prevItem.Key, prevItem.KeyLen) == 1)
 		{
 			//if last item greater then previous item, thats ok
 			return;
@@ -48,7 +49,8 @@ void HArrayVarRAM::sortLastItem(HArrayFixPair* pairs,
 		{
 			idx--;
 
-			if(lastItem.compareTo(pairs[idx]) == 1)
+			if ((*compareFunc)(lastItem.Key, lastItem.KeyLen,
+							   pairs[idx].Key, pairs[idx].KeyLen) == 1)
 			{
 				idx++;
 
@@ -446,9 +448,20 @@ uint32 HArrayVarRAM::getKeysAndValuesByRange(	HArrayFixPair* pairs,
 {
 	uint32 count = 0;
 
-	uint32 startHeader = minKey[0] >> HeaderBits;
-	uint32 endHeader = maxKey[0] >> HeaderBits;
+	uint32 startHeader;
+	uint32 endHeader;
 
+	if (!normalizeFunc)
+	{
+		startHeader = minKey[0] >> HeaderBits;
+		endHeader = maxKey[0] >> HeaderBits;
+	}
+	else
+	{
+		startHeader = (*normalizeFunc)(minKey) >> HeaderBits;
+		endHeader = (*normalizeFunc)(maxKey) >> HeaderBits;
+	}
+		
 	//start range
 	if(startHeader < endHeader)
 	{

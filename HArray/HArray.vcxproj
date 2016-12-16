@@ -100,7 +100,6 @@
     <ClCompile Include="HArrayVarRAM_delValueByKey.cpp" />
     <ClCompile Include="HArrayVarRAM_getKeysAndValuesByRange.cpp" />
     <ClCompile Include="HArrayVarRAM_getValueByKey.cpp" />
-    <ClCompile Include="HArrayVarRAM_getValuesByRange.cpp" />
     <ClCompile Include="HArrayVarRAM_hasPartKey.cpp" />
     <ClCompile Include="HArrayVarRAM_insert.cpp" />
     <ClCompile Include="HArrayVarRAM_scanKeysAndValues.cpp" />

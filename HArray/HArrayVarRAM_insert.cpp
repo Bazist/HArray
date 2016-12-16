@@ -44,7 +44,17 @@ uint32 HArrayVarRAM::insert(uint32* key,
 		uint32 keyOffset = 0;
 		uint32 contentOffset = 0;
 
-		uint32 headerOffset = key[0] >> HeaderBits;
+		uint32 headerOffset;
+		
+		if (!normalizeFunc)
+		{
+			headerOffset = key[0] >> HeaderBits;
+		}
+		else
+		{
+			headerOffset = (*normalizeFunc)(key) >> HeaderBits;
+		}
+
 		HeaderCell& headerCell = pHeader[headerOffset];
 
 		ContentPage* pContentPage;

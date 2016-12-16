@@ -117,20 +117,6 @@ struct HArrayFixPair
 	uint32 Key[16];
 	uint32 Value;
 	uint32 KeyLen;
-
-	int compareTo(HArrayFixPair& pair)
-	{
-		for (uint32 i = 0; i < KeyLen; i++)
-		{
-			if (Key[i] < pair.Key[i])
-				return -1;
-
-			if (Key[i] > pair.Key[i])
-				return 1;
-		}
-
-		return 0;
-	}
 };
 
 struct BranchCell
@@ -239,3 +225,7 @@ struct CompactPage
 
 	CompactPage* pNextPage;
 };
+
+typedef uint32 (*NormalizeFunc)(void* key);
+
+typedef int (*CompareFunc)(void* key1, uint32 keyLen1, void* key2, uint32 keyLen2);

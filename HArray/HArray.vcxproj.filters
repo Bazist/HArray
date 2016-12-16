@@ -38,9 +38,6 @@
     <ClCompile Include="HArrayVarRAM_getValueByKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_getValuesByRange.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HArrayVarRAM_insert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

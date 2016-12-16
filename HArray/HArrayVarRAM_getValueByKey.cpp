@@ -25,7 +25,18 @@ uint32 HArrayVarRAM::getValueByKey(uint32* key,
 	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
-	HeaderCell& headerCell = pHeader[key[0]>>HeaderBits];
+	uint32 headerOffset;
+
+	if (!normalizeFunc)
+	{
+		headerOffset = key[0] >> HeaderBits;
+	}
+	else
+	{
+		headerOffset = (*normalizeFunc)(key);
+	}
+
+	HeaderCell& headerCell = pHeader[headerOffset];
 
 	if(headerCell.Type)
 	{

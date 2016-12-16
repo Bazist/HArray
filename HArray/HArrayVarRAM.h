@@ -70,6 +70,9 @@ public:
 	BranchPage** pBranchPages;
 	BlockPage** pBlockPages;
 
+	NormalizeFunc normalizeFunc;
+	CompareFunc compareFunc;
+
 	uint32 HeaderBase;
 	uint32 HeaderBits;
 	uint32 HeaderSize;
@@ -101,6 +104,8 @@ public:
 	{
         //clear pointers
 		pHeader = 0;
+		normalizeFunc = 0;
+		compareFunc = &CompareUInt32;
 
 		NewParentID = 0;
 
@@ -256,6 +261,140 @@ public:
 				getBranchSize() +
 				getBlockSize();
 				//valueListPool.getTotalMemory();
+	}
+
+	static uint32 NormalizeStr(void* key)
+	{
+		//swap bytes
+		uint32 num = ((uint32*)key)[0];
+
+		return (num >> 24) |			 // move byte 3 to byte 0
+			   ((num << 8) & 0xff0000) | // move byte 1 to byte 2
+			   ((num >> 8) & 0xff00) |	 // move byte 2 to byte 1
+			   (num << 24);			     // byte 0 to byte 3
+	}
+
+	static int CompareStr(void* key1, uint32 keyLen1,
+						  void* key2, uint32 keyLen2)
+	{
+		return strcmp((char*)key1, (char*)key2);
+	}
+
+	static uint32 NormalizeInt(void* key)
+	{
+		//not implemented yet
+
+		return ((uint32*)key)[0];
+	}
+
+	static int CompareInt(void* key1, uint32 keyLen1,
+						  void* key2, uint32 keyLen2)
+	{
+		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
+
+		for (uint32 i = 0; i < keyLen; i++)
+		{
+			if (((int*)key1)[i] < ((int*)key2)[i])
+				return -1;
+
+			if (((int*)key1)[i] > ((int*)key2)[i])
+				return 1;
+		}
+
+		if (keyLen1 < keyLen2)
+			return -1;
+
+		if (keyLen1 > keyLen2)
+			return 1;
+
+		return 0;
+	}
+
+	static uint32 NormalizeULong(void* key)
+	{
+		return ((uint32*)key)[1];
+	}
+
+	static int CompareULong(void* key1, uint32 keyLen1,
+						    void* key2, uint32 keyLen2)
+	{
+		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 / 2 : keyLen2 / 2;
+
+		for (uint32 i = 0; i < keyLen; i++)
+		{
+			if (((ulong64*)key1)[i] < ((ulong64*)key2)[i])
+				return -1;
+
+			if (((ulong64*)key1)[i] > ((ulong64*)key2)[i])
+				return 1;
+		}
+
+		if (keyLen1 < keyLen2)
+			return -1;
+
+		if (keyLen1 > keyLen2)
+			return 1;
+
+		return 0;
+	}
+
+	static int CompareUInt32(void* key1, uint32 keyLen1,
+						     void* key2, uint32 keyLen2)
+	{
+		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
+
+		for (uint32 i = 0; i < keyLen; i++)
+		{
+			if (((uint32*)key1)[i] < ((uint32*)key2)[i])
+				return -1;
+
+			if (((uint32*)key1)[i] > ((uint32*)key2)[i])
+				return 1;
+		}
+
+		if (keyLen1 < keyLen2)
+			return -1;
+
+		if (keyLen1 > keyLen2)
+			return 1;
+
+		return 0;
+	}
+
+	static uint32 NormalizeFloat(void* key)
+	{
+		//not implemented yet
+
+		return ((uint32*)key)[0];
+	}
+
+	static int CompareFloat(void* key1, uint32 keyLen1,
+							void* key2, uint32 keyLen2)
+	{
+		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
+
+		for (uint32 i = 0; i < keyLen; i++)
+		{
+			if (((float*)key1)[i] < ((float*)key2)[i])
+				return -1;
+
+			if (((float*)key1)[i] > ((float*)key2)[i])
+				return 1;
+		}
+
+		if (keyLen1 < keyLen2)
+			return -1;
+
+		if (keyLen1 > keyLen2)
+			return 1;
+
+		return 0;
+	}
+
+	void setComparator(NormalizeFunc normFunc, CompareFunc compFunc)
+	{
+		normalizeFunc = normFunc;
+		compareFunc = compFunc;
 	}
 
 	void printMemory()
@@ -440,30 +579,6 @@ public:
 
 	bool hasPartKey(uint32* key, uint32 keyLen);
 	void delValueByKey(uint32* key, uint32 keyLen, uint32 value, uint32 index = 0);
-
-	//uint32* getValueByVarKey(uint32* key, uint32 keyLen);
-
-	void getValuesByRangeFromBlock(uint32** values,
-									uint32& count,
-									uint32 size,
-									uint32 contentOffset,
-									uint32 keyOffset,
-									uint32 blockOffset,
-									uint32* minKey,
-									uint32* maxKey);
-
-	void getValuesByRange(uint32** values,
-								uint32& count,
-								uint32 size,
-								uint32 keyOffset,
-								uint32 contentOffset,
-								uint32* minKey,
-								uint32* maxKey);
-
-	uint32 getValuesByRange(uint32** values,
-						 uint32 size,
-						 uint32* minKey,
-						 uint32* maxKey);
 
 	//RANGE keys and values =============================================================================================================
 	void sortLastItem(HArrayFixPair* pairs,

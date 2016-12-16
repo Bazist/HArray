@@ -31,7 +31,7 @@
 #define PERIOD_TESTS
 
 #define HARRAY_TESTS
-#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
+//#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
 #define STD_MAP_TESTS
 #define STD_UNORDERED_MAP_TESTS
 //#define PRINT_MEM
@@ -1056,8 +1056,7 @@ int main()
 	HArrayInt_VS_StdMap_IntKey(1000000,   //start
 							   2000000,   //step
 							   10000000); //stop
-
-
+	
 	HArrayVarRAM_VS_StdMap_BinKey(1000000,   //start
 								  2000000,   //step
 								  10000000,  //stop

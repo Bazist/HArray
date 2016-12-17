@@ -41,7 +41,6 @@
     <Compile Include="HArrayVarRAM_delValueByKey.cpp" />
     <Compile Include="HArrayVarRAM_getKeysAndValuesByRange.cpp" />
     <Compile Include="HArrayVarRAM_getValueByKey.cpp" />
-    <Compile Include="HArrayVarRAM_getValuesByRange.cpp" />
     <Compile Include="HArrayVarRAM_hasPartKey.cpp" />
     <Compile Include="HArrayVarRAM_insert.cpp" />
     <Compile Include="HArrayVarRAM_scanKeysAndValues.cpp" />

@@ -198,6 +198,163 @@ public:
 		}
 	}
 
+	void saveToFile(const char* path)
+	{
+		FILE * pFile = fopen (path, "w");
+  		if (pFile!=NULL)
+  		{
+    		fwrite (this, 1, sizeof(HArrayVarRAM), pFile);
+
+    		if(pHeader)
+			{
+				fwrite (pHeader, 1, HeaderSize, pFile);
+			}
+
+			if (pHeaderBranchPages)
+			{
+				for (uint32 i = 0; i<HeaderBranchPagesCount; i++)
+				{
+					fwrite (pHeaderBranchPages[i], 1, sizeof(HeaderBranchPage), pFile);
+				}
+			}
+
+			if(pContentPages)
+			{
+				for(uint32 i=0; i<ContentPagesCount; i++)
+				{
+					fwrite (pContentPages[i], 1, sizeof(ContentPage), pFile);
+				}
+			}
+
+			if(pVarPages)
+			{
+				for(uint32 i=0; i<VarPagesCount; i++)
+				{
+					fwrite (pVarPages[i], 1, sizeof(VarPage), pFile);
+				}
+			}
+
+			if(pBranchPages)
+			{
+				for(uint32 i=0; i<BranchPagesCount; i++)
+				{
+					fwrite (pBranchPages[i], 1, sizeof(BranchPage), pFile);
+				}
+			}
+
+			if(pBlockPages)
+			{
+				for(uint32 i=0; i<BlockPagesCount; i++)
+				{
+					fwrite (pBlockPages[i], 1, sizeof(BlockPage), pFile);
+				}
+			}
+
+			/*
+	        if(freeBranchCells)
+			{
+	            delete[] freeBranchCells;
+	            freeBranchCells = 0;
+			}
+			*/
+
+    		fclose (pFile);
+  		}
+	}
+
+	void loadFromFile(const char* path)
+	{
+		FILE * pFile = fopen (path, "r");
+  		if (pFile!=NULL)
+  		{
+    		fread (this, 1, sizeof(HArrayVarRAM), pFile);
+
+    		if(pHeader)
+			{
+				pHeader = new HeaderCell[HeaderSize];
+
+				fread (pHeader, 1, HeaderSize, pFile);
+			}
+
+			if (pHeaderBranchPages)
+			{
+				pHeaderBranchPages = new HeaderBranchPage*[HeaderBranchPagesCount];
+				HeaderBranchPagesSize = HeaderBranchPagesCount;
+
+				for (uint32 i = 0; i<HeaderBranchPagesCount; i++)
+				{
+					pHeaderBranchPages[i] = new HeaderBranchPage();
+
+					fread (pHeaderBranchPages[i], 1, sizeof(HeaderBranchPage), pFile);
+				}
+			}
+
+			if(pContentPages)
+			{
+				pContentPages = new ContentPage*[ContentPagesCount];
+				ContentPagesSize = ContentPagesCount;
+
+				for(uint32 i=0; i<ContentPagesCount; i++)
+				{
+					pContentPages[i] = new ContentPage();
+
+					fread (pContentPages[i], 1, sizeof(ContentPage), pFile);
+				}
+			}
+
+			if(pVarPages)
+			{
+				pVarPages = new VarPage*[VarPagesCount];
+				VarPagesSize = VarPagesCount;
+
+				for(uint32 i=0; i<VarPagesCount; i++)
+				{
+					pVarPages[i] = new VarPage();
+
+					fread (pVarPages[i], 1, sizeof(VarPage), pFile);
+				}
+			}
+
+			if(pBranchPages)
+			{
+				pBranchPages = new BranchPage*[BranchPagesCount];
+				BranchPagesSize = BranchPagesCount;
+
+				for(uint32 i=0; i<BranchPagesCount; i++)
+				{
+					pBranchPages[i] = new BranchPage();
+
+					fread (pBranchPages[i], 1, sizeof(BranchPage), pFile);
+				}
+			}
+
+			if(pBlockPages)
+			{
+				pBlockPages = new BlockPage*[BlockPagesCount];
+				BlockPagesSize = BlockPagesCount;
+
+				for(uint32 i=0; i<BlockPagesCount; i++)
+				{
+					pBlockPages[i] = new BlockPage();
+
+					fread (pBlockPages[i], 1, sizeof(BlockPage), pFile);
+				}
+			}
+
+			freeBranchCells = 0;
+
+			/*
+	        if(freeBranchCells)
+			{
+	            delete[] freeBranchCells;
+	            freeBranchCells = 0;
+			}
+			*/
+
+    		fclose (pFile);
+  		}
+	}
+
 	uint32 lastHeaderBranchOffset;
 	uint32 lastContentOffset;
 	uint32 lastVarOffset;
@@ -345,11 +502,11 @@ public:
 
 		if (dw >> 31)
 		{
-			return 2147483647 - (dw & 0x7FFFFFFF);
+			return 0xFFFFFFFF - dw;
 		}
 		else
 		{
-			return 2147483647 + dw;
+			return 0x7FFFFFFF + dw;
 		}
 	}
 

@@ -72,6 +72,7 @@ public:
 
 	NormalizeFunc normalizeFunc;
 	CompareFunc compareFunc;
+	CompareSegmentFunc compareSegmentFunc;
 
 	uint32 HeaderBase;
 	uint32 HeaderBits;
@@ -104,8 +105,8 @@ public:
 	{
         //clear pointers
 		pHeader = 0;
-		normalizeFunc = 0;
-		compareFunc = &CompareUInt32;
+		
+		setUInt32Comparator();
 
 		NewParentID = 0;
 
@@ -263,6 +264,7 @@ public:
 				//valueListPool.getTotalMemory();
 	}
 
+	//str comparator =====================================================
 	static uint32 NormalizeStr(void* key)
 	{
 		//swap bytes
@@ -274,21 +276,39 @@ public:
 			   (num << 24);			     // byte 0 to byte 3
 	}
 
+	static int CompareSegmentStr(void* keySeg1, void* keySeg2, uint32 index)
+	{
+		return memcmp(keySeg1, keySeg2, 4);
+	}
+
 	static int CompareStr(void* key1, uint32 keyLen1,
 						  void* key2, uint32 keyLen2)
 	{
 		return strcmp((char*)key1, (char*)key2);
 	}
 
-	static uint32 NormalizeInt(void* key)
+	//int comparator =====================================================
+
+	static uint32 NormalizeInt32(void* key)
 	{
 		//not implemented yet
 
 		return ((uint32*)key)[0];
 	}
 
-	static int CompareInt(void* key1, uint32 keyLen1,
-						  void* key2, uint32 keyLen2)
+	static int CompareSegmentInt32(void* keySeg1, void* keySeg2, uint32 index)
+	{
+		if (((int*)keySeg1)[0] < ((int*)keySeg2)[0])
+			return -1;
+
+		if (((int*)keySeg1)[0] > ((int*)keySeg2)[0])
+			return 1;
+
+		return 0;
+	}
+
+	static int CompareInt32(void* key1, uint32 keyLen1,
+						    void* key2, uint32 keyLen2)
 	{
 		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
 
@@ -310,22 +330,37 @@ public:
 		return 0;
 	}
 
-	static uint32 NormalizeULong(void* key)
+	//float comparator =====================================================
+
+	static uint32 NormalizeFloat(void* key)
 	{
-		return ((uint32*)key)[1];
+		//not implemented yet
+
+		return ((uint32*)key)[0];
 	}
 
-	static int CompareULong(void* key1, uint32 keyLen1,
-						    void* key2, uint32 keyLen2)
+	static int CompareSegmentFloat(void* keySeg1, void* keySeg2, uint32 index)
 	{
-		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 / 2 : keyLen2 / 2;
+		if (((float*)keySeg1)[0] < ((float*)keySeg2)[0])
+			return -1;
+
+		if (((float*)keySeg1)[0] > ((float*)keySeg2)[0])
+			return 1;
+
+		return 0;
+	}
+
+	static int CompareFloat(void* key1, uint32 keyLen1,
+							void* key2, uint32 keyLen2)
+	{
+		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
 
 		for (uint32 i = 0; i < keyLen; i++)
 		{
-			if (((ulong64*)key1)[i] < ((ulong64*)key2)[i])
+			if (((float*)key1)[i] < ((float*)key2)[i])
 				return -1;
 
-			if (((ulong64*)key1)[i] > ((ulong64*)key2)[i])
+			if (((float*)key1)[i] > ((float*)key2)[i])
 				return 1;
 		}
 
@@ -333,6 +368,18 @@ public:
 			return -1;
 
 		if (keyLen1 > keyLen2)
+			return 1;
+
+		return 0;
+	}
+
+	//uint32 comparator =====================================================
+	static int CompareSegmentUInt32(void* keySeg1, void* keySeg2, uint32 index)
+	{
+		if (((uint32*)keySeg1)[0] < ((uint32*)keySeg2)[0])
+			return -1;
+
+		if (((uint32*)keySeg1)[0] > ((uint32*)keySeg2)[0])
 			return 1;
 
 		return 0;
@@ -361,39 +408,40 @@ public:
 		return 0;
 	}
 
-	static uint32 NormalizeFloat(void* key)
+	void setUInt32Comparator()
 	{
-		//not implemented yet
-
-		return ((uint32*)key)[0];
+		normalizeFunc = 0;
+		compareSegmentFunc = CompareSegmentUInt32;
+		compareFunc = CompareUInt32;
 	}
 
-	static int CompareFloat(void* key1, uint32 keyLen1,
-							void* key2, uint32 keyLen2)
+	void setStrComparator()
 	{
-		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
-
-		for (uint32 i = 0; i < keyLen; i++)
-		{
-			if (((float*)key1)[i] < ((float*)key2)[i])
-				return -1;
-
-			if (((float*)key1)[i] > ((float*)key2)[i])
-				return 1;
-		}
-
-		if (keyLen1 < keyLen2)
-			return -1;
-
-		if (keyLen1 > keyLen2)
-			return 1;
-
-		return 0;
+		normalizeFunc = NormalizeStr;
+		compareSegmentFunc = CompareSegmentStr;
+		compareFunc = CompareStr;
 	}
 
-	void setComparator(NormalizeFunc normFunc, CompareFunc compFunc)
+	void setInt32Comparator()
+	{
+		normalizeFunc = NormalizeInt32;
+		compareSegmentFunc = CompareSegmentInt32;
+		compareFunc = CompareInt32;
+	}
+
+	void setFloatComparator()
+	{
+		normalizeFunc = NormalizeFloat;
+		compareSegmentFunc = CompareSegmentFloat;
+		compareFunc = CompareFloat;
+	}
+
+	void setCustomComparator(NormalizeFunc normFunc,
+							 CompareSegmentFunc compSegFunc,
+							 CompareFunc compFunc)
 	{
 		normalizeFunc = normFunc;
+		compareSegmentFunc = compSegFunc;
 		compareFunc = compFunc;
 	}
 

@@ -106,17 +106,21 @@ void HArrayVarRAM::getKeysAndValuesByRangeFromBlock(HArrayFixPair* pairs,
 
 			if (minKey)
 			{
-				if(keyValue < minKey[keyOffset])
+				int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+
+				if(res == -1)
 					continue;
-				else if(keyValue == minKey[keyOffset])
+				else if(res == 0)
 					subMinKey = minKey;
 			}
 
 			if (maxKey)
 			{
-				if(keyValue > maxKey[keyOffset])
+				int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+
+				if(res == 1)
 					continue;
-				else if(keyValue == maxKey[keyOffset])
+				else if(res == 0)
 					subMaxKey = maxKey;
 			}
 
@@ -139,17 +143,21 @@ void HArrayVarRAM::getKeysAndValuesByRangeFromBlock(HArrayFixPair* pairs,
 
 				if (minKey)
 				{
-					if(keyValue < minKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+
+					if(res == -1)
 						continue;
-					else if(keyValue == minKey[keyOffset])
+					else if(res == 0)
 						subMinKey = minKey;
 				}
 
 				if (maxKey)
 				{
-					if(keyValue > maxKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+
+					if(res == 1)
 						continue;
-					else if(keyValue == maxKey[keyOffset])
+					else if(res == 0)
 						subMaxKey = maxKey;
 				}
 
@@ -173,17 +181,21 @@ void HArrayVarRAM::getKeysAndValuesByRangeFromBlock(HArrayFixPair* pairs,
 
 				if (minKey)
 				{
-					if(keyValue < minKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+
+					if(res == -1)
 						continue;
-					else if(keyValue == minKey[keyOffset])
+					else if(res == 0)
 						subMinKey = minKey;
 				}
 
 				if (maxKey)
 				{
-					if(keyValue > maxKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+
+					if(res == 1)
 						continue;
-					else if(keyValue == maxKey[keyOffset])
+					else if(res == 0)
 						subMaxKey = maxKey;
 				}
 
@@ -207,17 +219,21 @@ void HArrayVarRAM::getKeysAndValuesByRangeFromBlock(HArrayFixPair* pairs,
 
 				if (minKey)
 				{
-					if(keyValue < minKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+
+					if(res == -1)
 						continue;
-					else if(keyValue == minKey[keyOffset])
+					else if(res == 0)
 						subMinKey = minKey;
 				}
 
 				if (maxKey)
 				{
-					if(keyValue > maxKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+
+					if(res == 1)
 						continue;
-					else if(keyValue == maxKey[keyOffset])
+					else if(res == 0)
 						subMaxKey = maxKey;
 				}
 
@@ -274,17 +290,21 @@ NEXT_KEY_PART:
 
 				if (minKey)
 				{
-					if(keyValue > minKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+
+					if(res == 1)
 						minKey = 0;
-					else if(keyValue < minKey[keyOffset])
+					else if(res == -1)
 						return;
 				}
 
 				if (maxKey)
 				{
-					if(keyValue < maxKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+
+					if(res == -1)
 						maxKey = 0;
-					else if(keyValue > maxKey[keyOffset])
+					else if(res == 1)
 						return;
 				}
 			}
@@ -355,17 +375,21 @@ NEXT_KEY_PART:
 
 				if (minKey)
 				{
-					if(keyValue < minKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+
+					if(res == -1)
 						continue;
-					else if(keyValue == minKey[keyOffset])
+					else if(res == 0)
 						subMinKey = minKey;
 				}
 
 				if (maxKey)
 				{
-					if(keyValue > maxKey[keyOffset])
+					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+
+					if(res == 1)
 						continue;
-					else if(keyValue == maxKey[keyOffset])
+					else if(res == 0)
 						subMaxKey = maxKey;
 				}
 
@@ -423,17 +447,21 @@ NEXT_KEY_PART:
 
 			if (minKey)
 			{
-				if(keyValue > minKey[keyOffset])
+				int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+
+				if(res == 1)
 					minKey = 0;
-				else if(keyValue < minKey[keyOffset])
-						return;
+				else if(res == -1)
+					return;
 			}
 
 			if (maxKey)
 			{
-				if(keyValue < maxKey[keyOffset])
+				int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+
+				if(res == -1)
 					maxKey = 0;
-				else if(keyValue > maxKey[keyOffset])
+				else if(res == 1)
 					return;
 			}
 		}

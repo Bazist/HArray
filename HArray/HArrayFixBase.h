@@ -229,3 +229,5 @@ struct CompactPage
 typedef uint32 (*NormalizeFunc)(void* key);
 
 typedef int (*CompareFunc)(void* key1, uint32 keyLen1, void* key2, uint32 keyLen2);
+
+typedef int(*CompareSegmentFunc)(void* keySeg1, void* keySeg2, uint32 index);

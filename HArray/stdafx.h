@@ -32,6 +32,7 @@
 #include <inttypes.h>
 
 #ifdef _WIN32
+#define int32 __int32
 #define uint32 unsigned __int32
 #define ulong64 unsigned __int64
 #define ushort16 unsigned __int16
@@ -40,6 +41,7 @@
 #endif
 
 #ifdef linux
+#define int32 int32_t
 #define uint32 uint32_t
 #define ulong64 uint64_t
 #define ushort16 uint16_t

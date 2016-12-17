@@ -291,9 +291,16 @@ public:
 
 	static uint32 NormalizeInt32(void* key)
 	{
-		//not implemented yet
+		int num = ((int*)key)[0];
 
-		return ((uint32*)key)[0];
+		if (num < 0)
+		{
+			return 2147483647 - (num * -1);
+		}
+		else
+		{
+			return (uint32)num + 2147483647;
+		}
 	}
 
 	static int CompareSegmentInt32(void* keySeg1, void* keySeg2, uint32 index)

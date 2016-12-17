@@ -341,9 +341,16 @@ public:
 
 	static uint32 NormalizeFloat(void* key)
 	{
-		//not implemented yet
+		uint32 dw = *(uint32*)key;
 
-		return ((uint32*)key)[0];
+		if (dw >> 31)
+		{
+			return 2147483647 - (dw & 0x7FFFFFFF);
+		}
+		else
+		{
+			return 2147483647 + dw;
+		}
 	}
 
 	static int CompareSegmentFloat(void* keySeg1, void* keySeg2, uint32 index)

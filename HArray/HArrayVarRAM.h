@@ -198,23 +198,32 @@ public:
 		}
 	}
 
-	void saveToFile(const char* path)
+	bool saveToFile(const char* path)
 	{
 		FILE * pFile = fopen (path, "w");
   		if (pFile!=NULL)
   		{
-    		fwrite (this, 1, sizeof(HArrayVarRAM), pFile);
+			if (fwrite(this, sizeof(HArrayVarRAM), 1, pFile) != 1)
+			{
+				goto ERROR;
+			}
 
     		if(pHeader)
 			{
-				fwrite (pHeader, 1, HeaderSize, pFile);
+				if (fwrite(pHeader, sizeof(HeaderCell), HeaderSize, pFile) != HeaderSize)
+				{
+					goto ERROR;
+				}
 			}
 
 			if (pHeaderBranchPages)
 			{
 				for (uint32 i = 0; i<HeaderBranchPagesCount; i++)
 				{
-					fwrite (pHeaderBranchPages[i], 1, sizeof(HeaderBranchPage), pFile);
+					if (fwrite(pHeaderBranchPages[i], sizeof(HeaderBranchPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -222,7 +231,10 @@ public:
 			{
 				for(uint32 i=0; i<ContentPagesCount; i++)
 				{
-					fwrite (pContentPages[i], 1, sizeof(ContentPage), pFile);
+					if (fwrite(pContentPages[i], sizeof(ContentPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -230,7 +242,10 @@ public:
 			{
 				for(uint32 i=0; i<VarPagesCount; i++)
 				{
-					fwrite (pVarPages[i], 1, sizeof(VarPage), pFile);
+					if (fwrite(pVarPages[i], sizeof(VarPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -238,7 +253,10 @@ public:
 			{
 				for(uint32 i=0; i<BranchPagesCount; i++)
 				{
-					fwrite (pBranchPages[i], 1, sizeof(BranchPage), pFile);
+					if (fwrite(pBranchPages[i], sizeof(BranchPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -246,7 +264,10 @@ public:
 			{
 				for(uint32 i=0; i<BlockPagesCount; i++)
 				{
-					fwrite (pBlockPages[i], 1, sizeof(BlockPage), pFile);
+					if (fwrite(pBlockPages[i], sizeof(BlockPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -259,21 +280,33 @@ public:
 			*/
 
     		fclose (pFile);
+
+			return true;
   		}
+		
+	ERROR:
+
+		return false;
 	}
 
-	void loadFromFile(const char* path)
+	bool loadFromFile(const char* path)
 	{
 		FILE * pFile = fopen (path, "r");
   		if (pFile!=NULL)
   		{
-    		fread (this, 1, sizeof(HArrayVarRAM), pFile);
+			if (fread(this, sizeof(HArrayVarRAM), 1, pFile) != 1)
+			{
+				goto ERROR;
+			}
 
     		if(pHeader)
 			{
 				pHeader = new HeaderCell[HeaderSize];
 
-				fread (pHeader, 1, HeaderSize, pFile);
+				if(fread (pHeader, sizeof(HeaderCell), HeaderSize, pFile) != HeaderSize)
+				{
+					goto ERROR;
+				}
 			}
 
 			if (pHeaderBranchPages)
@@ -285,7 +318,10 @@ public:
 				{
 					pHeaderBranchPages[i] = new HeaderBranchPage();
 
-					fread (pHeaderBranchPages[i], 1, sizeof(HeaderBranchPage), pFile);
+					if (fread(pHeaderBranchPages[i], sizeof(HeaderBranchPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -298,7 +334,10 @@ public:
 				{
 					pContentPages[i] = new ContentPage();
 
-					fread (pContentPages[i], 1, sizeof(ContentPage), pFile);
+					if (fread(pContentPages[i], sizeof(ContentPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -311,7 +350,10 @@ public:
 				{
 					pVarPages[i] = new VarPage();
 
-					fread (pVarPages[i], 1, sizeof(VarPage), pFile);
+					if (fread(pVarPages[i], sizeof(VarPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -324,7 +366,10 @@ public:
 				{
 					pBranchPages[i] = new BranchPage();
 
-					fread (pBranchPages[i], 1, sizeof(BranchPage), pFile);
+					if (fread(pBranchPages[i], sizeof(BranchPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -337,7 +382,10 @@ public:
 				{
 					pBlockPages[i] = new BlockPage();
 
-					fread (pBlockPages[i], 1, sizeof(BlockPage), pFile);
+					if (fread(pBlockPages[i], sizeof(BlockPage), 1, pFile) != 1)
+					{
+						goto ERROR;
+					}
 				}
 			}
 
@@ -352,7 +400,14 @@ public:
 			*/
 
     		fclose (pFile);
+
+			return true;
   		}
+
+	ERROR:
+		destroy();
+
+		return false;
 	}
 
 	uint32 lastHeaderBranchOffset;

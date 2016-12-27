@@ -852,7 +852,7 @@ public:
 					    uint32 keyLen);
 
 	bool hasPartKey(uint32* key, uint32 keyLen);
-	void delValueByKey(uint32* key, uint32 keyLen, uint32 value, uint32 index = 0);
+	bool delValueByKey(uint32* key, uint32 keyLen, uint32 value);
 
 	//RANGE keys and values =============================================================================================================
 	void sortLastItem(HArrayFixPair* pairs,

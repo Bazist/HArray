@@ -19,7 +19,7 @@
 #include "stdafx.h"
 #include "HArrayVarRAM.h"
 
-uint32 HArrayVarRAM::getValueByKey(uint32* key,
+uint32* HArrayVarRAM::getValueByKey(uint32* key,
 								  uint32 keyLen)
 {
 	keyLen >>= 2; //in 4 bytes
@@ -65,7 +65,7 @@ NEXT_KEY_PART:
 						return 0;
 				}
 
-				return pContentPage->pContent[contentIndex].Value; //return value
+				return &pContentPage->pContent[contentIndex].Value; //return value
 			}
 			else //content in two pages
 			{
@@ -77,17 +77,17 @@ NEXT_KEY_PART:
 
 				ContentCell& contentCell = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF];
 
-                return contentCell.Value; //return value
+                return &contentCell.Value; //return value
 			}
 		}
 
 		uint32& keyValue = key[keyOffset];
-		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex].Value;
+		uint32* pContentCellValueOrOffset = &pContentPage->pContent[contentIndex].Value;
 
 		if(contentCellType == VAR_TYPE) //VAR =====================================================================
 		{
-			VarPage* pVarPage = pVarPages[contentCellValueOrOffset >> 16];
-			VarCell& varCell = pVarPage->pVar[contentCellValueOrOffset & 0xFFFF];
+			VarPage* pVarPage = pVarPages[(*pContentCellValueOrOffset) >> 16];
+			VarCell& varCell = pVarPage->pVar[(*pContentCellValueOrOffset) & 0xFFFF];
 
 			if(keyOffset < keyLen)
 			{
@@ -101,19 +101,19 @@ NEXT_KEY_PART:
 				}
 				else
 				{
-					contentCellValueOrOffset = varCell.ContCell.Value;
+					pContentCellValueOrOffset = &varCell.ContCell.Value;
 				}
 			}
 			else
 			{
-                return varCell.ValueContentCell.Value;
+                return &varCell.ValueContentCell.Value;
 			}
 		}
 		else if(keyOffset == keyLen)
 		{
 			if(contentCellType == VALUE_TYPE)
 			{
-                return contentCellValueOrOffset;
+                return pContentCellValueOrOffset;
 			}
 			else
 			{
@@ -123,8 +123,8 @@ NEXT_KEY_PART:
 
 		if(contentCellType <= MAX_BRANCH_TYPE1) //BRANCH =====================================================================
 		{
-			BranchPage* pBranchPage = pBranchPages[contentCellValueOrOffset >> 16];
-			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
+			BranchPage* pBranchPage = pBranchPages[(*pContentCellValueOrOffset) >> 16];
+			BranchCell& branchCell = pBranchPage->pBranch[(*pContentCellValueOrOffset) & 0xFFFF];
 
 			//try find value in the list
 			uint32* values = branchCell.Values;
@@ -146,7 +146,7 @@ NEXT_KEY_PART:
 		{
 			if(keyOffset == keyLen)
 			{
-                return contentCellValueOrOffset;
+                return pContentCellValueOrOffset;
 			}
 			else
 			{
@@ -157,7 +157,7 @@ NEXT_KEY_PART:
 		{
 			uchar8 idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 
-			uint32 startOffset = contentCellValueOrOffset;
+			uint32 startOffset = *pContentCellValueOrOffset;
 
 	NEXT_BLOCK:
 			uint32 subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
@@ -256,7 +256,7 @@ NEXT_KEY_PART:
 		}
 		else if(contentCellType == CURRENT_VALUE_TYPE) //PART OF KEY =========================================================================
 		{
-			if(contentCellValueOrOffset == keyValue)
+			if(*pContentCellValueOrOffset == keyValue)
 			{
 				contentOffset++;
 				keyOffset++;

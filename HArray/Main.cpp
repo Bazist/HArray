@@ -430,7 +430,7 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (ha.getValueByKey((uint32*)keys[i].Data, sizeof(BinKey)) != keys[i].Data[0])
+		if (*ha.getValueByKey((uint32*)keys[i].Data, sizeof(BinKey)) != keys[i].Data[0])
 		{
 			printf("Error\n");
 			break;
@@ -782,7 +782,7 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 	{
 		const char* str = keys[i].c_str();
 
-		if (ha.getValueByKey((uint32*)str, STR_KEY_LEN) != str[0])
+		if (*ha.getValueByKey((uint32*)str, STR_KEY_LEN) != str[0])
 		{
 			printf("Error\n");
 			break;

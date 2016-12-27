@@ -848,11 +848,11 @@ public:
 
 	//GET =============================================================================================================
 
-	uint32 getValueByKey(uint32* key,
-					    uint32 keyLen);
+	uint32* getValueByKey(uint32* key,
+					      uint32 keyLen);
 
 	bool hasPartKey(uint32* key, uint32 keyLen);
-	bool delValueByKey(uint32* key, uint32 keyLen, uint32 value);
+	bool delValueByKey(uint32* key, uint32 keyLen);
 
 	//RANGE keys and values =============================================================================================================
 	void sortLastItem(HArrayFixPair* pairs,
@@ -865,7 +865,9 @@ public:
 										  uint32 keyOffset,
 										  uint32 blockOffset,
 										  uint32* minKey,
-										  uint32* maxKey);
+										  uint32 minKeyLen,
+										  uint32* maxKey,
+										  uint32 maxKeyLen);
 
 	void getKeysAndValuesByRange(HArrayFixPair* pairs,
 								 uint32& count,
@@ -873,12 +875,16 @@ public:
 								 uint32 keyOffset,
 								 uint32 contentOffset,
 								 uint32* minKey,
-								 uint32* maxKey);
+								 uint32 minKeyLen,
+								 uint32* maxKey,
+								 uint32 maxKeyLen);
 
 	uint32 getKeysAndValuesByRange(HArrayFixPair* pairs,
-								 uint32 size,
-								 uint32* minKey,
-								 uint32* maxKey);
+								uint32 size,
+								uint32* minKey,
+								uint32 minKeyLen,
+								uint32* maxKey,
+								uint32 maxKeyLen);
 
 	//TEMPLATE ====================================================================================================
 	void scanKeysAndValuesFromBlock(uint32* key,

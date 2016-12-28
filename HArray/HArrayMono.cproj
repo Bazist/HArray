@@ -46,5 +46,6 @@
     <Compile Include="HArrayVarRAM_scanKeysAndValues.cpp" />
     <Compile Include="Main.cpp" />
     <Compile Include="HArrayVarRAM_compact.cpp" />
+    <Compile Include="HArrayVarRAM_rebuild.cpp" />
   </ItemGroup>
 </Project>

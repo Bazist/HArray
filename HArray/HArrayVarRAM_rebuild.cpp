@@ -26,6 +26,7 @@ public:
 	HArrayVarRAM* pNewHA;
 
 	bool RemoveEmptyKeys;
+	uint32 Count;
 };
 
 bool HArrayVarRAM::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
@@ -34,7 +35,9 @@ bool HArrayVarRAM::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, ucha
 
 	if (!pRD->RemoveEmptyKeys || value)
 	{
-		pRD->pNewHA->insert(key, keyLen, value);
+		pRD->pNewHA->insert(key, keyLen << 2, value);
+
+		pRD->Count++;
 	}
 
 	return true;
@@ -43,7 +46,7 @@ bool HArrayVarRAM::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, ucha
 uint32 HArrayVarRAM::rebuild(bool removeEmptyKeys)
 {
 	//create new HA
-	HArrayVarRAM* pNewHA;
+	HArrayVarRAM* pNewHA = new HArrayVarRAM();
 	pNewHA->init(this->HeaderBase);
 
 	//move elements
@@ -51,6 +54,7 @@ uint32 HArrayVarRAM::rebuild(bool removeEmptyKeys)
 	rd.pOldHA = this;
 	rd.pNewHA = pNewHA;
 	rd.RemoveEmptyKeys = removeEmptyKeys;
+	rd.Count = 0;
 
 	this->scanKeysAndValues(&rebuildVisitor,
 							&rd);
@@ -101,5 +105,5 @@ uint32 HArrayVarRAM::rebuild(bool removeEmptyKeys)
 	//delete donor
 	delete pNewHA;
 
-	return 0;
+	return rd.Count;
 }

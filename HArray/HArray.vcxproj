@@ -30,7 +30,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -102,6 +102,7 @@
     <ClCompile Include="HArrayVarRAM_getValueByKey.cpp" />
     <ClCompile Include="HArrayVarRAM_hasPartKey.cpp" />
     <ClCompile Include="HArrayVarRAM_insert.cpp" />
+    <ClCompile Include="HArrayVarRAM_rebuild.cpp" />
     <ClCompile Include="HArrayVarRAM_scanKeysAndValues.cpp" />
     <ClCompile Include="Main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>

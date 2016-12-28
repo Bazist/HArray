@@ -22,11 +22,11 @@
 bool HArrayVarRAM::delValueByKey(uint32* key,
 								 uint32 keyLen)
 {
-	uint32* pKey = getValueByKey(key, keyLen);
+	uint32* pValue = getValueByKey(key, keyLen);
 
-	if(pKey)
+	if (pValue)
 	{
-		*pKey = 0;
+		*pValue = 0;
 
 		return true;
 	}

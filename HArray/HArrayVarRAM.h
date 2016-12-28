@@ -86,6 +86,12 @@ public:
 
 	uint32 MAX_SAFE_SHORT;
 
+	uint32 lastHeaderBranchOffset;
+	uint32 lastContentOffset;
+	uint32 lastVarOffset;
+	uint32 lastBranchOffset;
+	uint32 lastBlockOffset;
+
 	void init(uchar8 headerBase)
 	{
 		init(headerBase,
@@ -200,7 +206,7 @@ public:
 
 	bool saveToFile(const char* path)
 	{
-		FILE * pFile = fopen (path, "w");
+		FILE * pFile = fopen (path, "wb+");
   		if (pFile!=NULL)
   		{
 			if (fwrite(this, sizeof(HArrayVarRAM), 1, pFile) != 1)
@@ -291,7 +297,7 @@ public:
 
 	bool loadFromFile(const char* path)
 	{
-		FILE * pFile = fopen (path, "r");
+		FILE * pFile = fopen (path, "rb+");
   		if (pFile!=NULL)
   		{
 			if (fread(this, sizeof(HArrayVarRAM), 1, pFile) != 1)
@@ -409,12 +415,6 @@ public:
 
 		return false;
 	}
-
-	uint32 lastHeaderBranchOffset;
-	uint32 lastContentOffset;
-	uint32 lastVarOffset;
-	uint32 lastBranchOffset;
-	uint32 lastBlockOffset;
 
 	uint32 getHash()
 	{
@@ -846,6 +846,12 @@ public:
 							 uint32 keyOffset,
 							 ContentCell* pContentCell);
 
+	//REBUILD =========================================================================================================
+
+	static bool rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
+
+	uint32 rebuild(bool removeEmptyKeys = false);
+	
 	//GET =============================================================================================================
 
 	uint32* getValueByKey(uint32* key,
@@ -904,6 +910,9 @@ public:
 						 uint32 keyLen,
 						 HARRAY_ITEM_VISIT_FUNC visitor,
 						 void* pData);
+
+	uint32 scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
+							 void* pData);
 
 	//=============================================================================================================
 

@@ -216,7 +216,7 @@ uint32 HArrayVarRAM::insert(uint32* key,
 						pContentPage->pContent[contentIndex].Type = VALUE_TYPE;
 
 						return 0;
-				}
+					}
 					else if (contentCell.Value != key[keyOffset])
 					{
 #ifndef _RELEASE
@@ -272,7 +272,7 @@ uint32 HArrayVarRAM::insert(uint32* key,
 					{
 						contentCell.Type = CURRENT_VALUE_TYPE; //reset to current value
 					}
-			}
+				}
 
 				if (keyLen > originKeyLen) //key more than original
 				{
@@ -311,7 +311,7 @@ uint32 HArrayVarRAM::insert(uint32* key,
 
 					return 0;
 				}
-		}
+			}
 			else  //content in two pages
 			{
 				for (; keyOffset < originKeyLen; contentOffset++, keyOffset++)
@@ -356,7 +356,7 @@ uint32 HArrayVarRAM::insert(uint32* key,
 						pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Type = VALUE_TYPE;
 
 						return 0;
-				}
+					}
 					else if (pContentPage->pContent[contentIndex].Value != key[keyOffset])
 					{
 #ifndef _RELEASE
@@ -418,7 +418,7 @@ uint32 HArrayVarRAM::insert(uint32* key,
 					{
 						pContentPage->pContent[contentIndex].Type = CURRENT_VALUE_TYPE; //reset to current value
 					}
-			}
+				}
 
 				pContentPage = pContentPages[contentOffset >> 16];
 				contentIndex = contentOffset & 0xFFFF;
@@ -460,10 +460,10 @@ uint32 HArrayVarRAM::insert(uint32* key,
 
 					return 0;
 				}
-	}
+			}
 
 			return 0;
-}
+		}
 
 		uint32 keyValue;
 

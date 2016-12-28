@@ -222,9 +222,9 @@ NEXT_KEY_PART:
 }
 
 uint32 HArrayVarRAM::scanKeysAndValues(uint32* key,
-									 uint32 keyLen,
-									 HARRAY_ITEM_VISIT_FUNC visitor,
-									 void* pData)
+									   uint32 keyLen,
+									   HARRAY_ITEM_VISIT_FUNC visitor,
+									   void* pData)
 {
 	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
@@ -493,6 +493,53 @@ NEXT_KEY_PART:
 			else
 			{
 				return 0;
+			}
+		}
+	}
+
+	return 0;
+}
+
+//scan all
+uint32 HArrayVarRAM::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
+									   void* pData)
+{
+	uint32 key[1024];
+
+	for (uint32 i = 0; i < HeaderSize; i++)
+	{
+		HeaderCell& headerCell = pHeader[i];
+
+		switch (headerCell.Type)
+		{
+			case EMPTY_TYPE:
+			{
+				break;
+			}
+			case HEADER_JUMP_TYPE:
+			{
+				key[0] = (i << HeaderBits);
+
+				scanKeysAndValues(key, 0, visitor, pData);
+
+				break;
+			}
+			case HEADER_BRANCH_TYPE:
+			{
+				HeaderBranchCell& headerBranchCell = pHeaderBranchPages[headerCell.Offset >> 16]->pHeaderBranch[headerCell.Offset & 0xFFFF];
+
+				if (headerBranchCell.HeaderOffset)
+				{
+					key[0] = (i << HeaderBits);
+
+					scanKeysAndValues(key, 0, visitor, pData);
+				}
+
+				break;
+			}
+			default: //something else
+			{
+				break;
 			}
 		}
 	}

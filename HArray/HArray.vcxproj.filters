@@ -53,5 +53,8 @@
     <ClCompile Include="HArrayVarRAM_compact.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HArrayVarRAM_rebuild.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

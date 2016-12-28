@@ -1,0 +1,105 @@
+/*
+# Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
+# This file is part of VyMa\Trie.
+#
+# VyMa\Trie is free software : you can redistribute it and / or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Vyma\Trie is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#include "stdafx.h"
+#include "HArrayVarRAM.h"
+
+struct RebuildData
+{
+public:
+	HArrayVarRAM* pOldHA;
+	HArrayVarRAM* pNewHA;
+
+	bool RemoveEmptyKeys;
+};
+
+bool HArrayVarRAM::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
+{
+	RebuildData* pRD = (RebuildData*)pData;
+
+	if (!pRD->RemoveEmptyKeys || value)
+	{
+		pRD->pNewHA->insert(key, keyLen, value);
+	}
+
+	return true;
+}
+
+uint32 HArrayVarRAM::rebuild(bool removeEmptyKeys)
+{
+	//create new HA
+	HArrayVarRAM* pNewHA;
+	pNewHA->init(this->HeaderBase);
+
+	//move elements
+	RebuildData rd;
+	rd.pOldHA = this;
+	rd.pNewHA = pNewHA;
+	rd.RemoveEmptyKeys = removeEmptyKeys;
+
+	this->scanKeysAndValues(&rebuildVisitor,
+							&rd);
+
+	//destroy old
+	this->destroy();
+
+	//copy data from new to old
+	this->pHeader = pNewHA->pHeader;
+	this->pHeaderBranchPages = pNewHA->pHeaderBranchPages;
+	this->pContentPages = pNewHA->pContentPages;
+	this->pVarPages = pNewHA->pVarPages;
+	this->pBranchPages = pNewHA->pBranchPages;
+	this->pBlockPages = pNewHA->pBlockPages;
+
+	this->HeaderBranchPagesCount = pNewHA->HeaderBranchPagesCount;
+	this->ContentPagesCount = pNewHA->ContentPagesCount;
+	this->VarPagesCount = pNewHA->VarPagesCount;
+	this->BranchPagesCount = pNewHA->BranchPagesCount;
+	this->BlockPagesCount = pNewHA->BlockPagesCount;
+	
+	this->HeaderBranchPagesSize = pNewHA->HeaderBranchPagesSize;
+	this->ContentPagesSize = pNewHA->ContentPagesSize;
+	this->VarPagesSize = pNewHA->VarPagesSize;
+	this->BranchPagesSize = pNewHA->BranchPagesSize;
+	this->BlockPagesSize = pNewHA->BlockPagesSize;
+
+	this->normalizeFunc = pNewHA->normalizeFunc;
+	this->compareFunc = pNewHA->compareFunc;
+	this->compareSegmentFunc = pNewHA->compareSegmentFunc;
+
+	this->HeaderBase = pNewHA->HeaderBase;
+	this->HeaderBits = pNewHA->HeaderBits;
+	this->HeaderSize = pNewHA->HeaderSize;
+
+	this->freeBranchCells = pNewHA->freeBranchCells;
+	this->countFreeBranchCell = pNewHA->countFreeBranchCell;
+	this->ValueLen = pNewHA->ValueLen;
+	this->NewParentID = pNewHA->NewParentID;
+	this->MAX_SAFE_SHORT = pNewHA->MAX_SAFE_SHORT;
+
+	this->lastHeaderBranchOffset = pNewHA->lastHeaderBranchOffset;
+	this->lastContentOffset = pNewHA->lastContentOffset;
+	this->lastVarOffset = pNewHA->lastVarOffset;
+	this->lastBranchOffset = pNewHA->lastBranchOffset;
+	this->lastBlockOffset = pNewHA->lastBlockOffset;
+
+	//delete donor
+	delete pNewHA;
+
+	return 0;
+}

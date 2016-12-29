@@ -17,9 +17,9 @@
 */
 
 #include "stdafx.h"
-#include "HArrayVarRAM.h"
+#include "HArray.h"
 
-void HArrayVarRAM::scanKeysAndValuesFromBlock(uint32* key,
+void HArray::scanKeysAndValuesFromBlock(uint32* key,
 											  uint32 contentOffset,
 											  uint32 keyOffset,
 											  uint32 blockOffset,
@@ -107,7 +107,7 @@ void HArrayVarRAM::scanKeysAndValuesFromBlock(uint32* key,
 	}
 }
 
-void HArrayVarRAM::scanKeysAndValues(uint32* key,
+void HArray::scanKeysAndValues(uint32* key,
 									 uint32 keyOffset,
 									 uint32 contentOffset,
 									 HARRAY_ITEM_VISIT_FUNC visitor,
@@ -221,7 +221,7 @@ NEXT_KEY_PART:
 	}
 }
 
-uint32 HArrayVarRAM::scanKeysAndValues(uint32* key,
+uint32 HArray::scanKeysAndValues(uint32* key,
 									   uint32 keyLen,
 									   HARRAY_ITEM_VISIT_FUNC visitor,
 									   void* pData)
@@ -501,7 +501,7 @@ NEXT_KEY_PART:
 }
 
 //scan all
-uint32 HArrayVarRAM::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
+uint32 HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 									   void* pData)
 {
 	uint32 key[1024];

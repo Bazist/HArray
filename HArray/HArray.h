@@ -23,12 +23,12 @@
 
 #endif
 
-#include "HArrayFixBase.h"
+#include "HArrayBase.h"
 
-class HArrayVarRAM
+class HArray
 {
 public:
-	HArrayVarRAM()
+	HArray()
 	{
 		pHeaderBranchPages = 0;
 		pContentPages = 0;
@@ -209,7 +209,7 @@ public:
 		FILE * pFile = fopen (path, "wb+");
   		if (pFile!=NULL)
   		{
-			if (fwrite(this, sizeof(HArrayVarRAM), 1, pFile) != 1)
+			if (fwrite(this, sizeof(HArray), 1, pFile) != 1)
 			{
 				goto ERROR;
 			}
@@ -300,7 +300,7 @@ public:
 		FILE * pFile = fopen (path, "rb+");
   		if (pFile!=NULL)
   		{
-			if (fread(this, sizeof(HArrayVarRAM), 1, pFile) != 1)
+			if (fread(this, sizeof(HArray), 1, pFile) != 1)
 			{
 				goto ERROR;
 			}
@@ -673,7 +673,7 @@ public:
 
 	void printMemory()
 	{
-		printf("=================== HArrayVarRAM =========================\n");
+		printf("=================== HArray =========================\n");
 		printf("Header size: %d\n", getHeaderSize());
 		printf("Content size: %d\n", getContentSize());
 		printf("Var size: %d\n", getVarSize());
@@ -861,10 +861,10 @@ public:
 	bool delValueByKey(uint32* key, uint32 keyLen);
 
 	//RANGE keys and values =============================================================================================================
-	void sortLastItem(HArrayFixPair* pairs,
+	void sortLastItem(HArrayPair* pairs,
 					  uint32 count);
 
-	void getKeysAndValuesByRangeFromBlock(HArrayFixPair* pairs,
+	void getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 										  uint32& count,
 										  uint32 size,
 										  uint32 contentOffset,
@@ -875,7 +875,7 @@ public:
 										  uint32* maxKey,
 										  uint32 maxKeyLen);
 
-	void getKeysAndValuesByRange(HArrayFixPair* pairs,
+	void getKeysAndValuesByRange(HArrayPair* pairs,
 								 uint32& count,
 								 uint32 size,
 								 uint32 keyOffset,
@@ -885,7 +885,7 @@ public:
 								 uint32* maxKey,
 								 uint32 maxKeyLen);
 
-	uint32 getKeysAndValuesByRange(HArrayFixPair* pairs,
+	uint32 getKeysAndValuesByRange(HArrayPair* pairs,
 								uint32 size,
 								uint32* minKey,
 								uint32 minKeyLen,

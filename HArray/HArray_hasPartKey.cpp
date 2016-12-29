@@ -17,9 +17,9 @@
 */
 
 #include "stdafx.h"
-#include "HArrayVarRAM.h"
+#include "HArray.h"
 
-bool HArrayVarRAM::hasPartKey(uint32* key,
+bool HArray::hasPartKey(uint32* key,
 							  uint32 keyLen)
 {
 	keyLen >>= 2; //in 4 bytes

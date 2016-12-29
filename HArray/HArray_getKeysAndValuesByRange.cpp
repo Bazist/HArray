@@ -17,19 +17,19 @@
 */
 
 #include "stdafx.h"
-#include "HArrayVarRAM.h"
+#include "HArray.h"
 
-void HArrayVarRAM::sortLastItem(HArrayFixPair* pairs,
+void HArray::sortLastItem(HArrayPair* pairs,
 								uint32 count)
 {
 	if(count > 1)
 	{
 		//get last item
-		HArrayFixPair lastItem = pairs[count - 1];
+		HArrayPair lastItem = pairs[count - 1];
 
 		//find element
 		uint32 idx = count - 2;
-		HArrayFixPair& prevItem = pairs[idx];
+		HArrayPair& prevItem = pairs[idx];
 
 		if((*compareFunc)(lastItem.Key, lastItem.KeyLen,
 					      prevItem.Key, prevItem.KeyLen) == 1)
@@ -62,7 +62,7 @@ void HArrayVarRAM::sortLastItem(HArrayFixPair* pairs,
 	}
 }
 
-void HArrayVarRAM::getKeysAndValuesByRangeFromBlock(HArrayFixPair* pairs,
+void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 													uint32& count,
 													uint32 size,
 													uint32 contentOffset,
@@ -253,7 +253,7 @@ void HArrayVarRAM::getKeysAndValuesByRangeFromBlock(HArrayFixPair* pairs,
 	}
 }
 
-void HArrayVarRAM::getKeysAndValuesByRange(HArrayFixPair* pairs,
+void HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 										   uint32& count,
 										   uint32 size,
 										   uint32 keyOffset,
@@ -471,7 +471,7 @@ NEXT_KEY_PART:
 }
 
 
-uint32 HArrayVarRAM::getKeysAndValuesByRange(HArrayFixPair* pairs,
+uint32 HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 											uint32 size,
 											uint32* minKey,
 											uint32 minKeyLen,

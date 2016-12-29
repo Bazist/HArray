@@ -17,9 +17,9 @@
 */
 
 #include "stdafx.h"
-#include "HArrayVarRAM.h"
+#include "HArray.h"
 
-CompactPage* HArrayVarRAM::scanBlocks(uint32& count, uint32 blockOffset, CompactPage* pCompactPage)
+CompactPage* HArray::scanBlocks(uint32& count, uint32 blockOffset, CompactPage* pCompactPage)
 {
 	uint32 maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
 
@@ -117,7 +117,7 @@ CompactPage* HArrayVarRAM::scanBlocks(uint32& count, uint32 blockOffset, Compact
 	return pCompactPage;
 }
 
-bool HArrayVarRAM::finHeaderBlockPlace(CompactPage* pRootCompactPage,
+bool HArray::finHeaderBlockPlace(CompactPage* pRootCompactPage,
 									   uint32 count,
 									   uchar8 parentID,
 									   uint32& headerBlockType,
@@ -208,7 +208,7 @@ bool HArrayVarRAM::finHeaderBlockPlace(CompactPage* pRootCompactPage,
 	return false;
 }
 
-bool HArrayVarRAM::allocateHeaderBlock(uint32 keyValue,
+bool HArray::allocateHeaderBlock(uint32 keyValue,
 									   uint32 keyOffset,
 									   ContentCell* pContentCell)
 {

@@ -21,10 +21,10 @@
     <ClInclude Include="HArrayInt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HArrayFixBase.h">
+    <ClInclude Include="HArrayBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HArrayVarRAM.h">
+    <ClInclude Include="HArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -32,28 +32,28 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_getKeysAndValuesByRange.cpp">
+    <ClCompile Include="HArray_compact.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_getValueByKey.cpp">
+    <ClCompile Include="HArray_delValueByKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_insert.cpp">
+    <ClCompile Include="HArray_getKeysAndValuesByRange.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_delValueByKey.cpp">
+    <ClCompile Include="HArray_getValueByKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_hasPartKey.cpp">
+    <ClCompile Include="HArray_hasPartKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_scanKeysAndValues.cpp">
+    <ClCompile Include="HArray_insert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_compact.cpp">
+    <ClCompile Include="HArray_rebuild.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArrayVarRAM_rebuild.cpp">
+    <ClCompile Include="HArray_scanKeysAndValues.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -17,19 +17,19 @@
 */
 
 #include "stdafx.h"
-#include "HArrayVarRAM.h"
+#include "HArray.h"
 
 struct RebuildData
 {
 public:
-	HArrayVarRAM* pOldHA;
-	HArrayVarRAM* pNewHA;
+	HArray* pOldHA;
+	HArray* pNewHA;
 
 	bool RemoveEmptyKeys;
 	uint32 Count;
 };
 
-bool HArrayVarRAM::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
+bool HArray::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
 {
 	RebuildData* pRD = (RebuildData*)pData;
 
@@ -43,10 +43,10 @@ bool HArrayVarRAM::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, ucha
 	return true;
 }
 
-uint32 HArrayVarRAM::rebuild(bool removeEmptyKeys)
+uint32 HArray::rebuild(bool removeEmptyKeys)
 {
 	//create new HA
-	HArrayVarRAM* pNewHA = new HArrayVarRAM();
+	HArray* pNewHA = new HArray();
 	pNewHA->init(this->HeaderBase);
 
 	//move elements
@@ -56,6 +56,7 @@ uint32 HArrayVarRAM::rebuild(bool removeEmptyKeys)
 	rd.RemoveEmptyKeys = removeEmptyKeys;
 	rd.Count = 0;
 
+	//scan all elements + insert to new HArray
 	this->scanKeysAndValues(&rebuildVisitor,
 							&rd);
 

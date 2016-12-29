@@ -24,7 +24,7 @@
 #include <map>
 #include <unordered_map>
 #include "HArrayInt.h"
-#include "HArrayVarRAM.h"
+#include "HArray.h"
 
 #define SEQUENCE_TESTS
 #define RANDOM_TESTS
@@ -334,7 +334,7 @@ void HArrayInt_VS_StdMap_IntKey(uint32 startOnAmount, uint32 stepOfAmount, uint3
 	delete[] intKeys;
 }
 
-//==== HArrayVarRAM - Binary Keys ===========================================================================================
+//==== HArray - Binary Keys ===========================================================================================
 
 const uint32 BIN_KEY_LEN = 4;
 
@@ -393,9 +393,9 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 {
 	#ifdef HARRAY_TESTS
 
-	printf("HArrayVarRAM => ");
+	printf("HArray => ");
 
-	HArrayVarRAM ha;
+	HArray ha;
 	ha.init(26);
 
 	clock_t start, finish;
@@ -669,9 +669,9 @@ void fillPeriodBins(BinKey* keys, uint32 countKeys)
 	}
 }
 
-void HArrayVarRAM_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount, bool shuffle = false)
+void HArray_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount, bool shuffle = false)
 {
-	printf("=== HArrayVarRAM VS google::dense_hash_map<BinKey, int> VS std::map<BinKey,int> VS std::ordinary_map<BinKey,int> testing ===\n");
+	printf("=== HArray VS google::dense_hash_map<BinKey, int> VS std::map<BinKey,int> VS std::ordinary_map<BinKey,int> testing ===\n");
 
 	BinKey* binKeys = new BinKey[stopOnAmount];
 
@@ -726,7 +726,7 @@ void HArrayVarRAM_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 	delete[] binKeys;
 }
 
-//==== HArrayVarRAM - String Keys ===========================================================================================
+//==== HArray - String Keys ===========================================================================================
 
 const char STR_KEY_LEN = 64;
 
@@ -751,9 +751,9 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 {
 	#ifdef HARRAY_TESTS
 
-	printf("HArrayVarRAM => ");
+	printf("HArray => ");
 
-	HArrayVarRAM ha;
+	HArray ha;
 	ha.init(26);
 
 	clock_t start, finish;
@@ -992,9 +992,9 @@ void fillRandStrs(std::string* keys, uint32 countKeys)
 	}
 }
 
-void HArrayVarRAM_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
+void HArray_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
 {
-	printf("=== HArrayVarRAM VS google::dense_hash_map<StrKey, int> VS std::map<std::string,int> VS std::ordinary_map<std::string,int> testing ===\n");
+	printf("=== HArray VS google::dense_hash_map<StrKey, int> VS std::map<std::string,int> VS std::ordinary_map<std::string,int> testing ===\n");
 
 	std::string* strKeys = new std::string[stopOnAmount];
 
@@ -1057,12 +1057,12 @@ int main()
 							   2000000,   //step
 							   10000000); //stop
 	
-	HArrayVarRAM_VS_StdMap_BinKey(1000000,   //start
+	HArray_VS_StdMap_BinKey(1000000,   //start
 								  2000000,   //step
 								  10000000,  //stop
 								  false); 	 //shuffle
 	
-	HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
+	HArray_VS_StdMap_StrKey(1000000,   //start
 							  	  1000000,   //step
 							  	  3000000);  //stop
 

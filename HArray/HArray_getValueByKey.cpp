@@ -17,9 +17,9 @@
 */
 
 #include "stdafx.h"
-#include "HArrayVarRAM.h"
+#include "HArray.h"
 
-uint32* HArrayVarRAM::getValueByKey(uint32* key,
+uint32* HArray::getValueByKey(uint32* key,
 								  uint32 keyLen)
 {
 	keyLen >>= 2; //in 4 bytes

@@ -112,7 +112,7 @@ struct HACursor
 //	uchar8 Type;
 //};
 
-struct HArrayFixPair
+struct HArrayPair
 {
 	uint32 Key[16];
 	uint32 Value;

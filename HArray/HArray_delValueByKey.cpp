@@ -17,9 +17,11 @@
 */
 
 #include "stdafx.h"
-#include "HArrayVarRAM.h"
+#include "HArray.h"
 
 /*
+
+Main strategy
 1. OnlyContentType => zero content, zero header
 2. CurrentValue => ???
 3. Branch => Decrease branch => Remove branch + Current Value in content
@@ -27,10 +29,16 @@
 5. Branch2 in Block => Decrease branch => Remove branch + inject in block
 6. In Low Block less than 8 values => Remove block => create branches in block above level
 7. In Top Block less than 4 values => Create branch
+
+Pools
+1. Table of content holes
+2. List of free branches
+3. List of free blocks
+
 */
 
 
-bool HArrayVarRAM::delValueByKey(uint32* key,
+bool HArray::delValueByKey(uint32* key,
 								 uint32 keyLen)
 {
 	uint32* pValue = getValueByKey(key, keyLen);

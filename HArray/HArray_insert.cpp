@@ -18,9 +18,9 @@
 */
 
 #include "stdafx.h"
-#include "HArrayVarRAM.h"
+#include "HArray.h"
 
-uint32 HArrayVarRAM::insert(uint32* key,
+uint32 HArray::insert(uint32* key,
 	uint32 keyLen,
 	uint32 value)
 {

@@ -143,7 +143,8 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 				}
 			}
 
-			getKeysAndValuesByRange(pairs, count, size, keyOffset + 1,  blockCell.Offset, subMinKey, minKeyLen, subMaxKey, maxKeyLen);
+			getKeysAndValuesByRange(pairs, count, size, keyOffset + 1,  blockCell.Offset,
+									subMinKey, subMinKeyLen, subMaxKey, subMaxKeyLen);
 		}
 		else if(blockCellType <= MAX_BRANCH_TYPE1) //branch cell
 		{
@@ -205,7 +206,8 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 					}
 				}
 
-				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell1.Offsets[i], subMinKey, minKeyLen, subMaxKey, maxKeyLen);
+				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell1.Offsets[i],
+										subMinKey, subMinKeyLen, subMaxKey, subMaxKeyLen);
 			}
 		}
 		else if(blockCellType <= MAX_BRANCH_TYPE2) //branch cell
@@ -268,7 +270,8 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 					}
 				}
 
-				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell1.Offsets[i], subMinKey, minKeyLen, subMaxKey, maxKeyLen);
+				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell1.Offsets[i], 
+										subMinKey, subMinKeyLen, subMaxKey, subMaxKeyLen);
 			}
 
 			BranchPage* pBranchPage2 = pBranchPages[blockCell.ValueOrOffset >> 16];
@@ -331,7 +334,8 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 					}
 				}
 
-				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell2.Offsets[i], subMinKey, minKeyLen, subMaxKey, maxKeyLen);
+				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell2.Offsets[i],
+										subMinKey, subMinKeyLen, subMaxKey, subMaxKeyLen);
 			}
 		}
 		else if(blockCell.Type <= MAX_BLOCK_TYPE)
@@ -540,7 +544,8 @@ NEXT_KEY_PART:
 					}
 				}
 
-				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell.Offsets[i], subMinKey, minKeyLen, subMaxKey, maxKeyLen);
+				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell.Offsets[i],
+										subMinKey, subMinKeyLen, subMaxKey, subMaxKeyLen);
 			}
 
 			return;

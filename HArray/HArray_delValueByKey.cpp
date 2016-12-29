@@ -29,11 +29,18 @@ Main strategy
 5. Branch2 in Block => Decrease branch => Remove branch + inject in block
 6. In Low Block less than 8 values => Remove block => create branches in block above level
 7. In Top Block less than 4 values => Create branch
+8. VarBranch shunt (remove value) => Remove VarBranch + inject ContentCell
+9. VarBranch shunt (remove transit key) => Remove VarBranch + inject ContentCell.Value
+10. VarBranch continue (remove value) => Remove VarBranch + inject ContentCell
+//11. VarBranch continue (remove value) => Remove VarBranch + inject ContentCell
 
 Pools
 1. Table of content holes
 2. List of free branches
 3. List of free blocks
+4. List of varbranches
+
+Stats
 
 */
 

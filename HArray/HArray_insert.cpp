@@ -21,8 +21,8 @@
 #include "HArray.h"
 
 uint32 HArray::insert(uint32* key,
-	uint32 keyLen,
-	uint32 value)
+					uint32 keyLen,
+					uint32 value)
 {
 	try
 	{

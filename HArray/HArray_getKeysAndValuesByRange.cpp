@@ -254,14 +254,14 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 }
 
 void HArray::getKeysAndValuesByRange(HArrayPair* pairs,
-										   uint32& count,
-										   uint32 size,
-										   uint32 keyOffset,
-										   uint32 contentOffset,
-										   uint32* minKey,
-										   uint32 minKeyLen,
-										   uint32* maxKey,
-										   uint32 maxKeyLen)
+									uint32& count,
+									uint32 size,
+									uint32 keyOffset,
+									uint32 contentOffset,
+									uint32* minKey,
+									uint32 minKeyLen,
+									uint32* maxKey,
+									uint32 maxKeyLen)
 {
 	//printf("getValuesByRange count=%d size=%d contentOffset=%d keyOffset=%d\n", count, size, contentOffset, keyOffset);
 

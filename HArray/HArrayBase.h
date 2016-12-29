@@ -114,9 +114,20 @@ struct HACursor
 
 struct HArrayPair
 {
+public:
 	uint32 Key[16];
 	uint32 Value;
 	uint32 KeyLen;
+
+	void print()
+	{
+		for(int i=0; i<KeyLen; i++)
+		{
+			printf("%u ", Key[i]);
+		}
+
+		printf("=> %u\n", Value);
+	}
 };
 
 struct BranchCell

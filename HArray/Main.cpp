@@ -1049,6 +1049,42 @@ void dense_fake()
 
 	int val = mymap[buff];
 }
+
+void testRange()
+{
+	HArray ha;
+	ha.init(26);
+ 
+	uint32 key1[] = {100, 200};
+ 	uint32 key2[] = {200, 300, 400};
+ 	uint32 key3[] = {200, 300, 500};
+ 	uint32 key4[] = {300, 400, 500, 600};
+ 	uint32 key5[] = {300, 500, 600};
+ 	uint32 key6[] = {300};
+ 	uint32 key7[] = {400, 500};
+
+	ha.insert(key1, sizeof(key1), 1);
+	ha.insert(key2, sizeof(key2), 2);
+	ha.insert(key3, sizeof(key3), 3);
+ 	ha.insert(key4, sizeof(key4), 4);
+ 	ha.insert(key5, sizeof(key5), 5);
+ 	ha.insert(key6, sizeof(key6), 6);
+ 	ha.insert(key7, sizeof(key7), 7);
+
+ 	HArrayPair* pairs = new HArrayPair[10];
+
+ 	uint32 count = ha.getKeysAndValuesByRange(pairs,
+								   		   10,
+										   key6,
+										   8,
+										   key2,
+										   4);
+
+	for(uint32 i=0; i<count; i++)
+	{
+		printf("%u\n", pairs[i].Value);
+	}
+}
 */
 
 int main()

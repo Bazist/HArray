@@ -31,21 +31,20 @@
     <ExtraCompilerArguments>-std=gnu++11</ExtraCompilerArguments>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="HArrayFixBase.h" />
     <None Include="HArrayInt.h" />
-    <None Include="HArrayVarRAM.h" />
     <None Include="stdafx.h" />
     <None Include="targetver.h" />
+    <None Include="HArrayBase.h" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HArrayVarRAM_delValueByKey.cpp" />
-    <Compile Include="HArrayVarRAM_getKeysAndValuesByRange.cpp" />
-    <Compile Include="HArrayVarRAM_getValueByKey.cpp" />
-    <Compile Include="HArrayVarRAM_hasPartKey.cpp" />
-    <Compile Include="HArrayVarRAM_insert.cpp" />
-    <Compile Include="HArrayVarRAM_scanKeysAndValues.cpp" />
     <Compile Include="Main.cpp" />
-    <Compile Include="HArrayVarRAM_compact.cpp" />
-    <Compile Include="HArrayVarRAM_rebuild.cpp" />
+    <Compile Include="HArray_compact.cpp" />
+    <Compile Include="HArray_delValueByKey.cpp" />
+    <Compile Include="HArray_getKeysAndValuesByRange.cpp" />
+    <Compile Include="HArray_getValueByKey.cpp" />
+    <Compile Include="HArray_hasPartKey.cpp" />
+    <Compile Include="HArray_insert.cpp" />
+    <Compile Include="HArray_rebuild.cpp" />
+    <Compile Include="HArray_scanKeysAndValues.cpp" />
   </ItemGroup>
 </Project>

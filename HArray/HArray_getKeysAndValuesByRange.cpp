@@ -73,8 +73,6 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 													uint32* maxKey,
 													uint32 maxKeyLen)
 {
-	//printf("getValuesByRangeFromBlock count=%d size=%d contentOffset=%d keyOffset=%d blockOffset=%d\n", count, size, contentOffset, keyOffset, blockOffset);
-
 	uint32 maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
 
 	for(uint32 offset = blockOffset; offset < maxOffset; offset++)
@@ -98,26 +96,51 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 			pairs[count].Key[keyOffset] = keyValue;
 
 			uint32* subMinKey = 0;
+			uint32 subMinKeyLen = 0;
+
 			uint32* subMaxKey = 0;
+			uint32 subMaxKeyLen = 0;
 
 			if (minKey)
 			{
-				int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+				if(keyOffset < minKeyLen)
+				{
+					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
 
-				if(res == -1)
-					continue;
-				else if(res == 0)
-					subMinKey = minKey;
+					if(res == -1)
+						continue;
+					else if(res == 0)
+					{
+						subMinKey = minKey;
+						subMinKeyLen = minKeyLen;
+					}
+				}
+				else
+				{
+					subMinKey = 0;
+					subMinKeyLen = 0;
+				}
 			}
 
 			if (maxKey)
 			{
-				int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+				if(keyOffset < maxKeyLen)
+				{
+					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
 
-				if(res == 1)
-					continue;
-				else if(res == 0)
-					subMaxKey = maxKey;
+					if(res == 1)
+						continue;
+					else if(res == 0)
+					{
+						subMaxKey = maxKey;
+						subMaxKeyLen = maxKeyLen;
+					}
+				}
+				else
+				{
+					subMaxKey = 0;
+					subMaxKeyLen = 0;
+				}
 			}
 
 			getKeysAndValuesByRange(pairs, count, size, keyOffset + 1,  blockCell.Offset, subMinKey, minKeyLen, subMaxKey, maxKeyLen);
@@ -135,26 +158,51 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 				pairs[count].Key[keyOffset] = keyValue;
 
 				uint32* subMinKey = 0;
+				uint32 subMinKeyLen = 0;
+
 				uint32* subMaxKey = 0;
+				uint32 subMaxKeyLen = 0;
 
 				if (minKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+					if(keyOffset < minKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
 
-					if(res == -1)
-						continue;
-					else if(res == 0)
-						subMinKey = minKey;
+						if(res == -1)
+							continue;
+						else if(res == 0)
+						{
+							subMinKey = minKey;
+							subMinKeyLen = minKeyLen;
+						}
+					}
+					else
+					{
+						subMinKey = 0;
+						subMinKeyLen = 0;
+					}
 				}
 
 				if (maxKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+					if(keyOffset < maxKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
 
-					if(res == 1)
-						continue;
-					else if(res == 0)
-						subMaxKey = maxKey;
+						if(res == 1)
+							continue;
+						else if(res == 0)
+						{
+							subMaxKey = maxKey;
+							subMaxKeyLen = maxKeyLen;
+						}
+					}
+					else
+					{
+						subMaxKey = 0;
+						subMaxKeyLen = 0;
+					}
 				}
 
 				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell1.Offsets[i], subMinKey, minKeyLen, subMaxKey, maxKeyLen);
@@ -173,26 +221,51 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 				pairs[count].Key[keyOffset] = keyValue;
 
 				uint32* subMinKey = 0;
+				uint32 subMinKeyLen = 0;
+
 				uint32* subMaxKey = 0;
+				uint32 subMaxKeyLen = 0;
 
 				if (minKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+					if(keyOffset < minKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
 
-					if(res == -1)
-						continue;
-					else if(res == 0)
-						subMinKey = minKey;
+						if(res == -1)
+							continue;
+						else if(res == 0)
+						{
+							subMinKey = minKey;
+							subMinKeyLen = minKeyLen;
+						}
+					}
+					else
+					{
+						subMinKey = 0;
+						subMinKeyLen = 0;
+					}
 				}
 
 				if (maxKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+					if(keyOffset < maxKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
 
-					if(res == 1)
-						continue;
-					else if(res == 0)
-						subMaxKey = maxKey;
+						if(res == 1)
+							continue;
+						else if(res == 0)
+						{
+							subMaxKey = maxKey;
+							subMaxKeyLen = maxKeyLen;
+						}
+					}
+					else
+					{
+						subMaxKey = 0;
+						subMaxKeyLen = 0;
+					}
 				}
 
 				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell1.Offsets[i], subMinKey, minKeyLen, subMaxKey, maxKeyLen);
@@ -211,26 +284,51 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 				pairs[count].Key[keyOffset] = keyValue;
 
 				uint32* subMinKey = 0;
+				uint32 subMinKeyLen = 0;
+
 				uint32* subMaxKey = 0;
+				uint32 subMaxKeyLen = 0;
 
 				if (minKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+					if(keyOffset < minKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
 
-					if(res == -1)
-						continue;
-					else if(res == 0)
-						subMinKey = minKey;
+						if(res == -1)
+							continue;
+						else if(res == 0)
+						{
+							subMinKey = minKey;
+							subMinKeyLen = minKeyLen;
+						}
+					}
+					else
+					{
+						subMinKey = 0;
+						subMinKeyLen = 0;
+					}
 				}
 
 				if (maxKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+					if(keyOffset < maxKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
 
-					if(res == 1)
-						continue;
-					else if(res == 0)
-						subMaxKey = maxKey;
+						if(res == 1)
+							continue;
+						else if(res == 0)
+						{
+							subMaxKey = maxKey;
+							subMaxKeyLen = maxKeyLen;
+						}
+					}
+					else
+					{
+						subMaxKey = 0;
+						subMaxKeyLen = 0;
+					}
 				}
 
 				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell2.Offsets[i], subMinKey, minKeyLen, subMaxKey, maxKeyLen);
@@ -290,22 +388,44 @@ NEXT_KEY_PART:
 
 				if (minKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+					if(keyOffset < minKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
 
-					if(res == 1)
+						if(res == 1)
+						{
+							minKey = 0;
+							minKeyLen = 0;
+						}
+						else if(res == -1)
+							return;
+					}
+					else
+					{
 						minKey = 0;
-					else if(res == -1)
-						return;
+						minKeyLen = 0;
+					}
 				}
 
 				if (maxKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+					if(keyOffset < maxKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
 
-					if(res == -1)
+						if(res == -1)
+						{
+							maxKey = 0;
+							maxKeyLen = 0;
+						}
+						else if(res == 1)
+							return;
+					}
+					else
+					{
 						maxKey = 0;
-					else if(res == 1)
-						return;
+						maxKeyLen = 0;
+					}
 				}
 			}
 
@@ -316,6 +436,7 @@ NEXT_KEY_PART:
 				//printf("===> ADD VALUE\n");
 				pairs[count].Value = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF].Value;
 				pairs[count].KeyLen = keyOffset;
+				//pairs[count].print();
 
 				count++;
 				pairs[count] = pairs[count-1]; //copy prev key
@@ -338,6 +459,7 @@ NEXT_KEY_PART:
 			//save value
 			pairs[count].Value = varCell.ValueContentCell.Value;
 			pairs[count].KeyLen = keyOffset;
+			//pairs[count].print();
 
 			count++;
 			pairs[count] = pairs[count-1]; //copy prev key
@@ -371,26 +493,51 @@ NEXT_KEY_PART:
 				pairs[count].Key[keyOffset] = keyValue;
 
 				uint32* subMinKey = 0;
+				uint32 subMinKeyLen = 0;
+
 				uint32* subMaxKey = 0;
+				uint32 subMaxKeyLen = 0;
 
 				if (minKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+					if(keyOffset < minKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
 
-					if(res == -1)
-						continue;
-					else if(res == 0)
-						subMinKey = minKey;
+						if(res == -1)
+							continue;
+						else if(res == 0)
+						{
+							subMinKey = minKey;
+							subMinKeyLen = minKeyLen;
+						}
+					}
+					else
+					{
+						subMinKey = 0;
+						subMinKeyLen = 0;
+					}
 				}
 
 				if (maxKey)
 				{
-					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+					if(keyOffset < maxKeyLen)
+					{
+						int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
 
-					if(res == 1)
-						continue;
-					else if(res == 0)
-						subMaxKey = maxKey;
+						if(res == 1)
+							continue;
+						else if(res == 0)
+						{
+							subMaxKey = maxKey;
+							subMaxKeyLen = maxKeyLen;
+						}
+					}
+					else
+					{
+						subMinKey = 0;
+						subMinKeyLen = 0;
+					}
 				}
 
 				getKeysAndValuesByRange(pairs, count, size, keyOffset + 1, branchCell.Offsets[i], subMinKey, minKeyLen, subMaxKey, maxKeyLen);
@@ -405,6 +552,7 @@ NEXT_KEY_PART:
 				//printf("===> ADD VALUE\n");
 				pairs[count].Value = contentCellValueOrOffset;
 				pairs[count].KeyLen = keyOffset;
+				//pairs[count].print();
 
 				count++;
 				pairs[count] = pairs[count-1]; //copy prev key
@@ -449,22 +597,44 @@ NEXT_KEY_PART:
 
 			if (minKey)
 			{
-				int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
+				if(keyOffset < minKeyLen)
+				{
+					int res = (*compareSegmentFunc)(&keyValue, &minKey[keyOffset], keyOffset);
 
-				if(res == 1)
+					if(res == 1)
+					{
+						minKey = 0;
+						minKeyLen = 0;
+					}
+					else if(res == -1)
+						return;
+				}
+				else
+				{
 					minKey = 0;
-				else if(res == -1)
-					return;
+					minKeyLen = 0;
+				}
 			}
 
 			if (maxKey)
 			{
-				int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
+				if(keyOffset < maxKeyLen)
+				{
+					int res = (*compareSegmentFunc)(&keyValue, &maxKey[keyOffset], keyOffset);
 
-				if(res == -1)
+					if(res == -1)
+					{
+						maxKey = 0;
+						maxKeyLen = 0;
+					}
+					else if(res == 1)
+						return;
+				}
+				else
+				{
 					maxKey = 0;
-				else if(res == 1)
-					return;
+					maxKeyLen = 0;
+				}
 			}
 		}
 	}
@@ -472,12 +642,15 @@ NEXT_KEY_PART:
 
 
 uint32 HArray::getKeysAndValuesByRange(HArrayPair* pairs,
-											uint32 size,
-											uint32* minKey,
-											uint32 minKeyLen,
-											uint32* maxKey,
-											uint32 maxKeyLen)
+									    uint32 size,
+										uint32* minKey,
+										uint32 minKeyLen,
+										uint32* maxKey,
+										uint32 maxKeyLen)
 {
+	minKeyLen >>= 2;
+	maxKeyLen >>= 2;
+
 	uint32 count = 0;
 
 	uint32 startHeader;
@@ -485,13 +658,29 @@ uint32 HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 
 	if (!normalizeFunc)
 	{
-		startHeader = minKey[0] >> HeaderBits;
-		endHeader = maxKey[0] >> HeaderBits;
+		if(minKeyLen)
+		{
+			startHeader = minKey[0] >> HeaderBits;
+			endHeader = maxKey[0] >> HeaderBits;
+		}
+		else
+		{
+			startHeader = 0;
+			endHeader = 0xFFFFFFFF;
+		}
 	}
 	else
 	{
-		startHeader = (*normalizeFunc)(minKey) >> HeaderBits;
-		endHeader = (*normalizeFunc)(maxKey) >> HeaderBits;
+		if(maxKeyLen)
+		{
+			startHeader = (*normalizeFunc)(minKey) >> HeaderBits;
+			endHeader = (*normalizeFunc)(maxKey) >> HeaderBits;
+		}
+		else
+		{
+			startHeader = 0;
+			endHeader = 0xFFFFFFFF;
+		}
 	}
 		
 	//start range

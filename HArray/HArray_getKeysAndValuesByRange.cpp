@@ -661,25 +661,39 @@ uint32 HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 		if(minKeyLen)
 		{
 			startHeader = minKey[0] >> HeaderBits;
+		}
+		else
+		{
+			startHeader = 0;
+		}
+
+		if(maxKeyLen)
+		{
 			endHeader = maxKey[0] >> HeaderBits;
 		}
 		else
 		{
-			startHeader = 0;
-			endHeader = 0xFFFFFFFF;
+			endHeader = 0xFFFFFFFF >> HeaderBits;
 		}
 	}
 	else
 	{
-		if(maxKeyLen)
+		if(minKeyLen)
 		{
 			startHeader = (*normalizeFunc)(minKey) >> HeaderBits;
-			endHeader = (*normalizeFunc)(maxKey) >> HeaderBits;
 		}
 		else
 		{
 			startHeader = 0;
-			endHeader = 0xFFFFFFFF;
+		}
+
+		if(maxKeyLen)
+		{
+			endHeader = (*normalizeFunc)(maxKey) >> HeaderBits;
+		}
+		else
+		{
+			endHeader = 0xFFFFFFFF >> HeaderBits;
 		}
 	}
 		

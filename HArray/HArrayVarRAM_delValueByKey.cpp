@@ -19,6 +19,17 @@
 #include "stdafx.h"
 #include "HArrayVarRAM.h"
 
+/*
+1. OnlyContentType => zero content, zero header
+2. CurrentValue => ???
+3. Branch => Decrease branch => Remove branch + Current Value in content
+4. Branch1 in Block => Decrease branch => Remove branch + inject in block
+5. Branch2 in Block => Decrease branch => Remove branch + inject in block
+6. In Low Block less than 8 values => Remove block => create branches in block above level
+7. In Top Block less than 4 values => Create branch
+*/
+
+
 bool HArrayVarRAM::delValueByKey(uint32* key,
 								 uint32 keyLen)
 {

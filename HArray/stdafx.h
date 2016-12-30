@@ -32,21 +32,21 @@
 #include <inttypes.h>
 
 #ifdef _WIN32
-#define int32 __int32
-#define uint32 unsigned __int32
-#define ulong64 unsigned __int64
-#define ushort16 unsigned __int16
-#define uchar8 unsigned __int8
-#define ucode8 unsigned __int8
+typedef __int32 int32;
+typedef unsigned __int32 uint32;
+typedef unsigned __int64 ulong64;
+typedef unsigned __int16 ushort16;
+typedef unsigned __int8 uchar8;
+typedef unsigned __int8 ucode8;
 #endif
 
 #ifdef linux
-#define int32 int32_t
-#define uint32 uint32_t
-#define ulong64 uint64_t
-#define ushort16 uint16_t
-#define uchar8 uint8_t
-#define ucode8 uint8_t
+typedef int32_t int32;
+typedef uint32_t uint32;
+typedef uint64_t ulong64;
+typedef uint16_t ushort16;
+typedef uint8_t uchar8;
+typedef uint8_t ucode8;
 #endif
 
 const uint32 MAX_SHORT = 65536;

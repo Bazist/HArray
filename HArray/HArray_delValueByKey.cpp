@@ -66,9 +66,21 @@ bool HArray::delValueByKey(uint32* key,
 //ContentCell
 //BlockCell
 
+struct SegmentPath
+{
+	uchar8 Type;
+	BlockCell* pBlockCell;
+	BranchCell* pBranchCell;
+	uint32* pContentCellValueOrOffset;
+	uint32 Index;
+};
+
 bool HArray::delValueByKey2(uint32* key,
 							uint32 keyLen)
 {
+	SegmentPath path[128];
+	uint32 pathLen = 0;
+
 	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
@@ -104,29 +116,42 @@ bool HArray::delValueByKey2(uint32* key,
 				return false;
 			}
 
+			uint32 origKeyOffset = keyOffset;
+				
 			if (contentIndex < maxSafeShort) //content in one page
 			{
+				uint32 origContentIndex = contentIndex;
+
 				for (; keyOffset < keyLen; contentIndex++, keyOffset++)
 				{
 					if (pContentPage->pContent[contentIndex].Value != key[keyOffset])
 						return false;
 				}
 
-				return &pContentPage->pContent[contentIndex].Value; //return value
+				//remove
+				for (; origKeyOffset <= keyLen; origContentIndex++, origKeyOffset++)
+				{
+					pContentPage->pContent[origContentIndex].Type = 0;
+				}
 			}
 			else //content in two pages
 			{
+				uint32 origContentOffset = contentOffset;
+
 				for (; keyOffset < keyLen; contentOffset++, keyOffset++)
 				{
 					if (pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value != key[keyOffset])
-						return 0;
+						return false;
 				}
 
-				ContentCell& contentCell = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF];
-
-				//return &contentCell.Value; //return value
-				return true;
+				//remove
+				for (; origKeyOffset <= keyLen; origContentOffset++, origKeyOffset++)
+				{
+					pContentPages[origContentOffset >> 16]->pContent[origContentOffset & 0xFFFF].Type = 0;
+				}
 			}
+
+			goto DISMANTLING;
 		}
 
 		uint32& keyValue = key[keyOffset];
@@ -161,8 +186,10 @@ bool HArray::delValueByKey2(uint32* key,
 		{
 			if (contentCellType == VALUE_TYPE)
 			{
-				//return pContentCellValueOrOffset;
-				return true;
+				//remove
+				*pContentCellValueOrOffset = 0;
+
+				goto DISMANTLING;
 			}
 			else
 			{
@@ -185,6 +212,13 @@ bool HArray::delValueByKey2(uint32* key,
 					contentOffset = branchCell.Offsets[i];
 					keyOffset++;
 
+					//save path
+					SegmentPath& sp = path[pathLen++];
+					sp.Type = MAX_BRANCH_TYPE1;
+					sp.pBranchCell = &branchCell;
+					sp.pContentCellValueOrOffset = pContentCellValueOrOffset;
+					sp.Index = i;
+
 					goto NEXT_KEY_PART;
 				}
 			}
@@ -195,8 +229,10 @@ bool HArray::delValueByKey2(uint32* key,
 		{
 			if (keyOffset == keyLen)
 			{
-				//return pContentCellValueOrOffset;
-				return true;
+				//remove
+				*pContentCellValueOrOffset = 0;
+
+				goto DISMANTLING;
 			}
 			else
 			{
@@ -220,7 +256,7 @@ bool HArray::delValueByKey2(uint32* key,
 
 			if (blockCellType == EMPTY_TYPE)
 			{
-				return 0;
+				return false;
 			}
 			else if (blockCellType == CURRENT_VALUE_TYPE) //current value
 			{
@@ -228,6 +264,14 @@ bool HArray::delValueByKey2(uint32* key,
 				{
 					contentOffset = blockCell.Offset;
 					keyOffset++;
+
+					//save path
+					SegmentPath& sp = path[pathLen++];
+					sp.Type = MAX_BRANCH_TYPE1;
+					sp.pBlockCell = &blockCell;
+					sp.pBranchCell = 0;
+					sp.pContentCellValueOrOffset = pContentCellValueOrOffset;
+					//sp.Index = i;
 
 					goto NEXT_KEY_PART;
 				}
@@ -249,6 +293,14 @@ bool HArray::delValueByKey2(uint32* key,
 						contentOffset = branchCell1.Offsets[i];
 						keyOffset++;
 
+						//save path
+						SegmentPath& sp = path[pathLen++];
+						sp.Type = MAX_BRANCH_TYPE1;
+						sp.pBlockCell = &blockCell;
+						sp.pBranchCell = &branchCell1;
+						sp.pContentCellValueOrOffset = pContentCellValueOrOffset;
+						sp.Index = i;
+
 						goto NEXT_KEY_PART;
 					}
 				}
@@ -268,6 +320,14 @@ bool HArray::delValueByKey2(uint32* key,
 						contentOffset = branchCell1.Offsets[i];
 						keyOffset++;
 
+						//save path
+						SegmentPath& sp = path[pathLen++];
+						sp.Type = MAX_BRANCH_TYPE1;
+						sp.pBlockCell = &blockCell;
+						sp.pBranchCell = &branchCell1;
+						sp.pContentCellValueOrOffset = pContentCellValueOrOffset;
+						sp.Index = i;
+
 						goto NEXT_KEY_PART;
 					}
 				}
@@ -285,6 +345,14 @@ bool HArray::delValueByKey2(uint32* key,
 						contentOffset = branchCell2.Offsets[i];
 						keyOffset++;
 
+						//save path
+						SegmentPath& sp = path[pathLen++];
+						sp.Type = MAX_BRANCH_TYPE1;
+						sp.pBlockCell = &blockCell;
+						sp.pBranchCell = &branchCell2;
+						sp.pContentCellValueOrOffset = pContentCellValueOrOffset;
+						sp.Index = i;
+
 						goto NEXT_KEY_PART;
 					}
 				}
@@ -296,6 +364,14 @@ bool HArray::delValueByKey2(uint32* key,
 				//go to block
 				idxKeyValue = (blockCell.Type - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 				startOffset = blockCell.Offset;
+
+				//save path
+				SegmentPath& sp = path[pathLen++];
+				sp.Type = MAX_BRANCH_TYPE1;
+				sp.pBlockCell = &blockCell;
+				//sp.pBranchCell = &branchCell1;
+				sp.pContentCellValueOrOffset = pContentCellValueOrOffset;
+				//sp.Index = i;
 
 				goto NEXT_BLOCK;
 			}
@@ -311,6 +387,11 @@ bool HArray::delValueByKey2(uint32* key,
 				contentOffset++;
 				keyOffset++;
 
+				//save path
+				SegmentPath& sp = path[pathLen++];
+				sp.Type = CURRENT_VALUE_TYPE;
+				sp.pContentCellValueOrOffset = pContentCellValueOrOffset;
+
 				goto NEXT_KEY_PART;
 			}
 			else
@@ -319,4 +400,8 @@ bool HArray::delValueByKey2(uint32* key,
 			}
 		}
 	}
+
+	DISMANTLING:;
+
+	return false;
 }

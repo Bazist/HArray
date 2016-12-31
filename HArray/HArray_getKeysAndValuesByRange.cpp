@@ -647,7 +647,7 @@ NEXT_KEY_PART:
 
 
 uint32 HArray::getKeysAndValuesByRange(HArrayPair* pairs,
-									    uint32 size,
+									    uint32 pairsSize,
 										uint32* minKey,
 										uint32 minKeyLen,
 										uint32* maxKey,
@@ -708,20 +708,20 @@ uint32 HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 		uint32 contentOffset = pHeader[startHeader].Offset;
 		if(contentOffset)
 		{
-			getKeysAndValuesByRange(pairs, count, size, 0, contentOffset, minKey, minKeyLen, 0, 0);
+			getKeysAndValuesByRange(pairs, count, pairsSize, 0, contentOffset, minKey, minKeyLen, 0, 0);
 		}
 
 		//middle range
 		for(uint32 currKey = startHeader + 1; currKey < endHeader; currKey++)
 		{
-			if(count == size)
+			if(count == pairsSize)
 				return count;
 
 			contentOffset = pHeader[currKey].Offset;
 
 			if(contentOffset)
 			{
-				getKeysAndValuesByRange(pairs, count, size, 0, contentOffset, 0, 0, 0, 0);
+				getKeysAndValuesByRange(pairs, count, pairsSize, 0, contentOffset, 0, 0, 0, 0);
 			}
 		}
 
@@ -729,7 +729,7 @@ uint32 HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 		contentOffset = pHeader[endHeader].Offset;
 		if(contentOffset)
 		{
-			getKeysAndValuesByRange(pairs, count, size, 0, contentOffset, 0, 0, maxKey, maxKeyLen);
+			getKeysAndValuesByRange(pairs, count, pairsSize, 0, contentOffset, 0, 0, maxKey, maxKeyLen);
 		}
 	}
 	else
@@ -737,7 +737,7 @@ uint32 HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 		uint32 contentOffset = pHeader[startHeader].Offset;
 		if(contentOffset)
 		{
-			getKeysAndValuesByRange(pairs, count, size, 0, contentOffset, minKey, minKeyLen, maxKey, maxKeyLen);
+			getKeysAndValuesByRange(pairs, count, pairsSize, 0, contentOffset, minKey, minKeyLen, maxKey, maxKeyLen);
 		}
 	}
 

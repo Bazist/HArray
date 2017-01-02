@@ -159,8 +159,8 @@ NEXT_KEY_PART:
 
 			(*visitor)(key,
 					   keyOffset,
-					   varCell.ValueContentCell.Value,
-					   varCell.ValueContentCell.Type,
+					   varCell.ContValue,
+					   VALUE_TYPE,
 					   pData);
 
 			if(contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================

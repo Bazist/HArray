@@ -461,7 +461,7 @@ NEXT_KEY_PART:
 			VarCell& varCell = pVarPage->pVar[contentCellValueOrOffset & 0xFFFF];
 
 			//save value
-			pairs[count].Value = varCell.ValueContentCell.Value;
+			pairs[count].Value = varCell.ContValue;
 			pairs[count].KeyLen = keyOffset;
 			//pairs[count].print();
 

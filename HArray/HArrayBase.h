@@ -184,7 +184,7 @@ struct HeaderBranchPage
 
 struct VarCell
 {
-	ContentCell ValueContentCell;
+	uint32 ContValue;
 	ContentCell ContCell;
 };
 

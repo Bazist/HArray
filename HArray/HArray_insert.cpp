@@ -201,8 +201,7 @@ uint32 HArray::insert(uint32* key,
 						varCell.ContCell.Type = CURRENT_VALUE_TYPE;
 						varCell.ContCell.Value = contentCell.Value;
 
-						varCell.ValueContentCell.Type = VALUE_TYPE;
-						varCell.ValueContentCell.Value = value;
+						varCell.ContValue = value;
 
 						contentCell.Type = VAR_TYPE;
 						contentCell.Value = lastVarOffset++;
@@ -292,8 +291,7 @@ uint32 HArray::insert(uint32* key,
 
 					VarCell& varCell = pVarPage->pVar[lastVarOffset & 0xFFFF];
 
-					varCell.ValueContentCell.Type = VALUE_TYPE;
-					varCell.ValueContentCell.Value = contentCell.Value;
+					varCell.ContValue = contentCell.Value;
 
 					varCell.ContCell.Type = CONTINUE_VAR_TYPE;
 					varCell.ContCell.Value = lastContentOffset;
@@ -341,8 +339,7 @@ uint32 HArray::insert(uint32* key,
 						varCell.ContCell.Type = CURRENT_VALUE_TYPE;
 						varCell.ContCell.Value = currContentCell.Value;
 
-						varCell.ValueContentCell.Type = VALUE_TYPE;
-						varCell.ValueContentCell.Value = value;
+						varCell.ContValue = value;
 
 						pContentPage->pContent[contentIndex].Type = VAR_TYPE;
 						pContentPage->pContent[contentIndex].Value = lastVarOffset++;
@@ -441,8 +438,7 @@ uint32 HArray::insert(uint32* key,
 
 					VarCell& varCell = pVarPage->pVar[lastVarOffset & 0xFFFF];
 
-					varCell.ValueContentCell.Type = VALUE_TYPE;
-					varCell.ValueContentCell.Value = contentCell.Value;
+					varCell.ContValue = contentCell.Value;
 
 					varCell.ContCell.Type = CONTINUE_VAR_TYPE;
 					varCell.ContCell.Value = lastContentOffset;
@@ -499,9 +495,7 @@ uint32 HArray::insert(uint32* key,
 			else
 			{
 				//update existing value
-				ContentCell& contentCell = varCell.ValueContentCell;
-
-				contentCell.Value = value;
+				varCell.ContValue = value;
 
 				return 0;
 			}
@@ -526,8 +520,7 @@ uint32 HArray::insert(uint32* key,
 
 				VarCell& varCell = pVarPage->pVar[lastVarOffset & 0xFFFF];
 
-				varCell.ValueContentCell.Type = VALUE_TYPE;
-				varCell.ValueContentCell.Value = contentCell.Value;
+				varCell.ContValue = contentCell.Value;
 
 				varCell.ContCell.Type = CONTINUE_VAR_TYPE;
 				varCell.ContCell.Value = lastContentOffset;
@@ -564,8 +557,7 @@ uint32 HArray::insert(uint32* key,
 			varCell.ContCell.Type = contentCell.Type;
 			varCell.ContCell.Value = contentCell.Value;
 
-			varCell.ValueContentCell.Type = VALUE_TYPE;
-			varCell.ValueContentCell.Value = value; //save value
+			varCell.ContValue = value; //save value
 
 			contentCell.Type = VAR_TYPE;
 			contentCell.Value = lastVarOffset++;

@@ -72,7 +72,9 @@ const uchar8 BLOCK_VALUE_SEGMENT_TYPE = BRANCH_SEGMENT_TYPE + 1;
 const uchar8 BLOCK_BRANCH1_SEGMENT_TYPE = BLOCK_VALUE_SEGMENT_TYPE + 1;
 const uchar8 BLOCK_BRANCH2_SEGMENT_TYPE = BLOCK_BRANCH1_SEGMENT_TYPE + 1;
 const uchar8 BLOCK_OFFSET_SEGMENT_TYPE = BLOCK_BRANCH2_SEGMENT_TYPE + 1;
-const uchar8 VAR_SEGMENT_TYPE = BLOCK_OFFSET_SEGMENT_TYPE + 1;
+const uchar8 VAR_SHUNT_SEGMENT_TYPE = BLOCK_OFFSET_SEGMENT_TYPE + 1;
+const uchar8 VAR_CONTINUE_SEGMENT_TYPE = VAR_SHUNT_SEGMENT_TYPE + 1;
+const uchar8 VAR_VALUE_SEGMENT_TYPE = VAR_CONTINUE_SEGMENT_TYPE + 1;
 
 struct SegmentPath
 {
@@ -89,6 +91,8 @@ struct SegmentPath
 bool HArray::delValueByKey2(uint32* key,
 							uint32 keyLen)
 {
+	//EXTRACT PATH =============================================================================================
+
 	SegmentPath path[128];
 	uint32 pathLen = 0;
 
@@ -179,27 +183,43 @@ bool HArray::delValueByKey2(uint32* key,
 			{
 				contentCellType = varCell.ContCell.Type; //read from var cell
 
-				//save path
-				SegmentPath& sp = path[pathLen++];
-				sp.Type = VAR_SEGMENT_TYPE;
-				sp.pContentCell = &contentCell;
-				sp.pVarCell = &varCell;
-				//sp.pBranchCell = &branchCell1;
-				//sp.Index = i;
-
 				if (contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
 				{
 					contentOffset = varCell.ContCell.Value;
+
+					//save path
+					SegmentPath& sp = path[pathLen++];
+					sp.Type = VAR_CONTINUE_SEGMENT_TYPE;
+					sp.pContentCell = &contentCell;
+					sp.pVarCell = &varCell;
+					//sp.pBranchCell = &branchCell1;
+					//sp.Index = i;
 
 					goto NEXT_KEY_PART;
 				}
 				else
 				{
+					//save path
+					SegmentPath& sp = path[pathLen++];
+					sp.Type = VAR_SHUNT_SEGMENT_TYPE;
+					sp.pContentCell = &contentCell;
+					sp.pVarCell = &varCell;
+					//sp.pBranchCell = &branchCell1;
+					//sp.Index = i;
+
 					pContentCellValueOrOffset = &varCell.ContCell.Value;
 				}
 			}
 			else
 			{
+				//save path
+				SegmentPath& sp = path[pathLen++];
+				sp.Type = VAR_VALUE_SEGMENT_TYPE;
+				sp.pContentCell = &contentCell;
+				sp.pVarCell = &varCell;
+				//sp.pBranchCell = &branchCell1;
+				//sp.Index = i;
+
 				//return &varCell.ValueContentCell.Value;
 				goto DISMANTLING;
 			}
@@ -411,7 +431,7 @@ bool HArray::delValueByKey2(uint32* key,
 
 				//save path
 				SegmentPath& sp = path[pathLen++];
-				sp.Type = CURRENT_VALUE_TYPE;
+				sp.Type = CURRENT_VALUE_SEGMENT_TYPE;
 				sp.pContentCell = &contentCell;
 					
 				goto NEXT_KEY_PART;
@@ -424,6 +444,66 @@ bool HArray::delValueByKey2(uint32* key,
 	}
 
 	DISMANTLING:;
+
+	//DISMANTLING =============================================================================================
+	for(uint32 currPathLen = pathLen - 1; pathLen >= 0; pathLen--)
+	{
+		SegmentPath& sp = path[currPathLen];
+				
+		switch(sp.Type)
+		{
+			case CURRENT_VALUE_SEGMENT_TYPE:
+			{
+				sp.pContentCell->Type = 0;
+				sp.pContentCell->Value = 0;
+
+				break;
+			}
+		
+			case BRANCH_SEGMENT_TYPE:
+			{
+				break;
+			}
+
+			case BLOCK_VALUE_SEGMENT_TYPE:
+			{
+				break;
+			}
+
+			case BLOCK_BRANCH1_SEGMENT_TYPE:
+			{
+				break;
+			}
+
+			case BLOCK_BRANCH2_SEGMENT_TYPE:
+			{
+				break;
+			}
+
+			case BLOCK_OFFSET_SEGMENT_TYPE:
+			{
+				break;
+			}
+
+			case VAR_SHUNT_SEGMENT_TYPE:
+			{
+				break;
+			}
+
+			case VAR_CONTINUE_SEGMENT_TYPE:
+			{
+				break;
+			}
+
+			case VAR_VALUE_SEGMENT_TYPE:
+			{
+				break;
+			}
+
+			default: //fail state
+				break;
+		}
+	}
 
 	return false;
 }

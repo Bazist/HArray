@@ -196,7 +196,7 @@ public:
             lastBlockOffset = 0;
 
             releasedBranchCells = new uint32[MAX_SHORT];
-            releasedBlockCells = new uint32[MAX_SHORT];
+            releasedBlockCells = new uint32[MAX_SHORT / BLOCK_ENGINE_SIZE];
 			releasedVarCells = new uint32[MAX_SHORT];
 		}
 		catch(...)
@@ -209,7 +209,7 @@ public:
 
 	bool saveToFile(const char* path)
 	{
-		FILE * pFile = fopen (path, "wb+");
+		FILE * pFile = fopen (path, "wb");
   		if (pFile!=NULL)
   		{
 			if (fwrite(this, sizeof(HArray), 1, pFile) != 1)
@@ -300,7 +300,7 @@ public:
 
 	bool loadFromFile(const char* path)
 	{
-		FILE * pFile = fopen (path, "rb+");
+		FILE * pFile = fopen (path, "rb");
   		if (pFile!=NULL)
   		{
 			if (fread(this, sizeof(HArray), 1, pFile) != 1)

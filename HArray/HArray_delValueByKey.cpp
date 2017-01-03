@@ -69,17 +69,26 @@ void HArray::releaseContentCells(uint32 contentOffset, uint32 len)
 
 void HArray::releaseBranchCell(uint32 branchOffset)
 {
-
-}
-
-void HArray::releaseVarCell(uint32 varOffset)
-{
-
+	if(countReleasedBranchCells < MAX_SHORT)
+	{
+		releasedBranchCells[countReleasedBranchCells++] = branchOffset;
+	}
 }
 
 void HArray::releaseBlockCell(uint32 startBlockOffset)
 {
+	if(countReleasedBlockCells < MAX_SHORT / BLOCK_ENGINE_SIZE)
+	{
+		releasedBlockCells[countReleasedBlockCells++] = startBlockOffset;
+	}
+}
 
+void HArray::releaseVarCell(uint32 varOffset)
+{
+	if(countReleasedVarCells < MAX_SHORT)
+	{
+		releasedVarCells[countReleasedVarCells++] = varOffset;
+	}
 }
 
 void HArray::defragmentContentPages()

@@ -67,17 +67,17 @@ void HArray::releaseContentCells(uint32 contentOffset, uint32 len)
 
 }
 
-void HArray::releaseBranchCell(uint32 branchOffset, BranchCell* pBranchCell)
+void HArray::releaseBranchCell(uint32 branchOffset)
 {
 
 }
 
-void HArray::releaseVarCell(uint32 varOffset, VarCell* pVarCell)
+void HArray::releaseVarCell(uint32 varOffset)
 {
 
 }
 
-void HArray::releaseBlockCell(uint32 startBlockOffset, BlockCell* pBlockCell)
+void HArray::releaseBlockCell(uint32 startBlockOffset)
 {
 
 }
@@ -565,7 +565,7 @@ bool HArray::delValueByKey2(uint32* key,
 							sp.pContentCell->Type = CURRENT_VALUE_TYPE;
 							sp.pContentCell->Value = sp.pBranchCell1->Values[0];
 
-							releaseBranchCell(sp.BranchOffset1, sp.pBranchCell1);		
+							releaseBranchCell(sp.BranchOffset1);		
 						}
 					}
 
@@ -573,7 +573,7 @@ bool HArray::delValueByKey2(uint32* key,
 				}
 				else //last way
 				{
-					releaseBranchCell(sp.BranchOffset1, sp.pBranchCell1);
+					releaseBranchCell(sp.BranchOffset1);
 
 					break;	
 				}
@@ -585,55 +585,145 @@ bool HArray::delValueByKey2(uint32* key,
 				sp.pBlockCell->Offset = 0;
 				sp.pBlockCell->ValueOrOffset = 0;
 
-				//check block
-				uint32 subOffset = 0;
-				BlockCell* pCurrBlockCell = sp.pBlockCell - sp.ContentOrBlockSubOffset;
+				//check block ==============================================================
+				//calc amount values in block
 
 				uint32 count = 0;
 
+				uint32 values[BRANCH_ENGINE_SIZE * 2];
+				uint32 offsets[BRANCH_ENGINE_SIZE * 2];
+
+				uint32 subOffset = 0;
+				BlockCell* pCurrBlockCell = sp.pBlockCell - sp.ContentOrBlockSubOffset;
+
 				for(; subOffset < BLOCK_ENGINE_SIZE; subOffset++, pCurrBlockCell++)
 				{
-					if(pCurrBlockCell->Type == CURRENT_VALUE_TYPE)
+					if(pCurrBlockCell->Type)
 					{
-						count++;
-					}
-					else
-					{
-						count += pCurrBlockCell->Type;
-					}
-
-					if(count > BRANCH_ENGINE_SIZE * 2)
-					{
-						break;
-					}
-				}
-
-				if(count <= BRANCH_ENGINE_SIZE * 2)
-				{
-					if(count > 0)
-					{
-						if(path[currPathLen - 1].Type == BLOCK_OFFSET_SEGMENT_TYPE)
+						if(pCurrBlockCell->Type == CURRENT_VALUE_TYPE)
 						{
-							
+							values[count] = pCurrBlockCell->ValueOrOffset;
+							offsets[count] = pCurrBlockCell->Offset;
+
+							count++;
+
+							if(count > BRANCH_ENGINE_SIZE * 2) //leave block, do nothing, exit
+							{
+								goto DEFRAGMENT;
+							}
 						}
 						else
 						{
-							
-						}
-					}
-					else //only one value in block
-					{
-						if(path[currPathLen - 1].Type == BLOCK_OFFSET_SEGMENT_TYPE)
-						{
-							
-						}
-						else //inject to content last value from block, release block
-						{
+							if(count + pCurrBlockCell->Type > BRANCH_ENGINE_SIZE * 2) //leave block, do nothing, exit
+							{
+								goto DEFRAGMENT;
+							}
 
+							if(pCurrBlockCell->Type <= MAX_BRANCH_TYPE1)
+							{
+								BranchPage* pBranchPage1 = pBranchPages[pCurrBlockCell->Offset >> 16];
+								BranchCell branchCell1 = pBranchPage1->pBranch[pCurrBlockCell->Offset & 0xFFFF];
+
+								for (uint32 i = 0; i < pCurrBlockCell->Type; i++, count++)
+								{
+									values[count] = branchCell1.Values[i];
+									offsets[count] = branchCell1.Offsets[i];	
+								}
+							}
+							else if(pCurrBlockCell->Type <= MAX_BRANCH_TYPE2)
+							{
+								BranchPage* pBranchPage1 = pBranchPages[pCurrBlockCell->Offset >> 16];
+								BranchCell branchCell1 = pBranchPage1->pBranch[pCurrBlockCell->Offset & 0xFFFF];
+
+								for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++, count++)
+								{
+									values[count] = branchCell1.Values[i];
+									offsets[count] = branchCell1.Offsets[i];	
+								}
+
+								BranchPage* pBranchPage2 = pBranchPages[pCurrBlockCell->ValueOrOffset >> 16];
+								BranchCell branchCell2 = pBranchPage2->pBranch[pCurrBlockCell->ValueOrOffset & 0xFFFF];
+
+								uint32 countValues = pCurrBlockCell->Type - MAX_BRANCH_TYPE1;
+
+								for (uint32 i = 0; i < countValues; i++, count++)
+								{
+									values[count] = branchCell2.Values[i];
+									offsets[count] = branchCell2.Offsets[i];	
+								}
+							}
+
+							count += pCurrBlockCell->Type;
 						}
 					}
 				}
 
+				//if less than 8 values
+				SegmentPath& prevSP = path[currPathLen - 1];
+
+				if(prevSP.Type == BLOCK_OFFSET_SEGMENT_TYPE) //sub block
+				{
+					if(count == 0)
+					{
+						prevSP.pBlockCell->Type = 0;
+						prevSP.pBlockCell->ValueOrOffset = 0;
+						prevSP.pBlockCell->Offset = 0;
+
+						releaseBlockCell(sp.StartBlockOffset);
+
+						break;
+					}
+					else if(count == 1) //remove block, create CURRENT_VALUE_TYPE
+					{
+						prevSP.pBlockCell->Type = CURRENT_VALUE_TYPE;
+						prevSP.pBlockCell->ValueOrOffset = values[0];
+						prevSP.pBlockCell->Offset = offsets[0];
+
+						releaseBlockCell(sp.StartBlockOffset);
+
+						goto DEFRAGMENT;
+					}
+					else if(count <= BRANCH_ENGINE_SIZE) //remove block, create BRANCH
+					{
+						//create branch in content
+
+						releaseBlockCell(sp.StartBlockOffset);
+
+						goto DEFRAGMENT;
+					}
+				}
+				else //top block
+				{
+					if(count == 0)
+					{
+						sp.pContentCell->Type = 0;
+						sp.pContentCell->Value = 0;
+
+						//!!!!!!!!!!!!
+						//releaseContentCells(sp.ContentOrSubBlockOffset, 1);
+
+						releaseBlockCell(sp.StartBlockOffset);
+
+						break;
+					}
+					else if(count == 1) //remove block, create CURRENT_VALUE_TYPE
+					{
+						//if last element offset+1;
+
+						releaseBlockCell(sp.StartBlockOffset);
+
+						goto DEFRAGMENT;
+					}
+					else if(count <= BRANCH_ENGINE_SIZE) //remove block, create BRANCH
+					{
+						//create branch in content
+
+						releaseBlockCell(sp.StartBlockOffset);
+
+						goto DEFRAGMENT;
+					}
+				}
+				
 				break;
 			}
 
@@ -654,7 +744,7 @@ bool HArray::delValueByKey2(uint32* key,
 						sp.pBlockCell->Type = CURRENT_VALUE_TYPE;
 						sp.pBlockCell->ValueOrOffset = sp.pBranchCell1->Values[0];
 
-						releaseBranchCell(sp.BranchOffset1, sp.pBranchCell1);
+						releaseBranchCell(sp.BranchOffset1);
 					}
 
 					//check block ?
@@ -671,7 +761,7 @@ bool HArray::delValueByKey2(uint32* key,
 					//if it was last item in branch2 then release branch2
 					if(sp.pBlockCell->Type < MIN_BRANCH_TYPE2) //not last item in branch2
 					{
-						releaseBranchCell(sp.BranchOffset2, sp.pBranchCell2);
+						releaseBranchCell(sp.BranchOffset2);
 					}
 				}
 
@@ -689,7 +779,7 @@ bool HArray::delValueByKey2(uint32* key,
 				}
 				else //last item
 				{
-					releaseBranchCell(sp.BranchOffset2, sp.pBranchCell2);
+					releaseBranchCell(sp.BranchOffset2);
 				}
 
 				sp.pBlockCell->Type--;
@@ -699,7 +789,7 @@ bool HArray::delValueByKey2(uint32* key,
 
 			case BLOCK_OFFSET_SEGMENT_TYPE:
 			{
-				goto DEFRAGMENT;
+				break; //skip
 			}
 
 			case VAR_SHUNT_SEGMENT_TYPE:
@@ -709,7 +799,7 @@ bool HArray::delValueByKey2(uint32* key,
 					//delete continue way, inject value
 					*sp.pContentCell = sp.pVarCell->ValueContCell;
 
-					releaseVarCell(sp.VarOffset, sp.pVarCell);
+					releaseVarCell(sp.VarOffset);
 
 					goto DEFRAGMENT;
 				}
@@ -717,7 +807,7 @@ bool HArray::delValueByKey2(uint32* key,
 				{
 					//delete continue way, value was deleted earlier
 
-					releaseVarCell(sp.VarOffset, sp.pVarCell);
+					releaseVarCell(sp.VarOffset);
 
 					break;			
 				}
@@ -743,7 +833,7 @@ bool HArray::delValueByKey2(uint32* key,
 					//was only shunted value, remove var cell
 					*sp.pContentCell = sp.pVarCell->ContCell;
 
-					releaseVarCell(sp.VarOffset, sp.pVarCell);
+					releaseVarCell(sp.VarOffset);
 
 					goto DEFRAGMENT;
 				}

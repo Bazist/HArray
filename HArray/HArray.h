@@ -672,9 +672,9 @@ public:
 	}
 
 	void releaseContentCells(uint32 contentOffset, uint32 len);
-	void releaseBranchCell(uint32 branchOffset, BranchCell* pBranchCell);
-	void releaseVarCell(uint32 varOffset, VarCell* pVarCell);
-	void releaseBlockCell(uint32 startBlockOffset, BlockCell* pBlockCell);
+	void releaseBranchCell(uint32 branchOffset);
+	void releaseVarCell(uint32 varOffset);
+	void releaseBlockCell(uint32 startBlockOffset);
 
 	void defragmentContentPages();
 	void defragmentBranchPages();

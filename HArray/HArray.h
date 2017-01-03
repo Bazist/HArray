@@ -671,6 +671,16 @@ public:
 		compareFunc = compFunc;
 	}
 
+	void releaseContentCells(uint32 contentOffset, uint32 len);
+	void releaseBranchCell(uint32 branchOffset, BranchCell* pBranchCell);
+	void releaseVarCell(uint32 varOffset, VarCell* pVarCell);
+	void releaseBlockCell(uint32 startBlockOffset, BlockCell* pBlockCell);
+
+	void defragmentContentPages();
+	void defragmentBranchPages();
+	void defragmentBlockPages();	
+	void defragmentVarPages();
+
 	void printMemory()
 	{
 		printf("=================== HArray =========================\n");

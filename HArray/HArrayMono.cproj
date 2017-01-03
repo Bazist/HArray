@@ -35,6 +35,7 @@
     <None Include="stdafx.h" />
     <None Include="targetver.h" />
     <None Include="HArrayBase.h" />
+    <None Include="HArray.h" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cpp" />

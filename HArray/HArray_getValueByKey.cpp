@@ -106,7 +106,7 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-                return &varCell.ContValue;
+                return &varCell.ValueContCell.Value;
 			}
 		}
 		else if(keyOffset == keyLen)

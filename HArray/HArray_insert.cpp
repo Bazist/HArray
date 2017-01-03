@@ -3,9 +3,9 @@
 # Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 # This file is part of VyMa\Trie.
 #
-# VyMa\Trie is free software : you can redistribute it and / or modify
+# VyMa\Trie is release software : you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
+# the release Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # Vyma\Trie is distributed in the hope that it will be useful,
@@ -226,11 +226,11 @@ uint32 HArray::insert(uint32* key,
 						//create branch
 						contentCell.Type = MIN_BRANCH_TYPE1 + 1;
 
-						//get free branch cell
+						//get release branch cell
 						BranchCell* pBranchCell;
-						if (countFreeBranchCell)
+						if (countReleasedBranchCells)
 						{
-							uint32 branchOffset = freeBranchCells[--countFreeBranchCell];
+							uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
 							pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
 							pBranchCell->Values[0] = contentCell.Value;
@@ -366,11 +366,11 @@ uint32 HArray::insert(uint32* key,
 						//create branch
 						pContentPage->pContent[contentIndex].Type = MIN_BRANCH_TYPE1 + 1;
 
-						//get free branch cell
+						//get release branch cell
 						BranchCell* pBranchCell;
-						if (countFreeBranchCell)
+						if (countReleasedBranchCells)
 						{
-							uint32 branchOffset = freeBranchCells[--countFreeBranchCell];
+							uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
 							pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
 							pBranchCell->Values[0] = pContentPage->pContent[contentIndex].Value;
@@ -610,9 +610,9 @@ uint32 HArray::insert(uint32* key,
 				uchar8 idxKeyValue = 0;
 				uchar8 currContentCellType = MIN_BLOCK_TYPE;
 
-				if (countFreeBranchCell < MAX_SHORT)
+				if (countReleasedBranchCells < MAX_SHORT)
 				{
-					freeBranchCells[countFreeBranchCell++] = contentCellValueOrOffset;
+					releasedBranchCells[countReleasedBranchCells++] = contentCellValueOrOffset;
 				}
 
 				const ushort16 countCell = BRANCH_ENGINE_SIZE + 1;
@@ -696,11 +696,11 @@ uint32 HArray::insert(uint32* key,
 					{
 						if (currBlockCell.Type == 0) //create branch
 						{
-							//get free branch cell
+							//get release branch cell
 							BranchCell* pCurrBranchCell;
-							if (countFreeBranchCell)
+							if (countReleasedBranchCells)
 							{
-								uint32 branchOffset = freeBranchCells[--countFreeBranchCell];
+								uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
 								pCurrBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 								currBlockCell.Offset = branchOffset;
 							}
@@ -776,7 +776,7 @@ uint32 HArray::insert(uint32* key,
 
 			uchar8& blockCellType = blockCell.Type;
 
-			if (blockCellType == EMPTY_TYPE) //free cell, fill
+			if (blockCellType == EMPTY_TYPE) //release cell, fill
 			{
 				blockCellType = CURRENT_VALUE_TYPE;
 				blockCell.ValueOrOffset = keyValue;
@@ -799,11 +799,11 @@ uint32 HArray::insert(uint32* key,
 					{
 						blockCellType = MIN_BRANCH_TYPE1 + 1;
 
-						//get free branch cell
+						//get release branch cell
 						BranchCell* pBranchCell;
-						if (countFreeBranchCell)
+						if (countReleasedBranchCells)
 						{
-							uint32 branchOffset = freeBranchCells[--countFreeBranchCell];
+							uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
 							pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
 							pBranchCell->Offsets[0] = blockCell.Offset;
@@ -868,11 +868,11 @@ uint32 HArray::insert(uint32* key,
 					//create second branch
 					blockCellType = MIN_BRANCH_TYPE2;
 
-					//get free branch cell
+					//get release branch cell
 					BranchCell* pBranchCell;
-					if (countFreeBranchCell)
+					if (countReleasedBranchCells)
 					{
-						uint32 branchOffset = freeBranchCells[--countFreeBranchCell];
+						uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
 						pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
 						blockCell.ValueOrOffset = branchOffset;
@@ -996,14 +996,14 @@ uint32 HArray::insert(uint32* key,
 						BlockCell blockCells[countCell];
 						uchar8 indexes[countCell];
 
-						if (countFreeBranchCell < MAX_SHORT)
+						if (countReleasedBranchCells < MAX_SHORT)
 						{
-							freeBranchCells[countFreeBranchCell++] = blockCell.Offset;
+							releasedBranchCells[countReleasedBranchCells++] = blockCell.Offset;
 						}
 
-						if (countFreeBranchCell < MAX_SHORT)
+						if (countReleasedBranchCells < MAX_SHORT)
 						{
-							freeBranchCells[countFreeBranchCell++] = blockCell.ValueOrOffset;
+							releasedBranchCells[countReleasedBranchCells++] = blockCell.ValueOrOffset;
 						}
 
 					EXTRACT_BRANCH2:
@@ -1101,11 +1101,11 @@ uint32 HArray::insert(uint32* key,
 							{
 								if (currBlockCell.Type == 0) //create branch
 								{
-									//get free branch cell
+									//get release branch cell
 									BranchCell* pCurrBranchCell;
-									if (countFreeBranchCell)
+									if (countReleasedBranchCells)
 									{
-										uint32 branchOffset = freeBranchCells[--countFreeBranchCell];
+										uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
 										pCurrBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
 										currBlockCell.Offset = branchOffset;
@@ -1146,11 +1146,11 @@ uint32 HArray::insert(uint32* key,
 								}
 								else if (currBlockCell.Type == MAX_BRANCH_TYPE1)
 								{
-									//get free branch cell
+									//get release branch cell
 									BranchCell* pCurrBranchCell;
-									if (countFreeBranchCell)
+									if (countReleasedBranchCells)
 									{
-										uint32 branchOffset = freeBranchCells[--countFreeBranchCell];
+										uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
 										pCurrBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
 										currBlockCell.ValueOrOffset = branchOffset;
@@ -1223,11 +1223,11 @@ uint32 HArray::insert(uint32* key,
 			{
 				pContentCell->Type = MIN_BRANCH_TYPE1 + 1;
 
-				//get free branch cell
+				//get release branch cell
 				BranchCell* pBranchCell;
-				if (countFreeBranchCell)
+				if (countReleasedBranchCells)
 				{
-					uint32 branchOffset = freeBranchCells[--countFreeBranchCell];
+					uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
 					pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
 					pBranchCell->Values[0] = contentCellValueOrOffset;

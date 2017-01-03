@@ -2,7 +2,7 @@
 # Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 # This file is part of VyMa\Trie.
 #
-# VyMa\Trie is free software : you can redistribute it and / or modify
+# VyMa\Trie is release software : you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.

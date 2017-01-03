@@ -2,7 +2,7 @@
 # Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 # This file is part of VyMa\Trie.
 #
-# VyMa\Trie is free software : you can redistribute it and / or modify
+# VyMa\Trie is release software : you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
@@ -95,7 +95,7 @@ public:
 
 		lastHeaderCode = 1;
 
-		currFreeCell = 0;
+		currreleaseCell = 0;
 	}
 
 	uint32 HEADER_BASE;
@@ -122,8 +122,8 @@ public:
 	uint32 indexes[MAX_SHORT];
 	uint32 values[MAX_SHORT];
 
-	uint32 freeCells[MAX_SHORT];
-	uint32 currFreeCell;
+	uint32 releaseCells[MAX_SHORT];
+	uint32 currreleaseCell;
 
 	void init(uint32 headerBase)
 	{
@@ -197,9 +197,9 @@ public:
                     }
 
                     //Allocate block
-                    if(currFreeCell > 0)
+                    if(currreleaseCell > 0)
                     {
-                        uint32 blockOffset = freeCells[--currFreeCell];
+                        uint32 blockOffset = releaseCells[--currreleaseCell];
                         DoublePageInt* pPage = pDoublePages[blockOffset>>16];
                         DoubleValueCellInt& valueCell = pPage->pValues[blockOffset&0xFFFF];
 
@@ -266,9 +266,9 @@ public:
 
                     countValues = 3;
 
-                    if(currFreeCell < MAX_SHORT)
+                    if(currreleaseCell < MAX_SHORT)
                     {
-                        freeCells[currFreeCell++] = headerCell.Offset;
+                        releaseCells[currreleaseCell++] = headerCell.Offset;
                     }
                 }
                 else if(headerCell.Type == 3) //with multiply elements in block

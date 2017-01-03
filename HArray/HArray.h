@@ -2,9 +2,9 @@
 # Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 # This file is part of VyMa\Trie.
 #
-# VyMa\Trie is free software : you can redistribute it and / or modify
+# VyMa\Trie is release software : you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
+# the release Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # Vyma\Trie is distributed in the hope that it will be useful,
@@ -78,9 +78,6 @@ public:
 	uint32 HeaderBits;
 	uint32 HeaderSize;
 
-	uint32* freeBranchCells;
-	uint32 countFreeBranchCell;
-
 	uint32 ValueLen;
 	uint32 NewParentID;
 
@@ -122,7 +119,9 @@ public:
 		pBranchPages = 0;
 		pBlockPages = 0;
 
-		freeBranchCells = 0;
+		releasedBranchCells = 0;
+		releasedBlockCells = 0;
+		releasedVarCells = 0;
 
         try
         {
@@ -132,7 +131,9 @@ public:
             HeaderBits = 32-headerBase;
             HeaderSize = (0xFFFFFFFF>>HeaderBits) + 1;
 
-            countFreeBranchCell = 0;
+            countReleasedBranchCells = 0;
+			countReleasedBlockCells = 0;
+			countReleasedVarCells = 0;
 
             MAX_SAFE_SHORT = MAX_SHORT - ValueLen - 1;
 
@@ -194,7 +195,9 @@ public:
             lastBranchOffset = 0;
             lastBlockOffset = 0;
 
-            freeBranchCells = new uint32[MAX_SHORT];
+            releasedBranchCells = new uint32[MAX_SHORT];
+            releasedBlockCells = new uint32[MAX_SHORT];
+			releasedVarCells = new uint32[MAX_SHORT];
 		}
 		catch(...)
 		{
@@ -278,10 +281,10 @@ public:
 			}
 
 			/*
-	        if(freeBranchCells)
+	        if(releaseBranchCells)
 			{
-	            delete[] freeBranchCells;
-	            freeBranchCells = 0;
+	            delete[] releaseBranchCells;
+	            releaseBranchCells = 0;
 			}
 			*/
 
@@ -395,13 +398,13 @@ public:
 				}
 			}
 
-			freeBranchCells = 0;
+			//releaseBranchCells = 0;
 
 			/*
-	        if(freeBranchCells)
+	        if(releaseBranchCells)
 			{
-	            delete[] freeBranchCells;
-	            freeBranchCells = 0;
+	            delete[] releaseBranchCells;
+	            releaseBranchCells = 0;
 			}
 			*/
 
@@ -671,6 +674,8 @@ public:
 		compareFunc = compFunc;
 	}
 
+	//RELEASED ====================================================================================================
+
 	void releaseContentCells(uint32 contentOffset, uint32 len);
 	void releaseBranchCell(uint32 branchOffset);
 	void releaseVarCell(uint32 varOffset);
@@ -680,6 +685,16 @@ public:
 	void defragmentBranchPages();
 	void defragmentBlockPages();	
 	void defragmentVarPages();
+
+	uint32* releasedContentCells;
+	uint32* releasedBranchCells;
+	uint32* releasedBlockCells;
+	uint32* releasedVarCells;
+
+	uint32 countReleasedContentCells;
+	uint32 countReleasedBranchCells;
+	uint32 countReleasedBlockCells;
+	uint32 countReleasedVarCells;
 
 	void printMemory()
 	{
@@ -860,7 +875,7 @@ public:
 
 	static bool rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
 
-	uint32 rebuild(bool removeEmptyKeys = false);
+	uint32 rebuild(uint32 headerBase = 0, bool removeEmptyKeys = false);
 	
 	//GET =============================================================================================================
 
@@ -990,10 +1005,22 @@ public:
 			pBlockPages = 0;
 		}
 
-        if(freeBranchCells)
+        if(releasedBranchCells)
 		{
-            delete[] freeBranchCells;
-            freeBranchCells = 0;
+            delete[] releasedBranchCells;
+            releasedBranchCells = 0;
+		}
+
+		if(releasedBlockCells)
+		{
+            delete[] releasedBlockCells;
+            releasedBlockCells = 0;
+		}
+
+		if(releasedVarCells)
+		{
+            delete[] releasedVarCells;
+            releasedVarCells = 0;
 		}
 
 		//valueListPool.destroy();

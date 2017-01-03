@@ -2,9 +2,9 @@
 # Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
 # This file is part of VyMa\Trie.
 #
-# VyMa\Trie is free software : you can redistribute it and / or modify
+# VyMa\Trie is release software : you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
+# the release Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # Vyma\Trie is distributed in the hope that it will be useful,
@@ -43,11 +43,16 @@ bool HArray::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 val
 	return true;
 }
 
-uint32 HArray::rebuild(bool removeEmptyKeys)
+uint32 HArray::rebuild(uint32 headerBase, bool removeEmptyKeys)
 {
+	if(!headerBase)
+	{
+		headerBase = this->HeaderBase;
+	}
+
 	//create new HA
 	HArray* pNewHA = new HArray();
-	pNewHA->init(this->HeaderBase);
+	pNewHA->init(headerBase);
 
 	//move elements
 	RebuildData rd;
@@ -91,8 +96,15 @@ uint32 HArray::rebuild(bool removeEmptyKeys)
 	this->HeaderBits = pNewHA->HeaderBits;
 	this->HeaderSize = pNewHA->HeaderSize;
 
-	this->freeBranchCells = pNewHA->freeBranchCells;
-	this->countFreeBranchCell = pNewHA->countFreeBranchCell;
+	this->releasedBranchCells = pNewHA->releasedBranchCells;
+	this->countReleasedBranchCells = pNewHA->countReleasedBranchCells;
+
+	this->releasedBlockCells = pNewHA->releasedBlockCells;
+	this->countReleasedBlockCells = pNewHA->countReleasedBlockCells;
+
+	this->releasedVarCells = pNewHA->releasedVarCells;
+	this->countReleasedVarCells = pNewHA->countReleasedVarCells;
+
 	this->ValueLen = pNewHA->ValueLen;
 	this->NewParentID = pNewHA->NewParentID;
 	this->MAX_SAFE_SHORT = pNewHA->MAX_SAFE_SHORT;

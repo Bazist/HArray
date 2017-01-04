@@ -74,6 +74,20 @@ const uchar8 SHORT_WAY_STAT = 8;
 const uchar8 LONG_WAY_STAT = 9;
 const uchar8 CONTENT_BRANCH_STAT = 10;
 
+const uchar8 CURRENT_VALUE_SEGMENT_TYPE = 1;
+const uchar8 BRANCH_SEGMENT_TYPE = CURRENT_VALUE_SEGMENT_TYPE + 1;
+const uchar8 BLOCK_VALUE_SEGMENT_TYPE = BRANCH_SEGMENT_TYPE + 1;
+const uchar8 BLOCK_BRANCH1_SEGMENT_TYPE = BLOCK_VALUE_SEGMENT_TYPE + 1;
+const uchar8 BLOCK_BRANCH2_SEGMENT_TYPE = BLOCK_BRANCH1_SEGMENT_TYPE + 1;
+const uchar8 BLOCK_OFFSET_SEGMENT_TYPE = BLOCK_BRANCH2_SEGMENT_TYPE + 1;
+const uchar8 VAR_SHUNT_SEGMENT_TYPE = BLOCK_OFFSET_SEGMENT_TYPE + 1;
+const uchar8 VAR_VALUE_SEGMENT_TYPE = VAR_SHUNT_SEGMENT_TYPE + 1;
+
+const ushort16 MAX_SAFE_COUNT_RELEASED_CONTENT_CELLS = MAX_SHORT - (MAX_CHAR - ONLY_CONTENT_TYPE);
+const ushort16 MAX_SAFE_COUNT_RELEASED_BRANCH_CELLS = MAX_SHORT - (MAX_CHAR - ONLY_CONTENT_TYPE);
+const ushort16 MAX_SAFE_COUNT_RELEASED_BLOCK_CELLS = MAX_SHORT - (MAX_CHAR - ONLY_CONTENT_TYPE);
+const ushort16 MAX_SAFE_COUNT_RELEASED_VAR_CELLS = MAX_SHORT - (MAX_CHAR - ONLY_CONTENT_TYPE);
+
 typedef bool HARRAY_ITEM_VISIT_FUNC(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
 
 struct HArrayFixBaseInfo
@@ -235,6 +249,29 @@ struct CompactPage
 	uint32 Count;
 
 	CompactPage* pNextPage;
+};
+
+struct SegmentPath
+{
+	uchar8 Type;
+
+	ContentCell* pContentCell;
+
+	BlockCell* pBlockCell;
+	uint32 StartBlockOffset;
+
+	BranchCell* pBranchCell1;
+	uint32 BranchOffset1;
+
+	BranchCell* pBranchCell2;
+	uint32 BranchOffset2;
+
+	VarCell* pVarCell;
+	uint32 VarOffset;
+
+	uint32 BranchIndex;
+	uint32 ContentOffset;
+	uint32 BlockSubOffset;
 };
 
 typedef uint32 (*NormalizeFunc)(void* key);

@@ -681,10 +681,10 @@ public:
 	void releaseVarCell(uint32 varOffset);
 	void releaseBlockCell(uint32 startBlockOffset);
 
-	void defragmentContentPages();
-	void defragmentBranchPages();
-	void defragmentBlockPages();	
-	void defragmentVarPages();
+	void shrinkContentPages();
+	void shrinkBranchPages();
+	void shrinkBlockPages();
+	void shrinkVarPages();
 
 	uint32* releasedContentCells;
 	uint32* releasedBranchCells;
@@ -695,6 +695,9 @@ public:
 	uint32 countReleasedBranchCells;
 	uint32 countReleasedBlockCells;
 	uint32 countReleasedVarCells;
+
+	bool tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathLen);
+	bool dismantling(SegmentPath* path, uint32 pathLen);
 
 	void printMemory()
 	{

@@ -226,7 +226,7 @@ uint32 HArray::insert(uint32* key,
 						//create branch
 						contentCell.Type = MIN_BRANCH_TYPE1 + 1;
 
-						//get release branch cell
+						//get free branch cell
 						BranchCell* pBranchCell;
 						if (countReleasedBranchCells)
 						{
@@ -371,7 +371,7 @@ uint32 HArray::insert(uint32* key,
 						//create branch
 						pContentPage->pContent[contentIndex].Type = MIN_BRANCH_TYPE1 + 1;
 
-						//get release branch cell
+						//get free branch cell
 						BranchCell* pBranchCell;
 						if (countReleasedBranchCells)
 						{
@@ -620,15 +620,6 @@ uint32 HArray::insert(uint32* key,
 				uchar8 idxKeyValue = 0;
 				uchar8 currContentCellType = MIN_BLOCK_TYPE;
 
-				//if (countReleasedBranchCells < MAX_SHORT)
-				//{
-				branchCell.Values[0] = tailReleasedBranchOffset;
-
-				tailReleasedBranchOffset = contentCellValueOrOffset;
-
-				countReleasedBranchCells++;
-				//}
-
 				const ushort16 countCell = BRANCH_ENGINE_SIZE + 1;
 
 			EXTRACT_BRANCH:
@@ -677,6 +668,13 @@ uint32 HArray::insert(uint32* key,
 					}
 				}
 
+				//release branch cell
+				branchCell.Values[0] = tailReleasedBranchOffset;
+
+				tailReleasedBranchOffset = contentCellValueOrOffset;
+
+				countReleasedBranchCells++;
+				
 				//allocate page
 				uint32 maxLastBlockOffset = lastBlockOffset + BLOCK_ENGINE_SIZE * 2;
 				if (!pBlockPages[maxLastBlockOffset >> 16])
@@ -710,7 +708,7 @@ uint32 HArray::insert(uint32* key,
 					{
 						if (currBlockCell.Type == 0) //create branch
 						{
-							//get release branch cell
+							//get free branch cell
 							BranchCell* pCurrBranchCell;
 							if (countReleasedBranchCells)
 							{
@@ -819,7 +817,7 @@ uint32 HArray::insert(uint32* key,
 					{
 						blockCellType = MIN_BRANCH_TYPE1 + 1;
 
-						//get release branch cell
+						//get free branch cell
 						BranchCell* pBranchCell;
 						if (countReleasedBranchCells)
 						{
@@ -893,7 +891,7 @@ uint32 HArray::insert(uint32* key,
 					//create second branch
 					blockCellType = MIN_BRANCH_TYPE2;
 
-					//get release branch cell
+					//get free branch cell
 					BranchCell* pBranchCell;
 					if (countReleasedBranchCells)
 					{
@@ -1026,24 +1024,6 @@ uint32 HArray::insert(uint32* key,
 						BlockCell blockCells[countCell];
 						uchar8 indexes[countCell];
 
-						//if (countReleasedBranchCells < MAX_SHORT)
-						//{
-						branchCell1.Values[0] = tailReleasedBranchOffset;
-
-						tailReleasedBranchOffset = blockCell.Offset;
-
-						countReleasedBranchCells++;
-						//}
-
-						//if (countReleasedBranchCells < MAX_SHORT)
-						//{
-						branchCell2.Values[0] = tailReleasedBranchOffset;
-
-						tailReleasedBranchOffset = blockCell.ValueOrOffset;
-
-						countReleasedBranchCells++;
-						//}
-
 					EXTRACT_BRANCH2:
 						idxKeyValue += BLOCK_ENGINE_STEP;
 						if (idxKeyValue > BLOCK_ENGINE_SHIFT)
@@ -1106,6 +1086,20 @@ uint32 HArray::insert(uint32* key,
 							}
 						}
 
+						//release branch cell 1
+						branchCell1.Values[0] = tailReleasedBranchOffset;
+
+						tailReleasedBranchOffset = blockCell.Offset;
+
+						countReleasedBranchCells++;
+
+						//release branch cell 2
+						branchCell2.Values[0] = tailReleasedBranchOffset;
+
+						tailReleasedBranchOffset = blockCell.ValueOrOffset;
+
+						countReleasedBranchCells++;
+
 						//allocate page
 						uint32 maxLastBlockOffset = lastBlockOffset + BLOCK_ENGINE_SIZE * 2;
 						if (!pBlockPages[maxLastBlockOffset >> 16])
@@ -1139,7 +1133,7 @@ uint32 HArray::insert(uint32* key,
 							{
 								if (currBlockCell.Type == 0) //create branch
 								{
-									//get release branch cell
+									//get free branch cell
 									BranchCell* pCurrBranchCell;
 									if (countReleasedBranchCells)
 									{
@@ -1189,7 +1183,7 @@ uint32 HArray::insert(uint32* key,
 								}
 								else if (currBlockCell.Type == MAX_BRANCH_TYPE1)
 								{
-									//get release branch cell
+									//get free branch cell
 									BranchCell* pCurrBranchCell;
 									if (countReleasedBranchCells)
 									{
@@ -1271,7 +1265,7 @@ uint32 HArray::insert(uint32* key,
 			{
 				pContentCell->Type = MIN_BRANCH_TYPE1 + 1;
 
-				//get release branch cell
+				//get free branch cell
 				BranchCell* pBranchCell;
 				if (countReleasedBranchCells)
 				{

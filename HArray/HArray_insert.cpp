@@ -766,27 +766,44 @@ uint32 HArray::insert(uint32* key,
 				tailReleasedBranchOffset = contentCellValueOrOffset;
 
 				countReleasedBranchCells++;
-				
-				//allocate page
-				uint32 maxLastBlockOffset = lastBlockOffset + BLOCK_ENGINE_SIZE * 2;
-				if (!pBlockPages[maxLastBlockOffset >> 16])
-				{
-					pBlockPages[BlockPagesCount++] = new BlockPage();
 
-					if (BlockPagesCount == BlockPagesSize)
+				//get free block
+				uint32 startBlockOffset;
+				
+				if (countReleasedBlockCells)
+				{
+					startBlockOffset = tailReleasedBlockOffset;
+
+					tailReleasedBlockOffset = pBlockPages[startBlockOffset >> 16]->pBlock[startBlockOffset & 0xFFFF].Offset;
+
+					countReleasedBlockCells--;
+				}
+				else
+				{
+					startBlockOffset = lastBlockOffset;
+
+					uint32 maxLastBlockOffset = startBlockOffset + BLOCK_ENGINE_SIZE * 2;
+					if (!pBlockPages[maxLastBlockOffset >> 16])
 					{
-						reallocateBlockPages();
+						pBlockPages[BlockPagesCount++] = new BlockPage();
+
+						if (BlockPagesCount == BlockPagesSize)
+						{
+							reallocateBlockPages();
+						}
 					}
+
+					lastBlockOffset += BLOCK_ENGINE_SIZE;
 				}
 
 				//fill block
 				pContentCell->Type = currContentCellType;
-				pContentCell->Value = lastBlockOffset;
+				pContentCell->Value = startBlockOffset;
 
 				for (uint32 i = 0; i < countCell; i++)
 				{
 					uchar8 idx = indexes[i];
-					uint32 offset = lastBlockOffset + idx;
+					uint32 offset = startBlockOffset + idx;
 
 					BlockPage* pBlockPage = pBlockPages[offset >> 16];
 					BlockCell& currBlockCell = pBlockPage->pBlock[offset & 0xFFFF];
@@ -853,8 +870,6 @@ uint32 HArray::insert(uint32* key,
 					}
 				}
 
-				lastBlockOffset += BLOCK_ENGINE_SIZE;
-
 				goto FILL_KEY;
 			}
 		}
@@ -870,19 +885,7 @@ uint32 HArray::insert(uint32* key,
 			uint32 subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
 			uint32 blockOffset = startOffset + subOffset;
 
-			BlockPage* pBlockPage = pBlockPages[blockOffset >> 16];
-			if (!pBlockPage)
-			{
-				pBlockPage = new BlockPage();
-				pBlockPages[BlockPagesCount++] = pBlockPage;
-
-				if (BlockPagesCount == BlockPagesSize)
-				{
-					reallocateBlockPages();
-				}
-			}
-
-			BlockCell& blockCell = pBlockPage->pBlock[blockOffset & 0xFFFF];
+			BlockCell& blockCell = pBlockPages[blockOffset >> 16]->pBlock[blockOffset & 0xFFFF];
 
 			uchar8& blockCellType = blockCell.Type;
 
@@ -1192,26 +1195,43 @@ uint32 HArray::insert(uint32* key,
 
 						countReleasedBranchCells++;
 
-						//allocate page
-						uint32 maxLastBlockOffset = lastBlockOffset + BLOCK_ENGINE_SIZE * 2;
-						if (!pBlockPages[maxLastBlockOffset >> 16])
-						{
-							pBlockPages[BlockPagesCount++] = new BlockPage();
+						//get free block
+						uint32 startBlockOffset;
 
-							if (BlockPagesCount == BlockPagesSize)
+						if (countReleasedBlockCells)
+						{
+							startBlockOffset = tailReleasedBlockOffset;
+
+							tailReleasedBlockOffset = pBlockPages[startBlockOffset >> 16]->pBlock[startBlockOffset & 0xFFFF].Offset;
+
+							countReleasedBlockCells--;
+						}
+						else
+						{
+							startBlockOffset = lastBlockOffset;
+
+							uint32 maxLastBlockOffset = startBlockOffset + BLOCK_ENGINE_SIZE * 2;
+							if (!pBlockPages[maxLastBlockOffset >> 16])
 							{
-								reallocateBlockPages();
+								pBlockPages[BlockPagesCount++] = new BlockPage();
+
+								if (BlockPagesCount == BlockPagesSize)
+								{
+									reallocateBlockPages();
+								}
 							}
+
+							lastBlockOffset += BLOCK_ENGINE_SIZE;
 						}
 
 						//fill block
 						blockCellType = MIN_BLOCK_TYPE + (idxKeyValue / BLOCK_ENGINE_STEP);
-						blockCell.Offset = lastBlockOffset;
+						blockCell.Offset = startBlockOffset;
 
 						for (uint32 i = 0; i < countCell; i++)
 						{
 							uchar8 idx = indexes[i];
-							uint32 offset = lastBlockOffset + idx;
+							uint32 offset = startBlockOffset + idx;
 
 							BlockPage* pBlockPage = pBlockPages[offset >> 16];
 							BlockCell& currBlockCell = pBlockPage->pBlock[offset & 0xFFFF];
@@ -1326,8 +1346,6 @@ uint32 HArray::insert(uint32* key,
 								}
 							}
 						}
-
-						lastBlockOffset += BLOCK_ENGINE_SIZE;
 
 						goto FILL_KEY;
 					}

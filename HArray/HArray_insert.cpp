@@ -69,46 +69,92 @@ uint32 HArray::insert(uint32* key,
 #ifndef _RELEASE
 			tempValues[SHORT_WAY_STAT]++;
 #endif
-
 			headerCell.Type = HEADER_JUMP_TYPE;
-			headerCell.Offset = lastContentOffset;
 
-			ContentPage* pContentPage = pContentPages[lastContentOffset >> 16];
-			uint32 contentIndex = lastContentOffset & 0xFFFF;
-
-			pContentPage->pContent[contentIndex].Type = (ONLY_CONTENT_TYPE + keyLen);
-
-			if (contentIndex < maxSafeShort) //content in one page
+			if (tailReleasedContentOffsets[keyLen])
 			{
-				//fill key
-				for (; keyOffset < keyLen; contentIndex++, keyOffset++, lastContentOffset++)
+				uint32 startContentOffset = tailReleasedContentOffsets[keyLen];
+
+				headerCell.Offset = startContentOffset;
+
+				ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
+				uint32 contentIndex = startContentOffset & 0xFFFF;
+
+				pContentPage->pContent[contentIndex].Type = (ONLY_CONTENT_TYPE + keyLen);
+				tailReleasedContentOffsets[keyLen] = pContentPage->pContent[contentIndex].Value;
+
+				countReleasedContentCells -= keyLen;
+
+				if (contentIndex < maxSafeShort) //content in one page
 				{
-					pContentPage->pContent[contentIndex].Value = key[keyOffset];
+					//fill key
+					for (; keyOffset < keyLen; contentIndex++, keyOffset++)
+					{
+						pContentPage->pContent[contentIndex].Value = key[keyOffset];
+					}
+
+					pContentPage->pContent[contentIndex].Type = VALUE_TYPE;
+					pContentPage->pContent[contentIndex].Value = value;
+
+					return 0;
 				}
+				else
+				{
+					for (; keyOffset < keyLen; startContentOffset++, keyOffset++)
+					{
+						pContentPage = pContentPages[startContentOffset >> 16];
+						pContentPage->pContent[startContentOffset & 0xFFFF].Value = key[keyOffset];
+					}
 
-				pContentPage->pContent[contentIndex].Type = VALUE_TYPE;
-				pContentPage->pContent[contentIndex].Value = value;
+					pContentPage = pContentPages[startContentOffset >> 16];
 
-				lastContentOffset++;
+					pContentPage->pContent[startContentOffset & 0xFFFF].Type = VALUE_TYPE;
+					pContentPage->pContent[startContentOffset & 0xFFFF].Value = value;
 
-				return 0;
+					return 0;
+				}
 			}
 			else
 			{
-				for (; keyOffset < keyLen; lastContentOffset++, keyOffset++)
+				headerCell.Offset = lastContentOffset;
+
+				ContentPage* pContentPage = pContentPages[lastContentOffset >> 16];
+				uint32 contentIndex = lastContentOffset & 0xFFFF;
+
+				pContentPage->pContent[contentIndex].Type = (ONLY_CONTENT_TYPE + keyLen);
+
+				if (contentIndex < maxSafeShort) //content in one page
 				{
-					pContentPage = pContentPages[lastContentOffset >> 16];
-					pContentPage->pContent[lastContentOffset & 0xFFFF].Value = key[keyOffset];
+					//fill key
+					for (; keyOffset < keyLen; contentIndex++, keyOffset++, lastContentOffset++)
+					{
+						pContentPage->pContent[contentIndex].Value = key[keyOffset];
+					}
+
+					pContentPage->pContent[contentIndex].Type = VALUE_TYPE;
+					pContentPage->pContent[contentIndex].Value = value;
+
+					lastContentOffset++;
+
+					return 0;
 				}
+				else
+				{
+					for (; keyOffset < keyLen; lastContentOffset++, keyOffset++)
+					{
+						pContentPage = pContentPages[lastContentOffset >> 16];
+						pContentPage->pContent[lastContentOffset & 0xFFFF].Value = key[keyOffset];
+					}
 
-				pContentPage = pContentPages[lastContentOffset >> 16];
+					pContentPage = pContentPages[lastContentOffset >> 16];
 
-				pContentPage->pContent[lastContentOffset & 0xFFFF].Type = VALUE_TYPE;
-				pContentPage->pContent[lastContentOffset & 0xFFFF].Value = value;
+					pContentPage->pContent[lastContentOffset & 0xFFFF].Type = VALUE_TYPE;
+					pContentPage->pContent[lastContentOffset & 0xFFFF].Value = value;
 
-				lastContentOffset++;
+					lastContentOffset++;
 
-				return 0;
+					return 0;
+				}
 			}
 		}
 		case HEADER_JUMP_TYPE:
@@ -1569,43 +1615,90 @@ uint32 HArray::insert(uint32* key,
 
 	FILL_KEY2:
 
-		//fill key
-		pContentPage = pContentPages[lastContentOffset >> 16];
-		contentIndex = lastContentOffset & 0xFFFF;
+		uint32 restKeyLen = keyLen - keyOffset;
 
-		pContentPage->pContent[contentIndex].Type = ONLY_CONTENT_TYPE + keyLen - keyOffset;
-
-		if (contentIndex < maxSafeShort) //content in one page
+		if (tailReleasedContentOffsets[restKeyLen])
 		{
-			for (; keyOffset < keyLen; contentIndex++, keyOffset++, lastContentOffset++)
+			uint32 startContentOffset = tailReleasedContentOffsets[restKeyLen];
+
+			//fill key
+			pContentPage = pContentPages[startContentOffset >> 16];
+			contentIndex = startContentOffset & 0xFFFF;
+
+			pContentPage->pContent[contentIndex].Type = ONLY_CONTENT_TYPE + restKeyLen;
+			tailReleasedContentOffsets[restKeyLen] = pContentPage->pContent[contentIndex].Value;
+
+			countReleasedContentCells -= restKeyLen;
+
+			if (contentIndex < maxSafeShort) //content in one page
 			{
-				pContentPage->pContent[contentIndex].Value = key[keyOffset];
+				for (; keyOffset < keyLen; contentIndex++, keyOffset++)
+				{
+					pContentPage->pContent[contentIndex].Value = key[keyOffset];
+				}
+
+				pContentPage->pContent[contentIndex].Type = VALUE_TYPE;
+				pContentPage->pContent[contentIndex].Value = value;
+
+				return 0;
 			}
+			else //content in two pages
+			{
+				for (; keyOffset < keyLen; startContentOffset++, keyOffset++)
+				{
+					pContentPage = pContentPages[startContentOffset >> 16];
+					contentIndex = startContentOffset & 0xFFFF;
 
-			pContentPage->pContent[contentIndex].Type = VALUE_TYPE;
-			pContentPage->pContent[contentIndex].Value = value;
+					pContentPage->pContent[contentIndex].Value = key[keyOffset];
+				}
 
-			lastContentOffset++;
+				ContentCell& contentCell = pContentPages[startContentOffset >> 16]->pContent[startContentOffset & 0xFFFF];
+				contentCell.Type = VALUE_TYPE;
+				contentCell.Value = value;
 
-			return 0;
+				return 0;
+			}
 		}
-		else //content in two pages
+		else
 		{
-			for (; keyOffset < keyLen; lastContentOffset++, keyOffset++)
+			//fill key
+			pContentPage = pContentPages[lastContentOffset >> 16];
+			contentIndex = lastContentOffset & 0xFFFF;
+
+			pContentPage->pContent[contentIndex].Type = ONLY_CONTENT_TYPE + restKeyLen;
+
+			if (contentIndex < maxSafeShort) //content in one page
 			{
-				pContentPage = pContentPages[lastContentOffset >> 16];
-				contentIndex = lastContentOffset & 0xFFFF;
+				for (; keyOffset < keyLen; contentIndex++, keyOffset++, lastContentOffset++)
+				{
+					pContentPage->pContent[contentIndex].Value = key[keyOffset];
+				}
 
-				pContentPage->pContent[contentIndex].Value = key[keyOffset];
+				pContentPage->pContent[contentIndex].Type = VALUE_TYPE;
+				pContentPage->pContent[contentIndex].Value = value;
+
+				lastContentOffset++;
+
+				return 0;
 			}
+			else //content in two pages
+			{
+				for (; keyOffset < keyLen; lastContentOffset++, keyOffset++)
+				{
+					pContentPage = pContentPages[lastContentOffset >> 16];
+					contentIndex = lastContentOffset & 0xFFFF;
 
-			ContentCell& contentCell = pContentPages[lastContentOffset >> 16]->pContent[lastContentOffset & 0xFFFF];
-			contentCell.Type = VALUE_TYPE;
-			contentCell.Value = value;
+					pContentPage->pContent[contentIndex].Value = key[keyOffset];
+				}
 
-			lastContentOffset++;
+				ContentCell& contentCell = pContentPages[lastContentOffset >> 16]->pContent[lastContentOffset & 0xFFFF];
+				contentCell.Type = VALUE_TYPE;
+				contentCell.Value = value;
 
-			return 0;
+				lastContentOffset++;
+
+				return 0;
+			}
 		}
 	}
 	catch (...)

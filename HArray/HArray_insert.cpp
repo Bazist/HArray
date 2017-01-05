@@ -185,25 +185,41 @@ uint32 HArray::insert(uint32* key,
 					//key less than original, insert
 					if (keyOffset == keyLen)
 					{
-						VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
-						if (!pVarPage)
-						{
-							pVarPage = new VarPage();
-							pVarPages[VarPagesCount++] = pVarPage;
+						VarCell* pVarCell;
 
-							if (VarPagesCount == VarPagesSize)
+						if (countReleasedVarCells)
+						{
+							uint32 varOffset = tailReleasedVarOffset;
+
+							pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
+
+							tailReleasedVarOffset = pVarCell->ValueContCell.Value;
+
+							countReleasedVarCells--;
+						}
+						else
+						{
+							VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
+							if (!pVarPage)
 							{
-								reallocateVarPages();
+								pVarPage = new VarPage();
+								pVarPages[VarPagesCount++] = pVarPage;
+
+								if (VarPagesCount == VarPagesSize)
+								{
+									reallocateVarPages();
+								}
 							}
+
+							pVarCell = &pVarPage->pVar[lastVarOffset & 0xFFFF];
 						}
 
-						VarCell& varCell = pVarPage->pVar[lastVarOffset & 0xFFFF];
-						varCell.ContCell.Type = CURRENT_VALUE_TYPE;
-						varCell.ContCell.Value = contentCell.Value;
+						pVarCell->ContCell.Type = CURRENT_VALUE_TYPE;
+						pVarCell->ContCell.Value = contentCell.Value;
 
-						varCell.ValueContCell.Type = VALUE_TYPE;
-						varCell.ValueContCell.Value = value;
-
+						pVarCell->ValueContCell.Type = VALUE_TYPE;
+						pVarCell->ValueContCell.Value = value;
+						
 						contentCell.Type = VAR_TYPE;
 						contentCell.Value = lastVarOffset++;
 
@@ -281,27 +297,42 @@ uint32 HArray::insert(uint32* key,
 
 				if (keyLen > originKeyLen) //key more than original
 				{
-					VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
-					if (!pVarPage)
-					{
-						pVarPage = new VarPage();
-						pVarPages[VarPagesCount++] = pVarPage;
+					VarCell* pVarCell;
 
-						if (VarPagesCount == VarPagesSize)
+					if (countReleasedVarCells)
+					{
+						uint32 varOffset = tailReleasedVarOffset;
+
+						pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
+
+						tailReleasedVarOffset = pVarCell->ValueContCell.Value;
+
+						countReleasedVarCells--;
+					}
+					else
+					{
+						VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
+						if (!pVarPage)
 						{
-							reallocateVarPages();
+							pVarPage = new VarPage();
+							pVarPages[VarPagesCount++] = pVarPage;
+
+							if (VarPagesCount == VarPagesSize)
+							{
+								reallocateVarPages();
+							}
 						}
+
+						pVarCell = &pVarPage->pVar[lastVarOffset & 0xFFFF];
 					}
 
 					ContentCell& contentCell = pContentPage->pContent[contentIndex];
 
-					VarCell& varCell = pVarPage->pVar[lastVarOffset & 0xFFFF];
+					pVarCell->ValueContCell.Type = VALUE_TYPE;
+					pVarCell->ValueContCell.Value = contentCell.Value;
 
-					varCell.ValueContCell.Type = VALUE_TYPE;
-					varCell.ValueContCell.Value = contentCell.Value;
-
-					varCell.ContCell.Type = CONTINUE_VAR_TYPE;
-					varCell.ContCell.Value = lastContentOffset;
+					pVarCell->ContCell.Type = CONTINUE_VAR_TYPE;
+					pVarCell->ContCell.Value = lastContentOffset;
 
 					contentCell.Type = VAR_TYPE;
 					contentCell.Value = lastVarOffset++;
@@ -327,27 +358,42 @@ uint32 HArray::insert(uint32* key,
 					//key less than original, insert
 					if (keyOffset == keyLen)
 					{
-						VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
-						if (!pVarPage)
+						VarCell* pVarCell;
+
+						if (countReleasedVarCells)
 						{
-							pVarPage = new VarPage();
-							pVarPages[VarPagesCount++] = pVarPage;
+							uint32 varOffset = tailReleasedVarOffset;
 
-							if (VarPagesCount == VarPagesSize)
-							{
-								reallocateVarPages();
-							}
+							pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
+
+							tailReleasedVarOffset = pVarCell->ValueContCell.Value;
+
+							countReleasedVarCells--;
 						}
+						else
+						{
+							VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
+							if (!pVarPage)
+							{
+								pVarPage = new VarPage();
+								pVarPages[VarPagesCount++] = pVarPage;
 
-						VarCell& varCell = pVarPage->pVar[lastVarOffset & 0xFFFF];
+								if (VarPagesCount == VarPagesSize)
+								{
+									reallocateVarPages();
+								}
+							}
+
+							pVarCell = &pVarPage->pVar[lastVarOffset & 0xFFFF];
+						}
 
 						ContentCell& currContentCell = pContentPage->pContent[contentIndex];
 
-						varCell.ContCell.Type = CURRENT_VALUE_TYPE;
-						varCell.ContCell.Value = currContentCell.Value;
+						pVarCell->ContCell.Type = CURRENT_VALUE_TYPE;
+						pVarCell->ContCell.Value = currContentCell.Value;
 
-						varCell.ValueContCell.Type = VALUE_TYPE;
-						varCell.ValueContCell.Value = value;
+						pVarCell->ValueContCell.Type = VALUE_TYPE;
+						pVarCell->ValueContCell.Value = value;
 
 						pContentPage->pContent[contentIndex].Type = VAR_TYPE;
 						pContentPage->pContent[contentIndex].Value = lastVarOffset++;
@@ -435,27 +481,42 @@ uint32 HArray::insert(uint32* key,
 
 				if (keyLen > originKeyLen) //key more than original
 				{
-					VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
-					if (!pVarPage)
-					{
-						pVarPage = new VarPage();
-						pVarPages[VarPagesCount++] = pVarPage;
+					VarCell* pVarCell;
 
-						if (VarPagesCount == VarPagesSize)
+					if (countReleasedVarCells)
+					{
+						uint32 varOffset = tailReleasedVarOffset;
+
+						pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
+
+						tailReleasedVarOffset = pVarCell->ValueContCell.Value;
+
+						countReleasedVarCells--;
+					}
+					else
+					{
+						VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
+						if (!pVarPage)
 						{
-							reallocateVarPages();
+							pVarPage = new VarPage();
+							pVarPages[VarPagesCount++] = pVarPage;
+
+							if (VarPagesCount == VarPagesSize)
+							{
+								reallocateVarPages();
+							}
 						}
+
+						pVarCell = &pVarPage->pVar[lastVarOffset & 0xFFFF];
 					}
 
 					ContentCell& contentCell = pContentPage->pContent[contentIndex];
 
-					VarCell& varCell = pVarPage->pVar[lastVarOffset & 0xFFFF];
+					pVarCell->ValueContCell.Type = VALUE_TYPE;
+					pVarCell->ValueContCell.Value = contentCell.Value;
 
-					varCell.ValueContCell.Type = VALUE_TYPE;
-					varCell.ValueContCell.Value = contentCell.Value;
-
-					varCell.ContCell.Type = CONTINUE_VAR_TYPE;
-					varCell.ContCell.Value = lastContentOffset;
+					pVarCell->ContCell.Type = CONTINUE_VAR_TYPE;
+					pVarCell->ContCell.Value = lastContentOffset;
 
 					contentCell.Type = VAR_TYPE;
 					contentCell.Value = lastVarOffset++;
@@ -519,27 +580,42 @@ uint32 HArray::insert(uint32* key,
 		{
 			if (keyOffset < keyLen)
 			{
-				VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
-				if (!pVarPage)
-				{
-					pVarPage = new VarPage();
-					pVarPages[VarPagesCount++] = pVarPage;
+				VarCell* pVarCell;
 
-					if (VarPagesCount == VarPagesSize)
+				if (countReleasedVarCells)
+				{
+					uint32 varOffset = tailReleasedVarOffset;
+
+					pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
+
+					tailReleasedVarOffset = pVarCell->ValueContCell.Value;
+
+					countReleasedVarCells--;
+				}
+				else
+				{
+					VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
+					if (!pVarPage)
 					{
-						reallocateVarPages();
+						pVarPage = new VarPage();
+						pVarPages[VarPagesCount++] = pVarPage;
+
+						if (VarPagesCount == VarPagesSize)
+						{
+							reallocateVarPages();
+						}
 					}
+
+					pVarCell = &pVarPage->pVar[lastVarOffset & 0xFFFF];
 				}
 
 				ContentCell& contentCell = pContentPage->pContent[contentIndex];
 
-				VarCell& varCell = pVarPage->pVar[lastVarOffset & 0xFFFF];
+				pVarCell->ValueContCell.Type = VALUE_TYPE;
+				pVarCell->ValueContCell.Value = contentCell.Value;
 
-				varCell.ValueContCell.Type = VALUE_TYPE;
-				varCell.ValueContCell.Value = contentCell.Value;
-
-				varCell.ContCell.Type = CONTINUE_VAR_TYPE;
-				varCell.ContCell.Value = lastContentOffset;
+				pVarCell->ContCell.Type = CONTINUE_VAR_TYPE;
+				pVarCell->ContCell.Value = lastContentOffset;
 
 				contentCell.Type = VAR_TYPE;
 				contentCell.Value = lastVarOffset++;
@@ -555,26 +631,42 @@ uint32 HArray::insert(uint32* key,
 		}
 		else if (keyOffset == keyLen) //STOP =====================================================================
 		{
-			VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
-			if (!pVarPage)
-			{
-				pVarPage = new VarPage();
-				pVarPages[VarPagesCount++] = pVarPage;
+			VarCell* pVarCell;
 
-				if (VarPagesCount == VarPagesSize)
+			if (countReleasedVarCells)
+			{
+				uint32 varOffset = tailReleasedVarOffset;
+
+				pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
+
+				tailReleasedVarOffset = pVarCell->ValueContCell.Value;
+
+				countReleasedVarCells--;
+			}
+			else
+			{
+				VarPage* pVarPage = pVarPages[lastVarOffset >> 16];
+				if (!pVarPage)
 				{
-					reallocateVarPages();
+					pVarPage = new VarPage();
+					pVarPages[VarPagesCount++] = pVarPage;
+
+					if (VarPagesCount == VarPagesSize)
+					{
+						reallocateVarPages();
+					}
 				}
+
+				pVarCell = &pVarPage->pVar[lastVarOffset & 0xFFFF];
 			}
 
 			ContentCell& contentCell = pContentPage->pContent[contentIndex];
 
-			VarCell& varCell = pVarPage->pVar[lastVarOffset & 0xFFFF];
-			varCell.ContCell.Type = contentCell.Type;
-			varCell.ContCell.Value = contentCell.Value;
+			pVarCell->ContCell.Type = contentCell.Type;
+			pVarCell->ContCell.Value = contentCell.Value;
 
-			varCell.ValueContCell.Type = VALUE_TYPE;
-			varCell.ValueContCell.Value = value;
+			pVarCell->ValueContCell.Type = VALUE_TYPE;
+			pVarCell->ValueContCell.Value = value;
 
 			contentCell.Type = VAR_TYPE;
 			contentCell.Value = lastVarOffset++;

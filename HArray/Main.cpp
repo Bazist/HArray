@@ -1089,9 +1089,9 @@ void testRange()
 
 int main()
 {
-	//HArrayInt_VS_StdMap_IntKey(1000000,   //start
-	//						   2000000,   //step
-	//						   10000000); //stop
+	HArrayInt_VS_StdMap_IntKey(1000000,   //start
+							   2000000,   //step
+							   10000000); //stop
 	
 	HArray_VS_StdMap_BinKey(1000000,   //start
 							2000000,   //step

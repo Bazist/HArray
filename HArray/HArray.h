@@ -132,7 +132,7 @@ public:
 			countReleasedBlockCells = 0;
 			countReleasedVarCells = 0;
 
-            MAX_SAFE_SHORT = MAX_SHORT - ValueLen - 1;
+            MAX_SAFE_SHORT = MAX_SHORT - ValueLen;
 
             pHeader = new HeaderCell[HeaderSize];
             for(uint32 i=0; i < HeaderSize; i++)

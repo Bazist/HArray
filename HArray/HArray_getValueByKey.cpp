@@ -23,7 +23,6 @@ uint32* HArray::getValueByKey(uint32* key,
 								  uint32 keyLen)
 {
 	keyLen >>= 2; //in 4 bytes
-	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
 	uint32 headerOffset;
 
@@ -57,28 +56,13 @@ NEXT_KEY_PART:
 				return 0;
 			}
 
-			if(contentIndex < maxSafeShort) //content in one page
+			for(; keyOffset < keyLen; contentIndex++, keyOffset++)
 			{
-				for(; keyOffset < keyLen; contentIndex++, keyOffset++)
-				{
-					if(pContentPage->pContent[contentIndex].Value != key[keyOffset])
-						return 0;
-				}
-
-				return &pContentPage->pContent[contentIndex].Value; //return value
+				if(pContentPage->pContent[contentIndex].Value != key[keyOffset])
+					return 0;
 			}
-			else //content in two pages
-			{
-				for(; keyOffset < keyLen; contentOffset++, keyOffset++)
-				{
-					if(pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF].Value != key[keyOffset])
-						return 0;
-				}
 
-				ContentCell& contentCell = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF];
-
-                return &contentCell.Value; //return value
-			}
+			return &pContentPage->pContent[contentIndex].Value; //return value
 		}
 
 		uint32& keyValue = key[keyOffset];

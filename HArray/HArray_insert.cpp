@@ -230,8 +230,13 @@ uint32 HArray::insert(uint32* key,
 						BranchCell* pBranchCell;
 						if (countReleasedBranchCells)
 						{
-							uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
+							uint32 branchOffset = tailReleasedBranchOffset;
+
 							pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
+
+							tailReleasedBranchOffset = pBranchCell->Values[0];
+
+							countReleasedBranchCells--;
 
 							pBranchCell->Values[0] = contentCell.Value;
 							contentCell.Value = branchOffset;
@@ -370,8 +375,13 @@ uint32 HArray::insert(uint32* key,
 						BranchCell* pBranchCell;
 						if (countReleasedBranchCells)
 						{
-							uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
+							uint32 branchOffset = tailReleasedBranchOffset;
+
 							pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
+
+							tailReleasedBranchOffset = pBranchCell->Values[0];
+
+							countReleasedBranchCells--;
 
 							pBranchCell->Values[0] = pContentPage->pContent[contentIndex].Value;
 							pContentPage->pContent[contentIndex].Value = branchOffset;
@@ -610,10 +620,14 @@ uint32 HArray::insert(uint32* key,
 				uchar8 idxKeyValue = 0;
 				uchar8 currContentCellType = MIN_BLOCK_TYPE;
 
-				if (countReleasedBranchCells < MAX_SHORT)
-				{
-					releasedBranchCells[countReleasedBranchCells++] = contentCellValueOrOffset;
-				}
+				//if (countReleasedBranchCells < MAX_SHORT)
+				//{
+				branchCell.Values[0] = tailReleasedBranchOffset;
+
+				tailReleasedBranchOffset = contentCellValueOrOffset;
+
+				countReleasedBranchCells++;
+				//}
 
 				const ushort16 countCell = BRANCH_ENGINE_SIZE + 1;
 
@@ -700,8 +714,14 @@ uint32 HArray::insert(uint32* key,
 							BranchCell* pCurrBranchCell;
 							if (countReleasedBranchCells)
 							{
-								uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
+								uint32 branchOffset = tailReleasedBranchOffset;
+
 								pCurrBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
+
+								tailReleasedBranchOffset = pCurrBranchCell->Values[0];
+
+								countReleasedBranchCells--;
+
 								currBlockCell.Offset = branchOffset;
 							}
 							else
@@ -803,8 +823,13 @@ uint32 HArray::insert(uint32* key,
 						BranchCell* pBranchCell;
 						if (countReleasedBranchCells)
 						{
-							uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
+							uint32 branchOffset = tailReleasedBranchOffset;
+
 							pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
+
+							tailReleasedBranchOffset = pBranchCell->Values[0];
+
+							countReleasedBranchCells--;
 
 							pBranchCell->Offsets[0] = blockCell.Offset;
 							blockCell.Offset = branchOffset;
@@ -872,9 +897,14 @@ uint32 HArray::insert(uint32* key,
 					BranchCell* pBranchCell;
 					if (countReleasedBranchCells)
 					{
-						uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
+						uint32 branchOffset = tailReleasedBranchOffset;
+
 						pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
+						tailReleasedBranchOffset = pBranchCell->Values[0];
+
+						countReleasedBranchCells--;
+												
 						blockCell.ValueOrOffset = branchOffset;
 					}
 					else
@@ -996,15 +1026,23 @@ uint32 HArray::insert(uint32* key,
 						BlockCell blockCells[countCell];
 						uchar8 indexes[countCell];
 
-						if (countReleasedBranchCells < MAX_SHORT)
-						{
-							releasedBranchCells[countReleasedBranchCells++] = blockCell.Offset;
-						}
+						//if (countReleasedBranchCells < MAX_SHORT)
+						//{
+						branchCell1.Values[0] = tailReleasedBranchOffset;
 
-						if (countReleasedBranchCells < MAX_SHORT)
-						{
-							releasedBranchCells[countReleasedBranchCells++] = blockCell.ValueOrOffset;
-						}
+						tailReleasedBranchOffset = blockCell.Offset;
+
+						countReleasedBranchCells++;
+						//}
+
+						//if (countReleasedBranchCells < MAX_SHORT)
+						//{
+						branchCell2.Values[0] = tailReleasedBranchOffset;
+
+						tailReleasedBranchOffset = blockCell.ValueOrOffset;
+
+						countReleasedBranchCells++;
+						//}
 
 					EXTRACT_BRANCH2:
 						idxKeyValue += BLOCK_ENGINE_STEP;
@@ -1105,8 +1143,13 @@ uint32 HArray::insert(uint32* key,
 									BranchCell* pCurrBranchCell;
 									if (countReleasedBranchCells)
 									{
-										uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
+										uint32 branchOffset = tailReleasedBranchOffset;
+
 										pCurrBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
+
+										tailReleasedBranchOffset = pCurrBranchCell->Values[0];
+
+										countReleasedBranchCells--;
 
 										currBlockCell.Offset = branchOffset;
 									}
@@ -1150,8 +1193,13 @@ uint32 HArray::insert(uint32* key,
 									BranchCell* pCurrBranchCell;
 									if (countReleasedBranchCells)
 									{
-										uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
+										uint32 branchOffset = tailReleasedBranchOffset;
+
 										pCurrBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
+
+										tailReleasedBranchOffset = pCurrBranchCell->Values[0];
+
+										countReleasedBranchCells--;
 
 										currBlockCell.ValueOrOffset = branchOffset;
 									}
@@ -1227,8 +1275,13 @@ uint32 HArray::insert(uint32* key,
 				BranchCell* pBranchCell;
 				if (countReleasedBranchCells)
 				{
-					uint32 branchOffset = releasedBranchCells[--countReleasedBranchCells];
+					uint32 branchOffset = tailReleasedBranchOffset;
+
 					pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
+
+					tailReleasedBranchOffset = pBranchCell->Values[0];
+
+					countReleasedBranchCells--;
 
 					pBranchCell->Values[0] = contentCellValueOrOffset;
 					pContentCell->Value = branchOffset;

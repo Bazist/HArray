@@ -96,13 +96,13 @@ uint32 HArray::rebuild(uint32 headerBase, bool removeEmptyKeys)
 	this->HeaderBits = pNewHA->HeaderBits;
 	this->HeaderSize = pNewHA->HeaderSize;
 
-	this->releasedBranchCells = pNewHA->releasedBranchCells;
+	this->tailReleasedBranchOffset = pNewHA->tailReleasedBranchOffset;
 	this->countReleasedBranchCells = pNewHA->countReleasedBranchCells;
 
-	this->releasedBlockCells = pNewHA->releasedBlockCells;
+	this->tailReleasedBlockOffset = pNewHA->tailReleasedBlockOffset;
 	this->countReleasedBlockCells = pNewHA->countReleasedBlockCells;
 
-	this->releasedVarCells = pNewHA->releasedVarCells;
+	this->tailReleasedVarOffset = pNewHA->tailReleasedVarOffset;
 	this->countReleasedVarCells = pNewHA->countReleasedVarCells;
 
 	this->ValueLen = pNewHA->ValueLen;

@@ -119,11 +119,7 @@ public:
 		pBranchPages = 0;
 		pBlockPages = 0;
 
-		releasedBranchCells = 0;
-		releasedBlockCells = 0;
-		releasedVarCells = 0;
-
-        try
+		try
         {
             ValueLen = 1;
 
@@ -131,6 +127,7 @@ public:
             HeaderBits = 32-headerBase;
             HeaderSize = (0xFFFFFFFF>>HeaderBits) + 1;
 
+            countReleasedContentCells = 0;
             countReleasedBranchCells = 0;
 			countReleasedBlockCells = 0;
 			countReleasedVarCells = 0;
@@ -195,9 +192,14 @@ public:
             lastBranchOffset = 0;
             lastBlockOffset = 0;
 
-            releasedBranchCells = new uint32[MAX_SHORT];
-            releasedBlockCells = new uint32[MAX_SHORT / BLOCK_ENGINE_SIZE];
-			releasedVarCells = new uint32[MAX_SHORT];
+            tailReleasedContentOffsets = new uint32[MAX_KEY_SEGMENTS];
+
+            for(uint32 i=0; i<MAX_KEY_SEGMENTS; i++)
+            	tailReleasedContentOffsets[i] = 0;
+
+            tailReleasedBranchOffset = 0;
+            tailReleasedBlockOffset = 0;
+			tailReleasedVarOffset = 0;
 		}
 		catch(...)
 		{
@@ -676,20 +678,20 @@ public:
 
 	//RELEASED ====================================================================================================
 
-	void releaseContentCells(uint32 contentOffset, uint32 len);
-	void releaseBranchCell(uint32 branchOffset);
-	void releaseVarCell(uint32 varOffset);
-	void releaseBlockCell(uint32 startBlockOffset);
+	void releaseContentCells(ContentCell* pContentCell, uint32 contentOffset, uint32 len);
+	void releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset);
+	void releaseVarCell(VarCell* pVarCell, uint32 varOffset);
+	void releaseBlockCell(BlockCell* pBlockCell, uint32 startBlockOffset);
 
 	void shrinkContentPages();
 	void shrinkBranchPages();
 	void shrinkBlockPages();
 	void shrinkVarPages();
 
-	uint32* releasedContentCells;
-	uint32* releasedBranchCells;
-	uint32* releasedBlockCells;
-	uint32* releasedVarCells;
+	uint32* tailReleasedContentOffsets;
+	uint32 tailReleasedBranchOffset;
+	uint32 tailReleasedBlockOffset;
+	uint32 tailReleasedVarOffset;
 
 	uint32 countReleasedContentCells;
 	uint32 countReleasedBranchCells;
@@ -1008,22 +1010,10 @@ public:
 			pBlockPages = 0;
 		}
 
-        if(releasedBranchCells)
+        if(tailReleasedContentOffsets)
 		{
-            delete[] releasedBranchCells;
-            releasedBranchCells = 0;
-		}
-
-		if(releasedBlockCells)
-		{
-            delete[] releasedBlockCells;
-            releasedBlockCells = 0;
-		}
-
-		if(releasedVarCells)
-		{
-            delete[] releasedVarCells;
-            releasedVarCells = 0;
+            delete[] tailReleasedContentOffsets;
+            tailReleasedContentOffsets = 0;
 		}
 
 		//valueListPool.destroy();

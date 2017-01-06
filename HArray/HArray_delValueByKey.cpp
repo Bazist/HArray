@@ -348,12 +348,36 @@ void HArray::shrinkContentPages()
 		}
 	}
 
-	//5. clear pool from shrinked spaces ===========================================================================
+	//5. clear shrinked spaces in pool ===========================================================================
+	for (uint32 i = 0; i < MAX_KEY_SEGMENTS; i++)
+	{
+		uint32 contentOffset = tailReleasedContentOffsets[i];
+		uint32 prevContentOffset = 0;
 
+		while (contentOffset)
+		{
+			if (contentOffset < shrinkLastContentOffset) //next
+			{
+				contentOffset = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
+			}
+			else
+			{
+				if (contentOffset == tailReleasedContentOffsets[i]) //remove tail
+				{
+					contentOffset = tailReleasedContentOffsets[i] = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
+				}
+				else //remove in middle
+				{
+					pContentPages[prevContentOffset >> 16]->pContent[prevContentOffset & 0xFFFF].Value = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
+				}
 
+				countReleasedContentCells -= (i + 1);
+			}
 
-
-
+			prevContentOffset = contentOffset;
+		}
+	}
+	
 EXIT:
 	//6. remove pages ==============================================================================================
 	if (pContentPages[shrinkLastPage])

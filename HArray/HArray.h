@@ -676,31 +676,6 @@ public:
 		compareFunc = compFunc;
 	}
 
-	//RELEASED ====================================================================================================
-
-	void releaseContentCells(ContentCell* pContentCell, uint32 contentOffset, uint32 len);
-	void releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset);
-	void releaseVarCell(VarCell* pVarCell, uint32 varOffset);
-	void releaseBlockCell(BlockCell* pBlockCell, uint32 startBlockOffset);
-
-	void shrinkContentPages();
-	void shrinkBranchPages();
-	void shrinkBlockPages();
-	void shrinkVarPages();
-
-	uint32* tailReleasedContentOffsets;
-	uint32 tailReleasedBranchOffset;
-	uint32 tailReleasedBlockOffset;
-	uint32 tailReleasedVarOffset;
-
-	uint32 countReleasedContentCells;
-	uint32 countReleasedBranchCells;
-	uint32 countReleasedBlockCells;
-	uint32 countReleasedVarCells;
-
-	bool tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathLen);
-	bool dismantling(SegmentPath* path, uint32 pathLen);
-
 	void printMemory()
 	{
 		printf("=================== HArray =========================\n");
@@ -945,6 +920,35 @@ public:
 	uint32 scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 							 void* pData);
 
+	//DISMANTLING ====================================================================================================
+
+	void releaseContentCells(ContentCell* pContentCell, uint32 contentOffset, uint32 len);
+	void releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset);
+	void releaseVarCell(VarCell* pVarCell, uint32 varOffset);
+	void releaseBlockCell(BlockCell* pBlockCell, uint32 startBlockOffset);
+
+	void shrinkContentPages();
+	void shrinkBranchPages();
+	void shrinkBlockPages();
+	void shrinkVarPages();
+
+	uint32* tailReleasedContentOffsets;
+	uint32 tailReleasedBranchOffset;
+	uint32 tailReleasedBlockOffset;
+	uint32 tailReleasedVarOffset;
+
+	uint32 countReleasedContentCells;
+	uint32 countReleasedBranchCells;
+	uint32 countReleasedBlockCells;
+	uint32 countReleasedVarCells;
+
+	bool tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathLen);
+	bool dismantling(SegmentPath* path, uint32 pathLen);
+	uint32 moveContentCells(uint32& startContentOffset,
+							ContentPage** pNewContentPage,
+							uint32 shrinkLastContentOffset,
+							uint32& lastContentOffsetOnNewPage);
+	
 	//=============================================================================================================
 
 	void destroy()

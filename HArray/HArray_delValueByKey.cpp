@@ -62,13 +62,13 @@ bool HArray::delValueByKey(uint32* key,
 	}
 }
 
-void HArray::releaseContentCells(ContentCell* pContentCell, uint32 contentOffset, uint32 len)
+void HArray::releaseContentCells(ContentCell* pContentCell, uint32 contentOffset, uint32 keyLen)
 {
-	pContentCell->Value = tailReleasedContentOffsets[len];
+	pContentCell->Value = tailReleasedContentOffsets[keyLen];
 
-	tailReleasedContentOffsets[len] = contentOffset;
+	tailReleasedContentOffsets[keyLen] = contentOffset;
 
-	countReleasedContentCells += len;
+	countReleasedContentCells += (keyLen + ValueLen);
 }
 
 void HArray::releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset)
@@ -98,9 +98,155 @@ void HArray::releaseVarCell(VarCell* pVarCell, uint32 varOffset)
 	countReleasedVarCells++;
 }
 
+uint32 HArray::moveContentCells(uint32& startContentOffset,
+							  ContentPage** pNewContentPage,
+							  uint32 shrinkLastContentOffset,
+							  uint32& lastContentOffsetOnNewPage)
+{
+	ContentCell* pSourceStartContentCell = &pContentPages[startContentOffset >> 16]->pContent[startContentOffset & 0xFFFF];
+
+	//identify key len
+	uint32 keyLen;
+
+	if (pSourceStartContentCell->Type >= ONLY_CONTENT_TYPE)
+	{
+		keyLen = pSourceStartContentCell->Type - ONLY_CONTENT_TYPE;
+	}
+	else
+	{
+		//detect key len
+		ContentCell* pEndContentCell = pSourceStartContentCell;
+
+		while (true)
+		{
+			if (pEndContentCell->Type == VALUE_TYPE)
+			{
+				break;
+			}
+			else if (pEndContentCell->Type == VAR_TYPE) //check shunt
+			{
+				VarCell& varCell = pVarPages[pEndContentCell->Value >> 16]->pVar[pEndContentCell->Value & 0xFFFF];
+
+				if (varCell.ContCell.Type == CONTINUE_VAR_TYPE)
+				{
+					break; //end of key
+				}
+			}
+		}
+
+		keyLen = pEndContentCell - pSourceStartContentCell - 1;
+	}
+
+	//get key from pool
+	ContentCell* pDestStartContentCell = 0;
+
+	while (tailReleasedContentOffsets[keyLen]) //to existing page
+	{
+		//release content cells
+		startContentOffset = tailReleasedContentOffsets[keyLen];
+
+		ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
+		ContentCell& contentCell = pContentPage->pContent[startContentOffset & 0xFFFF];
+
+		tailReleasedContentOffsets[keyLen] = contentCell.Value;
+
+		countReleasedContentCells -= (keyLen + ValueLen);
+
+		if (startContentOffset < shrinkLastContentOffset) //skip spaces on shrink page
+		{
+			pDestStartContentCell = &contentCell;
+
+			break;
+		}
+	}
+	
+	if (!pDestStartContentCell)
+	{
+		//to new page
+		if (!(*pNewContentPage)) //create new page
+		{
+			*pNewContentPage = new ContentPage();
+
+			lastContentOffsetOnNewPage = 0;
+		}
+
+		startContentOffset = shrinkLastContentOffset + lastContentOffsetOnNewPage;
+
+		pDestStartContentCell = &(*pNewContentPage)->pContent[startContentOffset & 0xFFFF];
+
+		lastContentOffsetOnNewPage += (keyLen + ValueLen);
+
+		//copy data
+		for (uint32 i = 0; i <= keyLen; i++, pSourceStartContentCell++, pDestStartContentCell++)
+		{
+			*pDestStartContentCell = *pSourceStartContentCell;
+		}
+	}
+
+	return (keyLen + ValueLen);
+}
+
 void HArray::shrinkContentPages()
 {
+	uint32 shrinkLastPage = ((lastContentOffset >> 16) - 1);
+	uint32 shrinkLastContentOffset = shrinkLastPage << 16; //begin of previous page
+	
+	uint32 currMovedLen = 0;
+	uint32 totalMovedLen = lastContentOffset - shrinkLastContentOffset;
+	
+	ContentPage* pNewContentPage = 0;
+	uint32 lastContentOffsetOnNewPage = 0;
 
+	//1. scan header ==============================================================================================
+	for (uint32 cell = 0; cell < HeaderSize; cell++)
+	{
+		HeaderCell& headerCell = pHeader[cell];
+
+		if (headerCell.Offset >= shrinkLastContentOffset &&
+			headerCell.Type == HEADER_JUMP_TYPE)
+		{
+			currMovedLen = moveContentCells(headerCell.Offset, //changed
+											&pNewContentPage,
+											shrinkLastContentOffset,
+											lastContentOffsetOnNewPage);
+
+			if (currMovedLen >= totalMovedLen)
+			{
+				goto EXIT;
+			}
+		}
+	}
+
+	//2. scan branches =============================================================================================
+
+	//3. scan blocks ===============================================================================================
+
+	//4. var cells =================================================================================================
+
+	//5. clear pool from shrinked spaces ===========================================================================
+
+EXIT:
+	//6. remove pages ==============================================================================================
+	if (pContentPages[shrinkLastPage])
+	{
+		delete pContentPages[shrinkLastPage];
+	}
+
+	if (pContentPages[shrinkLastPage + 1])
+	{
+		delete pContentPages[shrinkLastPage + 1];
+	}
+
+	if (pNewContentPage) //not all content were moved to existing pages
+	{
+		pContentPages[shrinkLastPage] = pNewContentPage;
+
+		lastContentOffset = (shrinkLastPage << 16) + lastContentOffsetOnNewPage;
+	}
+	else //all content were moved to existing pages
+	{
+		lastContentOffset = (shrinkLastPage << 16);
+	}
 }
 
 void HArray::shrinkBranchPages()
@@ -1217,8 +1363,7 @@ bool HArray::delValueByKey2(uint32* key,
 	int32 pathLen = 0;
 
 	keyLen >>= 2; //in 4 bytes
-	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
-
+	
 	uint32 headerOffset;
 
 	if (!normalizeFunc)
@@ -1255,43 +1400,22 @@ bool HArray::delValueByKey2(uint32* key,
 
 			uint32 origKeyOffset = keyOffset;
 				
-			if (contentIndex < maxSafeShort) //content in one page
+			uint32 origContentIndex = contentIndex;
+
+			for (; keyOffset < keyLen; contentIndex++, keyOffset++)
 			{
-				uint32 origContentIndex = contentIndex;
-
-				for (; keyOffset < keyLen; contentIndex++, keyOffset++)
-				{
-					if (pContentPage->pContent[contentIndex].Value != key[keyOffset])
-						return false;
-				}
-
-				//remove
-				releaseContentCells(&contentCell, contentOffset, keyLen + 1);
-
-				for (; origKeyOffset <= keyLen; origContentIndex++, origKeyOffset++)
-				{
-					pContentPage->pContent[origContentIndex].Type = 0;
-				}
-			}
-			else //content in two pages
-			{
-				uint32 origContentOffset = contentOffset;
-
-				for (; keyOffset < keyLen; contentOffset++, keyOffset++)
-				{
-					if (pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value != key[keyOffset])
-						return false;
-				}
-
-				//remove
-				releaseContentCells(&contentCell, origContentOffset, keyLen + 1);
-
-				for (; origKeyOffset <= keyLen; origContentOffset++, origKeyOffset++)
-				{
-					pContentPages[origContentOffset >> 16]->pContent[origContentOffset & 0xFFFF].Type = 0;
-				}
+				if (pContentPage->pContent[contentIndex].Value != key[keyOffset])
+					return false;
 			}
 
+			//remove
+			releaseContentCells(&contentCell, contentOffset, keyLen);
+
+			for (; origKeyOffset <= keyLen; origContentIndex++, origKeyOffset++)
+			{
+				pContentPage->pContent[origContentIndex].Type = 0;
+			}
+			
 			goto DISMANTLING;
 		}
 

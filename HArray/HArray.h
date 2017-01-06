@@ -864,7 +864,6 @@ public:
 
 	bool hasPartKey(uint32* key, uint32 keyLen);
 	bool delValueByKey(uint32* key, uint32 keyLen);
-	bool delValueByKey2(uint32* key, uint32 keyLen);
 
 	//RANGE keys and values =============================================================================================================
 	void sortLastItem(HArrayPair* pairs,
@@ -944,6 +943,7 @@ public:
 
 	bool tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathLen);
 	bool dismantling(SegmentPath* path, uint32 pathLen);
+	bool dismantlingContentCells(SegmentPath* path, int32& currPathLen);
 	uint32 moveContentCells(uint32& startContentOffset,
 							ContentPage** pNewContentPage,
 							uint32 shrinkLastContentOffset,

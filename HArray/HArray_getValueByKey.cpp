@@ -172,8 +172,7 @@ NEXT_KEY_PART:
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE1) //branch cell
 			{
-				BranchPage* pBranchPage = pBranchPages[blockCell.Offset >> 16];
-				BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
+				BranchCell& branchCell1 = pBranchPages[blockCell.Offset >> 16]->pBranch[blockCell.Offset & 0xFFFF];
 
 				//try find value in the list
 				for(uint32 i=0; i<blockCellType; i++)
@@ -191,8 +190,7 @@ NEXT_KEY_PART:
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE2) //branch cell
 			{
-				BranchPage* pBranchPage1 = pBranchPages[blockCell.Offset >> 16];
-				BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
+				BranchCell& branchCell1 = pBranchPages[blockCell.Offset >> 16]->pBranch[blockCell.Offset & 0xFFFF];
 
 				//try find value in the list
 				for(uint32 i=0; i < BRANCH_ENGINE_SIZE; i++)
@@ -206,8 +204,7 @@ NEXT_KEY_PART:
 					}
 				}
 
-				BranchPage* pBranchPage2 = pBranchPages[blockCell.ValueOrOffset >> 16];
-				BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
+				BranchCell& branchCell2 = pBranchPages[blockCell.ValueOrOffset >> 16]->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 
 				//try find value in the list
 				uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;

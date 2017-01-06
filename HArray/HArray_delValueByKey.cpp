@@ -975,8 +975,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 
 				if (pCurrBlockCell->Type <= MAX_BRANCH_TYPE1)
 				{
-					BranchPage* pBranchPage1 = pBranchPages[pCurrBlockCell->Offset >> 16];
-					BranchCell branchCell1 = pBranchPage1->pBranch[pCurrBlockCell->Offset & 0xFFFF];
+					BranchCell& branchCell1 = pBranchPages[pCurrBlockCell->Offset >> 16]->pBranch[pCurrBlockCell->Offset & 0xFFFF];
 
 					for (uint32 i = 0; i < pCurrBlockCell->Type; i++, count++)
 					{
@@ -986,8 +985,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 				}
 				else if (pCurrBlockCell->Type <= MAX_BRANCH_TYPE2)
 				{
-					BranchPage* pBranchPage1 = pBranchPages[pCurrBlockCell->Offset >> 16];
-					BranchCell branchCell1 = pBranchPage1->pBranch[pCurrBlockCell->Offset & 0xFFFF];
+					BranchCell& branchCell1 = pBranchPages[pCurrBlockCell->Offset >> 16]->pBranch[pCurrBlockCell->Offset & 0xFFFF];
 
 					for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++, count++)
 					{
@@ -995,8 +993,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 						offsets[count] = branchCell1.Offsets[i];
 					}
 
-					BranchPage* pBranchPage2 = pBranchPages[pCurrBlockCell->ValueOrOffset >> 16];
-					BranchCell branchCell2 = pBranchPage2->pBranch[pCurrBlockCell->ValueOrOffset & 0xFFFF];
+					BranchCell& branchCell2 = pBranchPages[pCurrBlockCell->ValueOrOffset >> 16]->pBranch[pCurrBlockCell->ValueOrOffset & 0xFFFF];
 
 					uint32 countValues = pCurrBlockCell->Type - MAX_BRANCH_TYPE1;
 
@@ -1189,7 +1186,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 
 			//fill branch
 			uint32 i = 0;
-			for (; i < BLOCK_ENGINE_SIZE; i++)
+			for (; i < BRANCH_ENGINE_SIZE; i++)
 			{
 				pBranchCell1->Offsets[i] = offsets[i];
 				pBranchCell1->Values[i] = values[i];
@@ -1382,6 +1379,7 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 				{
 					sp.pBlockCell->Type = CURRENT_VALUE_TYPE;
 					sp.pBlockCell->ValueOrOffset = sp.pBranchCell1->Values[0];
+					sp.pBlockCell->Offset = sp.pBranchCell1->Offsets[0];
 
 					releaseBranchCell(sp.pBranchCell1, sp.BranchOffset1);
 				}
@@ -1491,7 +1489,7 @@ bool HArray::delValueByKey(uint32* key,
 {
 	//EXTRACT PATH =============================================================================================
 
-	SegmentPath path[128];
+	SegmentPath path[MAX_KEY_SEGMENTS];
 	int32 pathLen = 0;
 
 	keyLen >>= 2; //in 4 bytes
@@ -1707,8 +1705,7 @@ bool HArray::delValueByKey(uint32* key,
 			}
 			else if (blockCellType <= MAX_BRANCH_TYPE1) //branch cell
 			{
-				BranchPage* pBranchPage = pBranchPages[blockCell.Offset >> 16];
-				BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
+				BranchCell& branchCell1 = pBranchPages[blockCell.Offset >> 16]->pBranch[blockCell.Offset & 0xFFFF];
 
 				//try find value in the list
 				for (uint32 i = 0; i < blockCellType; i++)
@@ -1737,11 +1734,8 @@ bool HArray::delValueByKey(uint32* key,
 			}
 			else if (blockCellType <= MAX_BRANCH_TYPE2) //branch cell
 			{
-				BranchPage* pBranchPage1 = pBranchPages[blockCell.Offset >> 16];
-				BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
-
-				BranchPage* pBranchPage2 = pBranchPages[blockCell.ValueOrOffset >> 16];
-				BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
+				BranchCell& branchCell1 = pBranchPages[blockCell.Offset >> 16]->pBranch[blockCell.Offset & 0xFFFF];
+				BranchCell& branchCell2 = pBranchPages[blockCell.ValueOrOffset >> 16]->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 
 				//try find value in the list
 				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)

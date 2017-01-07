@@ -19,34 +19,13 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-/*
-
-Main strategy
-1. OnlyContentType => zero content, zero header
-2. CurrentValue => ???
-3. Branch => Decrease branch => Remove branch + Current Value in content
-4. Branch1 in Block => Decrease branch => Remove branch + inject in block
-5. Branch2 in Block => Decrease branch => Remove branch + inject in block
-6. In Low Block less than 8 values => Remove block => create branches in block above level
-7. In Top Block less than 4 values => Create branch
-8. VarBranch shunt (remove value) => Remove VarBranch + inject ContentCell
-9. VarBranch shunt (remove transit key) => Remove VarBranch + inject ContentCell.Value
-10. VarBranch continue (remove value) => Remove VarBranch + inject ContentCell
-//11. VarBranch continue (remove value) => Remove VarBranch + inject ContentCell
-
-Pools
-1. Table of content holes
-2. List of release branches
-3. List of release blocks
-4. List of varbranches
-
-Stats
-
-*/
-
 void HArray::releaseContentCells(ContentCell* pContentCell, uint32 contentOffset, uint32 keyLen)
 {
+	#ifndef _RELEASE
+
 	printf("releaseContentCells => %u\n", keyLen);
+
+	#endif
 
 	memset(pContentCell, 0, sizeof(ContentCell));
 
@@ -59,7 +38,11 @@ void HArray::releaseContentCells(ContentCell* pContentCell, uint32 contentOffset
 
 void HArray::releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset)
 {
+	#ifndef _RELEASE
+
 	printf("releaseBranchCell => 1\n");
+
+	#endif
 
 	memset(pBranchCell, 0, sizeof(BranchCell));
 
@@ -70,13 +53,17 @@ void HArray::releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset)
 	countReleasedBranchCells++;
 }
 
-void HArray::releaseBlockCell(BlockCell* pBlockCell, uint32 startBlockOffset)
+void HArray::releaseBlockCells(BlockCell* pStartBlockCell, uint32 startBlockOffset)
 {
-	printf("releaseBlockCell => 16\n");
+	#ifndef _RELEASE
 
-	memset(pBlockCell, 0, sizeof(BlockCell));
+	printf("releaseBlockCells => 16\n");
 
-	pBlockCell->Offset = tailReleasedBlockOffset;
+	#endif
+
+	memset(pStartBlockCell, 0, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
+
+	pStartBlockCell->Offset = tailReleasedBlockOffset;
 
 	tailReleasedBlockOffset = startBlockOffset;
 
@@ -85,7 +72,11 @@ void HArray::releaseBlockCell(BlockCell* pBlockCell, uint32 startBlockOffset)
 
 void HArray::releaseVarCell(VarCell* pVarCell, uint32 varOffset)
 {
+	#ifndef _RELEASE
+
 	printf("releaseVarCell => 1\n");
+
+	#endif
 
 	memset(pVarCell, 0, sizeof(VarCell));
 
@@ -222,7 +213,7 @@ void HArray::shrinkContentPages()
 
 	for (uint32 page = 0; page < BranchPagesCount; page++)
 	{
-		BranchPage* pBranchPage = pBranchPages[page >> 16];
+		BranchPage* pBranchPage = pBranchPages[page];
 
 		uint32 countCells;
 
@@ -269,7 +260,7 @@ void HArray::shrinkContentPages()
 
 	for (uint32 page = 0; page < BlockPagesCount; page++)
 	{
-		BlockPage* pBlockPage = pBlockPages[page >> 16];
+		BlockPage* pBlockPage = pBlockPages[page];
 
 		uint32 countCells;
 
@@ -307,7 +298,7 @@ void HArray::shrinkContentPages()
 
 	for (uint32 page = 0; page < VarPagesCount; page++)
 	{
-		VarPage* pVarPage = pVarPages[page >> 16];
+		VarPage* pVarPage = pVarPages[page];
 
 		uint32 countCells;
 
@@ -398,12 +389,34 @@ void HArray::shrinkBranchPages()
 {
 	uint32 shrinkLastBranchOffset = lastBranchOffset - countReleasedBranchCells;
 
+	//the are no branches in ha, delete all branch pages
+	if(!shrinkLastBranchOffset)
+	{
+		tailReleasedBranchOffset = 0;
+		countReleasedBranchCells = 0;
+
+		for(uint32 page = 0; page < BranchPagesCount; page++)
+		{ 
+			if (pBranchPages[page])
+			{
+				delete pBranchPages[page];
+
+				pBranchPages[page] = 0;
+			}
+		}
+
+		lastBranchOffset = 0;
+		BranchPagesCount = 0;
+
+		return;
+	}
+
 	//content ===================================================================================================================
 	int32 lastPage = ContentPagesCount - 1;
 
 	for (uint32 page = 0; page < ContentPagesCount; page++)
 	{
-		ContentPage* pContentPage = pContentPages[page >> 16];
+		ContentPage* pContentPage = pContentPages[page];
 
 		uint32 countCells;
 
@@ -515,7 +528,7 @@ void HArray::shrinkBranchPages()
 
 	for (uint32 page = 0; page < BlockPagesCount; page++)
 	{
-		BlockPage* pBlockPage = pBlockPages[page >> 16];
+		BlockPage* pBlockPage = pBlockPages[page];
 
 		uint32 countCells;
 
@@ -662,30 +675,66 @@ void HArray::shrinkBranchPages()
 		}
 	}
 
+	printf("FAIL STATE");
+
+	return;
+
 EXIT:
-	//max one page we can delete
-	BranchPagesCount = (shrinkLastBranchOffset >> 16) + 1;
+	
+	//delete shrinked pages
+	uint32 startPage = (shrinkLastBranchOffset >> 16) + 1;
 
-	if (pBranchPages[BranchPagesCount])
-	{
-		delete pBranchPages[BranchPagesCount];
+	uint32 endPage = (lastBranchOffset >> 16);
 
-		pBranchPages[BranchPagesCount] = 0;
+	for(uint32 page = startPage; page <= endPage; page++)
+	{ 
+		if (pBranchPages[page])
+		{
+			delete pBranchPages[page];
+
+			pBranchPages[page] = 0;
+		}
 	}
 
 	lastBranchOffset = shrinkLastBranchOffset;
+
+	BranchPagesCount = startPage;
+
+	return;
 }
 
 void HArray::shrinkBlockPages()
 {
-	uint32 shrinkLastBlockOffset = lastVarOffset - countReleasedBlockCells;
+	uint32 shrinkLastBlockOffset = lastBlockOffset - countReleasedBlockCells;
+
+	//the are no blocks in ha, delete all block pages
+	if(!shrinkLastBlockOffset)
+	{
+		tailReleasedBlockOffset = 0;
+		countReleasedBlockCells = 0;
+
+		for(uint32 page = 0; page < BlockPagesCount; page++)
+		{ 
+			if (pBlockPages[page])
+			{
+				delete pBlockPages[page];
+
+				pBlockPages[page] = 0;
+			}
+		}
+
+		lastBlockOffset = 0;
+		BlockPagesCount = 0;
+
+		return;
+	}
 
 	//content ===================================================================================================================
 	int32 lastPage = ContentPagesCount - 1;
 
 	for (uint32 page = 0; page < ContentPagesCount; page++)
 	{
-		ContentPage* pContentPage = pContentPages[page >> 16];
+		ContentPage* pContentPage = pContentPages[page];
 
 		uint32 countCells;
 
@@ -711,7 +760,7 @@ void HArray::shrinkBlockPages()
 					//find free block cell
 					while (countReleasedBlockCells)
 					{
-						countReleasedBlockCells--;
+						countReleasedBlockCells -= BLOCK_ENGINE_SIZE;
 
 						if (tailReleasedBlockOffset < shrinkLastBlockOffset)
 						{
@@ -741,7 +790,7 @@ void HArray::shrinkBlockPages()
 						destBlockCell = srcBlockCell;
 					}
 
-					if (!countReleasedBranchCells)
+					if (!countReleasedBlockCells)
 					{
 						goto EXIT;
 					}
@@ -755,7 +804,7 @@ void HArray::shrinkBlockPages()
 
 	for (uint32 page = 0; page < BlockPagesCount; page++)
 	{
-		BlockPage* pBlockPage = pBlockPages[page >> 16];
+		BlockPage* pBlockPage = pBlockPages[page];
 
 		uint32 countCells;
 
@@ -768,99 +817,116 @@ void HArray::shrinkBlockPages()
 			countCells = (lastBlockOffset & 0xFFFF) + 1;
 		}
 
-		for (uint32 startCell = 0; startCell < countCells; startCell += BLOCK_ENGINE_SIZE)
+		for (uint32 cell = 0; cell < countCells; cell++)
 		{
-			bool isEmptyBlock = true;
+			BlockCell& blockCell = pBlockPage->pBlock[cell];
 
-			for (uint32 cell = startCell; cell < BLOCK_ENGINE_SIZE; cell++)
+			if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
 			{
-				if (!pBlockPage->pBlock[cell].Type)
+				if (blockCell.Offset >= shrinkLastBlockOffset)
 				{
-					isEmptyBlock = false;
+					uint32 newBlockOffset;
 
-					break;
-				}
-			}
-
-			if (!isEmptyBlock)
-			{
-				for (uint32 cell = startCell; cell < BLOCK_ENGINE_SIZE; cell++)
-				{
-					BlockCell& blockCell = pBlockPage->pBlock[cell];
-
-					if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
+					//find free block cell
+					while (countReleasedBlockCells)
 					{
-						if (blockCell.Offset >= shrinkLastBlockOffset)
+						countReleasedBlockCells -= BLOCK_ENGINE_SIZE;
+
+						if (tailReleasedBlockOffset < shrinkLastBlockOffset)
 						{
-							uint32 newBlockOffset;
+							newBlockOffset = tailReleasedBlockOffset;
 
-							//find free block cell
-							while (countReleasedBlockCells)
-							{
-								countReleasedBlockCells--;
+							tailReleasedBlockOffset = pBlockPages[tailReleasedBlockOffset >> 16]->pBlock[tailReleasedBlockOffset & 0xFFFF].Offset;
 
-								if (tailReleasedBlockOffset < shrinkLastBlockOffset)
-								{
-									newBlockOffset = tailReleasedBlockOffset;
-
-									tailReleasedBlockOffset = pBlockPages[tailReleasedBlockOffset >> 16]->pBlock[tailReleasedBlockOffset & 0xFFFF].Offset;
-
-									break;
-								}
-								else
-								{
-									tailReleasedBlockOffset = pBlockPages[tailReleasedBlockOffset >> 16]->pBlock[tailReleasedBlockOffset & 0xFFFF].Offset;
-								}
-							}
-
-							uint32 oldBlockOffset = blockCell.Offset;
-							blockCell.Offset = newBlockOffset;
-
-							for (uint32 i = 0; i < BLOCK_ENGINE_SIZE; i++, oldBlockOffset++, newBlockOffset++)
-							{
-								//get cells
-								BlockCell& srcBlockCell = pBlockPages[oldBlockOffset >> 16]->pBlock[oldBlockOffset & 0xFFFF];
-
-								BlockCell& destBlockCell = pBlockPages[newBlockOffset >> 16]->pBlock[newBlockOffset & 0xFFFF];
-
-								//copy
-								destBlockCell = srcBlockCell;
-							}
-
-							if (!countReleasedBranchCells)
-							{
-								goto EXIT;
-							}
+							break;
 						}
+						else
+						{
+							tailReleasedBlockOffset = pBlockPages[tailReleasedBlockOffset >> 16]->pBlock[tailReleasedBlockOffset & 0xFFFF].Offset;
+						}
+					}
+
+					uint32 oldBlockOffset = blockCell.Offset;
+					blockCell.Offset = newBlockOffset;
+
+					for (uint32 i = 0; i < BLOCK_ENGINE_SIZE; i++, oldBlockOffset++, newBlockOffset++)
+					{
+						//get cells
+						BlockCell& srcBlockCell = pBlockPages[oldBlockOffset >> 16]->pBlock[oldBlockOffset & 0xFFFF];
+
+						BlockCell& destBlockCell = pBlockPages[newBlockOffset >> 16]->pBlock[newBlockOffset & 0xFFFF];
+
+						//copy
+						destBlockCell = srcBlockCell;
+					}
+
+					if (!countReleasedBlockCells)
+					{
+						goto EXIT;
 					}
 				}
 			}
 		}
 	}
 
+	tailReleasedBlockOffset = 0;
+	countReleasedBlockCells = 0;
+
 EXIT:
-	//max one page we can delete
-	BlockPagesCount = (shrinkLastBlockOffset >> 16) + 1;
 
-	if (pBlockPages[BlockPagesCount])
-	{
-		delete pBlockPages[BlockPagesCount];
+	//delete shrinked pages
+	uint32 startPage = (shrinkLastBlockOffset >> 16) + 1;
 
-		pBlockPages[BlockPagesCount] = 0;
+	uint32 endPage = (lastBlockOffset >> 16);
+
+	for(uint32 page = startPage; page <= endPage; page++)
+	{ 
+		if (pBlockPages[page])
+		{
+			delete pBlockPages[page];
+
+			pBlockPages[page] = 0;
+		}
 	}
 
 	lastBlockOffset = shrinkLastBlockOffset;
+
+	BlockPagesCount = startPage;
+
+	return;
 }
 
 void HArray::shrinkVarPages()
 {
 	uint32 shrinkLastVarOffset = lastVarOffset - countReleasedVarCells;
 
+	//the are no vars in ha, delete all var pages
+	if(!shrinkLastVarOffset)
+	{
+		tailReleasedVarOffset = 0;
+		countReleasedVarCells = 0;
+
+		for(uint32 page = 0; page < VarPagesCount; page++)
+		{ 
+			if (pVarPages[page])
+			{
+				delete pVarPages[page];
+
+				pVarPages[page] = 0;
+			}
+		}
+
+		lastVarOffset = 0;
+		VarPagesCount = 0;
+
+		return;
+	}
+
 	int32 lastPage = ContentPagesCount - 1;
 
 	for (uint32 page = 0; page < ContentPagesCount; page++)
 	{
-		ContentPage* pContentPage = pContentPages[page >> 16];
+		ContentPage* pContentPage = pContentPages[page];
 
 		uint32 countCells;
 
@@ -921,18 +987,32 @@ void HArray::shrinkVarPages()
 		}
 	}
 
+	printf("FAIL STATE");
+
+	return;
+
 EXIT:
-	//max one page we can delete
-	VarPagesCount = (shrinkLastVarOffset >> 16) + 1;
 
-	if (pVarPages[VarPagesCount])
-	{
-		delete pVarPages[VarPagesCount];
+	//delete shrinked pages
+	uint32 startPage = (shrinkLastVarOffset >> 16) + 1;
 
-		pVarPages[VarPagesCount] = 0;
+	uint32 endPage = (lastVarOffset >> 16);
+
+	for(uint32 page = startPage; page <= endPage; page++)
+	{ 
+		if (pVarPages[page])
+		{
+			delete pVarPages[page];
+
+			pVarPages[page] = 0;
+		}
 	}
 
 	lastVarOffset = shrinkLastVarOffset;
+
+	VarPagesCount = startPage;
+
+	return;
 }
 
 bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathLen)
@@ -1016,7 +1096,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 	{
 		if (count == 0)
 		{
-			releaseBlockCell(sp.pBlockCell, sp.StartBlockOffset);
+			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
 
 			return dismantlingContentCells(path, currPathLen);
 		}
@@ -1028,7 +1108,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 				sp.pContentCell->Type = CURRENT_VALUE_TYPE;
 				sp.pContentCell->Value = values[0];
 
-				releaseBlockCell(sp.pBlockCell, sp.StartBlockOffset);
+				releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
 			}
 		}
 		else if (count <= BRANCH_ENGINE_SIZE) //remove block, create BRANCH
@@ -1077,7 +1157,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 			sp.pContentCell->Value = branchOffset;
 
 			//release block cell
-			releaseBlockCell(sp.pBlockCell, sp.StartBlockOffset);
+			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
 		}
 	}
 	else //sub block
@@ -1088,7 +1168,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 			prevSP.pBlockCell->ValueOrOffset = 0;
 			prevSP.pBlockCell->Offset = 0;
 
-			releaseBlockCell(sp.pBlockCell, sp.StartBlockOffset);
+			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
 
 			return true;
 		}
@@ -1098,7 +1178,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 			prevSP.pBlockCell->ValueOrOffset = values[0];
 			prevSP.pBlockCell->Offset = offsets[0];
 
-			releaseBlockCell(sp.pBlockCell, sp.StartBlockOffset);
+			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
 		}
 		else if (count <= BRANCH_ENGINE_SIZE) //remove block, create BRANCH
 		{
@@ -1147,7 +1227,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 			prevSP.pBlockCell->ValueOrOffset = branchOffset;
 
 			//release block
-			releaseBlockCell(sp.pBlockCell, sp.StartBlockOffset);
+			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
 		}
 		else if (count <= BRANCH_ENGINE_SIZE * 2) //remove block, create two BRANCHES
 		{
@@ -1238,7 +1318,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 			prevSP.pBlockCell->ValueOrOffset = branchOffset2;
 
 			//release block
-			releaseBlockCell(sp.pBlockCell, sp.StartBlockOffset);
+			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
 		}
 	}
 
@@ -1457,13 +1537,9 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 				if (sp.pVarCell->ValueContCell.Type)
 				{
 					sp.pVarCell->ValueContCell.Type = 0;
+				}
 
-					return false;
-				}
-				else
-				{
-					return false;
-				}
+				return false;
 			}
 			else
 			{
@@ -1583,15 +1659,22 @@ bool HArray::delValueByKey(uint32* key,
 			}
 			else
 			{
-				//save path
-				SegmentPath& sp = path[pathLen++];
-				sp.Type = VAR_VALUE_SEGMENT_TYPE;
-				sp.pContentCell = &contentCell;
-				sp.pVarCell = &varCell;
-				sp.VarOffset = *pContentCellValueOrOffset;
+				if(varCell.ValueContCell.Type)
+				{
+					//save path
+					SegmentPath& sp = path[pathLen++];
+					sp.Type = VAR_VALUE_SEGMENT_TYPE;
+					sp.pContentCell = &contentCell;
+					sp.pVarCell = &varCell;
+					sp.VarOffset = *pContentCellValueOrOffset;
 
-				//return &varCell.ValueContentCell.Value;
-				goto DISMANTLING;
+					//return &varCell.ValueContentCell.Value;
+					goto DISMANTLING;
+				}
+				else
+				{
+					return false;
+				}
 			}
 		}
 		else if (keyOffset == keyLen)
@@ -1838,14 +1921,14 @@ DISMANTLING:
 
 	if (dismantling(path, pathLen))
 	{
-		headerCell.Type = 0;
+		headerCell.Type = EMPTY_TYPE;
 		headerCell.Offset = 0;
 	}
 
 	//SHRINK =============================================================================================
 	if (countReleasedContentCells > MAX_COUNT_RELEASED_CONTENT_CELLS)
 	{
-		shrinkContentPages();
+		//shrinkContentPages();
 	}
 
 	if (countReleasedBranchCells > MAX_COUNT_RELEASED_BRANCH_CELLS)

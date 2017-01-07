@@ -807,7 +807,7 @@ uint32 HArray::insert(uint32* key,
 
 					tailReleasedBlockOffset = pBlockPages[startBlockOffset >> 16]->pBlock[startBlockOffset & 0xFFFF].Offset;
 
-					countReleasedBlockCells--;
+					countReleasedBlockCells -= BLOCK_ENGINE_SIZE;
 				}
 				else
 				{
@@ -1257,7 +1257,7 @@ uint32 HArray::insert(uint32* key,
 
 							tailReleasedBlockOffset = pBlockPages[startBlockOffset >> 16]->pBlock[startBlockOffset & 0xFFFF].Offset;
 
-							countReleasedBlockCells--;
+							countReleasedBlockCells -= BLOCK_ENGINE_SIZE;
 						}
 						else
 						{

@@ -90,7 +90,14 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-                return &varCell.ValueContCell.Value;
+				if(varCell.ValueContCell.Type)
+                {
+                	return &varCell.ValueContCell.Value;
+                }
+                else
+                {
+                	return 0;
+                }
 			}
 		}
 		else if(keyOffset == keyLen)

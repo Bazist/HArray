@@ -924,7 +924,7 @@ public:
 	void releaseContentCells(ContentCell* pContentCell, uint32 contentOffset, uint32 len);
 	void releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset);
 	void releaseVarCell(VarCell* pVarCell, uint32 varOffset);
-	void releaseBlockCell(BlockCell* pBlockCell, uint32 startBlockOffset);
+	void releaseBlockCells(BlockCell* pBlockCell, uint32 startBlockOffset);
 
 	void shrinkContentPages();
 	void shrinkBranchPages();

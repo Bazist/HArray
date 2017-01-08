@@ -793,6 +793,7 @@ uint32 HArray::insert(uint32* key,
 
 				//release branch cell
 				branchCell.Values[0] = tailReleasedBranchOffset;
+				branchCell.Offsets[0] = 0;
 
 				tailReleasedBranchOffset = contentCellValueOrOffset;
 
@@ -1236,15 +1237,19 @@ uint32 HArray::insert(uint32* key,
 
 						//release branch cell 1
 						branchCell1.Values[0] = tailReleasedBranchOffset;
+						branchCell1.Offsets[0] = 0;
 
 						tailReleasedBranchOffset = blockCell.Offset;
+						blockCell.Offset = 0;
 
 						countReleasedBranchCells++;
 
 						//release branch cell 2
 						branchCell2.Values[0] = tailReleasedBranchOffset;
+						branchCell2.Offsets[0] = 0;
 
 						tailReleasedBranchOffset = blockCell.ValueOrOffset;
+						blockCell.ValueOrOffset = 0;
 
 						countReleasedBranchCells++;
 

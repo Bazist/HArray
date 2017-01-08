@@ -385,6 +385,87 @@ EXIT:
 	}
 }
 
+bool HArray::testBranchConsistency()
+{
+	uint32 count = 0;
+
+	//content ===================================================================================================================
+	int32 lastPage = ContentPagesCount - 1;
+
+	for (uint32 page = 0; page < ContentPagesCount; page++)
+	{
+		ContentPage* pContentPage = pContentPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = (lastContentOffset & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			ContentCell& contentCell = pContentPage->pContent[cell];
+
+			if (MIN_BRANCH_TYPE1 <= contentCell.Type && contentCell.Type <= MAX_BRANCH_TYPE1) //in content
+			{
+				count++;
+			}
+			else if (contentCell.Type == VAR_TYPE) //shunted in var cell
+			{
+				VarCell& varCell = pVarPages[contentCell.Value >> 16]->pVar[contentCell.Value & 0xFFFF];
+
+				if (MIN_BRANCH_TYPE1 <= varCell.ContCell.Type && varCell.ContCell.Type <= MAX_BRANCH_TYPE1) //in content
+				{
+					count++;
+				}
+			}
+		}
+	}
+
+	//blocks ===================================================================================================================
+	lastPage = BlockPagesCount - 1;
+
+	for (uint32 page = 0; page < BlockPagesCount; page++)
+	{
+		BlockPage* pBlockPage = pBlockPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = (lastBlockOffset & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+			if (blockCell.Type >= MIN_BRANCH_TYPE1)
+			{
+				if (blockCell.Type <= MAX_BRANCH_TYPE1) //one branch found
+				{
+					count++;
+				}
+				else if (blockCell.Type <= MAX_BRANCH_TYPE2) //one branch found
+				{
+					count+=2;
+				}
+			}
+		}
+	}
+
+	return (count + countReleasedBranchCells) == lastBranchOffset;
+}
+
 void HArray::shrinkBranchPages()
 {
 	uint32 shrinkLastBranchOffset = lastBranchOffset - countReleasedBranchCells;
@@ -675,9 +756,8 @@ void HArray::shrinkBranchPages()
 		}
 	}
 
-	printf("FAIL STATE");
-
-	return;
+	tailReleasedBranchOffset = 0;
+	countReleasedBranchCells = 0;
 
 EXIT:
 	
@@ -701,6 +781,71 @@ EXIT:
 	BranchPagesCount = startPage;
 
 	return;
+}
+
+bool HArray::testBlockConsistency()
+{
+	uint32 count = 0;
+
+	//content ===================================================================================================================
+	int32 lastPage = ContentPagesCount - 1;
+
+	for (uint32 page = 0; page < ContentPagesCount; page++)
+	{
+		ContentPage* pContentPage = pContentPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = (lastContentOffset & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			ContentCell& contentCell = pContentPage->pContent[cell];
+
+			if (MIN_BLOCK_TYPE <= contentCell.Type && contentCell.Type <= MAX_BLOCK_TYPE) //in content
+			{
+				count++;
+			}
+		}
+	}
+
+	//sub blocks ===================================================================================================================
+	lastPage = BlockPagesCount - 1;
+
+	for (uint32 page = 0; page < BlockPagesCount; page++)
+	{
+		BlockPage* pBlockPage = pBlockPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = (lastBlockOffset & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+			if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
+			{
+				count++;
+			}
+		}
+	}
+
+	return ((count * BLOCK_ENGINE_SIZE + countReleasedBlockCells) == lastBlockOffset);
 }
 
 void HArray::shrinkBlockPages()
@@ -1022,10 +1167,13 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 
 	SegmentPath& sp = path[currPathLen];
 
-	uint32 count = 0;
-
 	uint32 values[BRANCH_ENGINE_SIZE * 2];
 	uint32 offsets[BRANCH_ENGINE_SIZE * 2];
+	uint32 count = 0;
+
+	BranchCell* releaseBranchCells[4];
+	uint32 releaseBranchOffsets[4];
+	uint32 countReleaseBranchCells = 0;
 
 	uint32 subOffset = 0;
 	BlockCell* pCurrBlockCell = sp.pBlockCell - sp.BlockSubOffset;
@@ -1062,6 +1210,10 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 						values[count] = branchCell1.Values[i];
 						offsets[count] = branchCell1.Offsets[i];
 					}
+
+					releaseBranchCells[countReleaseBranchCells] = &branchCell1;
+					releaseBranchOffsets[countReleaseBranchCells] = pCurrBlockCell->Offset;
+					countReleaseBranchCells++;
 				}
 				else if (pCurrBlockCell->Type <= MAX_BRANCH_TYPE2)
 				{
@@ -1073,6 +1225,10 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 						offsets[count] = branchCell1.Offsets[i];
 					}
 
+					releaseBranchCells[countReleaseBranchCells] = &branchCell1;
+					releaseBranchOffsets[countReleaseBranchCells] = pCurrBlockCell->Offset;
+					countReleaseBranchCells++;
+
 					BranchCell& branchCell2 = pBranchPages[pCurrBlockCell->ValueOrOffset >> 16]->pBranch[pCurrBlockCell->ValueOrOffset & 0xFFFF];
 
 					uint32 countValues = pCurrBlockCell->Type - MAX_BRANCH_TYPE1;
@@ -1082,6 +1238,10 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 						values[count] = branchCell2.Values[i];
 						offsets[count] = branchCell2.Offsets[i];
 					}
+
+					releaseBranchCells[countReleaseBranchCells] = &branchCell2;
+					releaseBranchOffsets[countReleaseBranchCells] = pCurrBlockCell->ValueOrOffset;
+					countReleaseBranchCells++;
 				}
 
 				count += pCurrBlockCell->Type;
@@ -1090,13 +1250,19 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 	}
 
 	//if less than 8 values ===================================================================================
-	SegmentPath& prevSP = path[currPathLen - 1];
-
-	if (prevSP.Type != BLOCK_OFFSET_SEGMENT_TYPE) //top block
+	if (currPathLen <= 0 || 
+		path[currPathLen - 1].Type != BLOCK_OFFSET_SEGMENT_TYPE) //top block
 	{
 		if (count == 0)
 		{
-			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
+			//release branches on block
+			for(uint32 i=0; i<countReleaseBranchCells; i++)
+			{
+				releaseBranchCell(releaseBranchCells[i],
+								  releaseBranchOffsets[i]);
+			}
+
+			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 
 			return dismantlingContentCells(path, currPathLen);
 		}
@@ -1108,11 +1274,25 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 				sp.pContentCell->Type = CURRENT_VALUE_TYPE;
 				sp.pContentCell->Value = values[0];
 
-				releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
+				//release branches on block
+				for(uint32 i=0; i<countReleaseBranchCells; i++)
+				{
+					releaseBranchCell(releaseBranchCells[i],
+									  releaseBranchOffsets[i]);
+				}
+
+				releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 			}
 		}
 		else if (count <= BRANCH_ENGINE_SIZE) //remove block, create BRANCH
 		{
+			//release branches on block
+			for(uint32 i=0; i<countReleaseBranchCells; i++)
+			{
+				releaseBranchCell(releaseBranchCells[i],
+								  releaseBranchOffsets[i]);
+			}
+
 			//create branch ==================================================================================
 			uint32 branchOffset;
 			BranchCell* pBranchCell;
@@ -1141,7 +1321,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 					}
 				}
 
-				branchOffset = lastBranchOffset;
+				branchOffset = lastBranchOffset++;
 				pBranchCell = &pBranchPage->pBranch[lastBranchOffset & 0xFFFF];
 			}
 
@@ -1157,18 +1337,27 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 			sp.pContentCell->Value = branchOffset;
 
 			//release block cell
-			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
+			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 		}
 	}
 	else //sub block
 	{
+		SegmentPath& prevSP = path[currPathLen - 1];
+
 		if (count == 0)
 		{
 			prevSP.pBlockCell->Type = 0;
 			prevSP.pBlockCell->ValueOrOffset = 0;
 			prevSP.pBlockCell->Offset = 0;
 
-			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
+			//release branches on block
+			for(uint32 i=0; i<countReleaseBranchCells; i++)
+			{
+				releaseBranchCell(releaseBranchCells[i],
+								  releaseBranchOffsets[i]);
+			}
+
+			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 
 			return true;
 		}
@@ -1178,10 +1367,24 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 			prevSP.pBlockCell->ValueOrOffset = values[0];
 			prevSP.pBlockCell->Offset = offsets[0];
 
-			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
+			//release branches on block
+			for(uint32 i=0; i<countReleaseBranchCells; i++)
+			{
+				releaseBranchCell(releaseBranchCells[i],
+								  releaseBranchOffsets[i]);
+			}
+
+			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 		}
 		else if (count <= BRANCH_ENGINE_SIZE) //remove block, create BRANCH
 		{
+			//release branches on block
+			for(uint32 i=0; i<countReleaseBranchCells; i++)
+			{
+				releaseBranchCell(releaseBranchCells[i],
+								  releaseBranchOffsets[i]);
+			}
+
 			//create branch ==================================================================================
 			//get free branch cell
 			uint32 branchOffset;
@@ -1211,7 +1414,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 					}
 				}
 
-				branchOffset = lastBranchOffset;
+				branchOffset = lastBranchOffset++;
 				pBranchCell = &pBranchPage->pBranch[lastBranchOffset & 0xFFFF];
 			}
 
@@ -1224,13 +1427,20 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 
 			//set content cell
 			prevSP.pBlockCell->Type = MIN_BRANCH_TYPE1 + count - 1;
-			prevSP.pBlockCell->ValueOrOffset = branchOffset;
+			prevSP.pBlockCell->Offset = branchOffset;
 
 			//release block
-			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
+			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 		}
 		else if (count <= BRANCH_ENGINE_SIZE * 2) //remove block, create two BRANCHES
 		{
+			//release branches on block
+			for(uint32 i=0; i<countReleaseBranchCells; i++)
+			{
+				releaseBranchCell(releaseBranchCells[i],
+								  releaseBranchOffsets[i]);
+			}
+
 			//create branch 1 ==================================================================================
 			//get free branch cell
 			uint32 branchOffset1;
@@ -1260,7 +1470,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 					}
 				}
 
-				branchOffset1 = lastBranchOffset;
+				branchOffset1 = lastBranchOffset++;
 				pBranchCell1 = &pBranchPage->pBranch[lastBranchOffset & 0xFFFF];
 			}
 
@@ -1301,7 +1511,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 					}
 				}
 
-				branchOffset2 = lastBranchOffset;
+				branchOffset2 = lastBranchOffset++;
 				pBranchCell2 = &pBranchPage->pBranch[lastBranchOffset & 0xFFFF];
 			}
 
@@ -1318,7 +1528,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 			prevSP.pBlockCell->ValueOrOffset = branchOffset2;
 
 			//release block
-			releaseBlockCells(sp.pBlockCell, sp.StartBlockOffset);
+			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 		}
 	}
 
@@ -1934,11 +2144,27 @@ DISMANTLING:
 	if (countReleasedBranchCells > MAX_COUNT_RELEASED_BRANCH_CELLS)
 	{
 		shrinkBranchPages();
+
+		/*
+		if(!testBranchConsistency())
+		{
+			printf("\n!!! 111111 testBranchConsistency failed !!!\n");
+
+			return true;
+		}
+		*/
 	}
 
 	if (countReleasedBlockCells > MAX_COUNT_RELEASED_BLOCK_CELLS)
 	{
 		shrinkBlockPages();
+
+		//if(!testBlockConsistency())
+		//{
+		//	printf("\n!!! 111111 testBranchConsistency failed !!!\n");
+
+		//	return true;
+		//}
 	}
 
 	if (countReleasedVarCells > MAX_COUNT_RELEASED_VAR_CELLS)

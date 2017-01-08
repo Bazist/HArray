@@ -948,7 +948,10 @@ public:
 							ContentPage** pNewContentPage,
 							uint32 shrinkLastContentOffset,
 							uint32& lastContentOffsetOnNewPage);
-	
+
+	bool testBlockConsistency();
+	bool testBranchConsistency();
+		
 	//=============================================================================================================
 
 	void destroy()

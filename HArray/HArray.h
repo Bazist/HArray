@@ -949,9 +949,14 @@ public:
 							uint32 shrinkLastContentOffset,
 							uint32& lastContentOffsetOnNewPage);
 
+	//for testing
+	bool testContentConsistency();
 	bool testBlockConsistency();
 	bool testBranchConsistency();
-		
+	bool testVarConsistency();
+
+	uint32 getFullContentLen(uint32 contentOffset);
+
 	//=============================================================================================================
 
 	void destroy()

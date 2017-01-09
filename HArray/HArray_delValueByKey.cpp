@@ -12,7 +12,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
 # GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
+# You should have received a copy of the GNU General Public LicenseЕ
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 */
 
@@ -88,9 +88,9 @@ void HArray::releaseVarCell(VarCell* pVarCell, uint32 varOffset)
 }
 
 uint32 HArray::moveContentCells(uint32& startContentOffset,
-	ContentPage** pNewContentPage,
-	uint32 shrinkLastContentOffset,
-	uint32& lastContentOffsetOnNewPage)
+								ContentPage** pNewContentPage,
+								uint32 shrinkLastContentOffset,
+								uint32& lastContentOffsetOnNewPage)
 {
 	ContentCell* pSourceStartContentCell = &pContentPages[startContentOffset >> 16]->pContent[startContentOffset & 0xFFFF];
 
@@ -108,7 +108,9 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 
 		while (true)
 		{
-			if (pEndContentCell->Type == VALUE_TYPE)
+			if (pEndContentCell->Type == VALUE_TYPE ||
+				(MIN_BRANCH_TYPE1 <= pEndContentCell->Type && pEndContentCell->Type <= MAX_BRANCH_TYPE1) ||
+				(MIN_BLOCK_TYPE <= pEndContentCell->Type && pEndContentCell->Type <= MAX_BLOCK_TYPE))
 			{
 				break;
 			}
@@ -121,9 +123,11 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 					break; //end of key
 				}
 			}
+
+			pEndContentCell++;
 		}
 
-		keyLen = pEndContentCell - pSourceStartContentCell - 1;
+		keyLen = pEndContentCell - pSourceStartContentCell;
 	}
 
 	//get key from pool
@@ -164,15 +168,156 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 		pDestStartContentCell = &(*pNewContentPage)->pContent[startContentOffset & 0xFFFF];
 
 		lastContentOffsetOnNewPage += (keyLen + ValueLen);
+	}
 
-		//copy data
-		for (uint32 i = 0; i <= keyLen; i++, pSourceStartContentCell++, pDestStartContentCell++)
-		{
-			*pDestStartContentCell = *pSourceStartContentCell;
-		}
+	//copy data
+	for (uint32 i = 0; i <= keyLen; i++, pSourceStartContentCell++, pDestStartContentCell++)
+	{
+		*pDestStartContentCell = *pSourceStartContentCell;
 	}
 
 	return (keyLen + ValueLen);
+}
+
+uint32 HArray::getFullContentLen(uint32 contentOffset)
+{
+	ContentCell* pSourceStartContentCell = &pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF];
+	ContentCell* pEndContentCell = pSourceStartContentCell;
+
+	while (true)
+	{
+		if (pEndContentCell->Type == VALUE_TYPE ||
+			(MIN_BRANCH_TYPE1 <= pEndContentCell->Type && pEndContentCell->Type <= MAX_BRANCH_TYPE1) ||
+			(MIN_BLOCK_TYPE <= pEndContentCell->Type && pEndContentCell->Type <= MAX_BLOCK_TYPE))
+		{
+			break;
+		}
+		else if (pEndContentCell->Type == VAR_TYPE) //check shunt
+		{
+			VarCell& varCell = pVarPages[pEndContentCell->Value >> 16]->pVar[pEndContentCell->Value & 0xFFFF];
+
+			if (varCell.ContCell.Type == CONTINUE_VAR_TYPE)
+			{
+				break; //end of key
+			}
+		}
+
+		pEndContentCell++;
+	}
+
+	return (pEndContentCell - pSourceStartContentCell) + 1;
+}
+
+bool HArray::testContentConsistency()
+{
+	uint32 count = 0;
+
+	//1. scan header ==============================================================================================
+	for (uint32 cell = 0; cell < HeaderSize; cell++)
+	{
+		HeaderCell& headerCell = pHeader[cell];
+
+		if (headerCell.Type == HEADER_JUMP_TYPE)
+		{
+			count += getFullContentLen(headerCell.Offset);
+		}
+	}
+
+	//2. scan branches =============================================================================================
+	uint32 lastPage = BranchPagesCount - 1;
+
+	for (uint32 page = 0; page < BranchPagesCount; page++)
+	{
+		BranchPage* pBranchPage = pBranchPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = (lastBranchOffset & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			BranchCell& branchCell = pBranchPage->pBranch[cell];
+
+			for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+			{
+				if (branchCell.Offsets[i]) //not empty
+				{
+					count += getFullContentLen(branchCell.Offsets[i]);
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+	}
+
+	//3. scan blocks ===============================================================================================
+	lastPage = BlockPagesCount - 1;
+
+	for (uint32 page = 0; page < BlockPagesCount; page++)
+	{
+		BlockPage* pBlockPage = pBlockPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = (lastBlockOffset & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+			if (blockCell.Type == CURRENT_VALUE_TYPE)
+			{
+				count += getFullContentLen(blockCell.Offset);
+			}
+		}
+	}
+
+	//4. var cells =================================================================================================
+	lastPage = VarPagesCount - 1;
+
+	for (uint32 page = 0; page < VarPagesCount; page++)
+	{
+		VarPage* pVarPage = pVarPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = (lastBranchOffset & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			VarCell& varCell = pVarPage->pVar[cell];
+
+			if (varCell.ContCell.Type == CONTINUE_VAR_TYPE)
+			{
+				count += getFullContentLen(varCell.ContCell.Value);
+			}
+		}
+	}
+
+	return (countReleasedContentCells + count) == (lastContentOffset - 1);
 }
 
 void HArray::shrinkContentPages()
@@ -366,23 +511,29 @@ EXIT:
 	if (pContentPages[shrinkLastPage])
 	{
 		delete pContentPages[shrinkLastPage];
+
+		pContentPages[shrinkLastPage] = 0;
 	}
 
 	if (pContentPages[shrinkLastPage + 1])
 	{
 		delete pContentPages[shrinkLastPage + 1];
+
+		pContentPages[shrinkLastPage + 1] = 0;
 	}
 
 	if (pNewContentPage) //not all content were moved to existing pages
 	{
 		pContentPages[shrinkLastPage] = pNewContentPage;
 
-		lastContentOffset = (shrinkLastPage << 16) + lastContentOffsetOnNewPage;
+		lastContentOffset = shrinkLastContentOffset + lastContentOffsetOnNewPage;
 	}
 	else //all content were moved to existing pages
 	{
-		lastContentOffset = (shrinkLastPage << 16);
+		lastContentOffset = shrinkLastContentOffset;
 	}
+
+	ContentPagesCount = shrinkLastPage + 1;
 }
 
 bool HArray::testBranchConsistency()
@@ -924,16 +1075,12 @@ void HArray::shrinkBlockPages()
 					uint32 oldBlockOffset = contentCell.Value;
 					contentCell.Value = newBlockOffset;
 
-					for (uint32 i = 0; i < BLOCK_ENGINE_SIZE; i++, oldBlockOffset++, newBlockOffset++)
-					{
-						//get cells
-						BlockCell& srcBlockCell = pBlockPages[oldBlockOffset >> 16]->pBlock[oldBlockOffset & 0xFFFF];
+					//get cells
+					BlockCell& srcBlockCell = pBlockPages[oldBlockOffset >> 16]->pBlock[oldBlockOffset & 0xFFFF];
+					BlockCell& destBlockCell = pBlockPages[newBlockOffset >> 16]->pBlock[newBlockOffset & 0xFFFF];
 
-						BlockCell& destBlockCell = pBlockPages[newBlockOffset >> 16]->pBlock[newBlockOffset & 0xFFFF];
-
-						//copy
-						destBlockCell = srcBlockCell;
-					}
+					//copy data
+					memcpy(&destBlockCell, &srcBlockCell, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
 
 					if (!countReleasedBlockCells)
 					{
@@ -994,16 +1141,12 @@ void HArray::shrinkBlockPages()
 					uint32 oldBlockOffset = blockCell.Offset;
 					blockCell.Offset = newBlockOffset;
 
-					for (uint32 i = 0; i < BLOCK_ENGINE_SIZE; i++, oldBlockOffset++, newBlockOffset++)
-					{
-						//get cells
-						BlockCell& srcBlockCell = pBlockPages[oldBlockOffset >> 16]->pBlock[oldBlockOffset & 0xFFFF];
+					//get cells
+					BlockCell& srcBlockCell = pBlockPages[oldBlockOffset >> 16]->pBlock[oldBlockOffset & 0xFFFF];
+					BlockCell& destBlockCell = pBlockPages[newBlockOffset >> 16]->pBlock[newBlockOffset & 0xFFFF];
 
-						BlockCell& destBlockCell = pBlockPages[newBlockOffset >> 16]->pBlock[newBlockOffset & 0xFFFF];
-
-						//copy
-						destBlockCell = srcBlockCell;
-					}
+					//copy data
+					memcpy(&destBlockCell, &srcBlockCell, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
 
 					if (!countReleasedBlockCells)
 					{
@@ -1039,6 +1182,41 @@ EXIT:
 	BlockPagesCount = startPage;
 
 	return;
+}
+
+bool HArray::testVarConsistency()
+{
+	uint32 count = 0;
+
+	int32 lastPage = ContentPagesCount - 1;
+
+	for (uint32 page = 0; page < ContentPagesCount; page++)
+	{
+		ContentPage* pContentPage = pContentPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = (lastContentOffset & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			ContentCell& contentCell = pContentPage->pContent[cell];
+
+			if (contentCell.Type == VAR_TYPE)
+			{
+				count++;
+			}
+		}
+	}
+
+	return (count + countReleasedVarCells) == lastVarOffset;
 }
 
 void HArray::shrinkVarPages()
@@ -1132,9 +1310,8 @@ void HArray::shrinkVarPages()
 		}
 	}
 
-	printf("FAIL STATE");
-
-	return;
+	tailReleasedVarOffset = 0;
+	countReleasedVarCells = 0;
 
 EXIT:
 
@@ -1606,6 +1783,9 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 				sp.pBranchCell1->Values[sp.BranchIndex] = sp.pBranchCell1->Values[lastIndex];
 				sp.pBranchCell1->Offsets[sp.BranchIndex] = sp.pBranchCell1->Offsets[lastIndex];
 
+				sp.pBranchCell1->Values[lastIndex] = 0;
+				sp.pBranchCell1->Offsets[lastIndex] = 0;
+
 				sp.pContentCell->Type--;
 
 				if (sp.pContentCell->Type == MIN_BRANCH_TYPE1) //last way is original ?
@@ -1663,6 +1843,9 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 				sp.pBranchCell1->Values[sp.BranchIndex] = sp.pBranchCell1->Values[lastIndex];
 				sp.pBranchCell1->Offsets[sp.BranchIndex] = sp.pBranchCell1->Offsets[lastIndex];
 
+				sp.pBranchCell1->Values[lastIndex] = 0;
+				sp.pBranchCell1->Offsets[lastIndex] = 0;
+
 				sp.pBlockCell->Type--;
 
 				if (sp.pBlockCell->Type == MIN_BRANCH_TYPE1) //only one item, inject to block
@@ -1682,6 +1865,9 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 
 				sp.pBranchCell1->Values[sp.BranchIndex] = sp.pBranchCell2->Values[lastIndex];
 				sp.pBranchCell1->Offsets[sp.BranchIndex] = sp.pBranchCell2->Offsets[lastIndex];
+
+				sp.pBranchCell2->Values[lastIndex] = 0;
+				sp.pBranchCell2->Offsets[lastIndex] = 0;
 
 				sp.pBlockCell->Type--;
 
@@ -1703,6 +1889,9 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 
 				sp.pBranchCell2->Values[sp.BranchIndex] = sp.pBranchCell2->Values[lastIndex];
 				sp.pBranchCell2->Offsets[sp.BranchIndex] = sp.pBranchCell2->Offsets[lastIndex];
+
+				sp.pBranchCell2->Values[lastIndex] = 0;
+				sp.pBranchCell2->Offsets[lastIndex] = 0;
 			}
 			else //last item
 			{
@@ -2139,11 +2328,18 @@ DISMANTLING:
 	if (countReleasedContentCells > MAX_COUNT_RELEASED_CONTENT_CELLS)
 	{
 		//shrinkContentPages();
+
+		if(!testContentConsistency())
+		{
+			printf("\n!!! 1111111 testContentConsistency failed !!!\n");
+
+			return true;
+		}
 	}
 
 	if (countReleasedBranchCells > MAX_COUNT_RELEASED_BRANCH_CELLS)
 	{
-		shrinkBranchPages();
+		//shrinkBranchPages();
 
 		/*
 		if(!testBranchConsistency())
@@ -2157,14 +2353,30 @@ DISMANTLING:
 
 	if (countReleasedBlockCells > MAX_COUNT_RELEASED_BLOCK_CELLS)
 	{
+		if(!testContentConsistency())
+		{
+			printf("\n!!! 1111111 testContentConsistency failed !!!\n");
+
+			return true;
+		}
+
 		shrinkBlockPages();
 
-		//if(!testBlockConsistency())
-		//{
-		//	printf("\n!!! 111111 testBranchConsistency failed !!!\n");
+		if(!testBlockConsistency())
+		{
+			printf("\n!!! 111111 testBranchConsistency failed !!!\n");
 
-		//	return true;
-		//}
+			return true;
+		}
+
+		if(!testContentConsistency())
+		{
+			printf("\n!!! 1111111 testContentConsistency failed !!!\n");
+
+			return true;
+		}
+
+
 	}
 
 	if (countReleasedVarCells > MAX_COUNT_RELEASED_VAR_CELLS)

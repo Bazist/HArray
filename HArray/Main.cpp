@@ -411,6 +411,11 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
+		if(i == countKeys - 1)
+		{
+			i = countKeys - 1;
+		}
+
 		ha.insert((uint32*)keys[i].Data, sizeof(BinKey), keys[i].Data[0]);
 	}
 
@@ -439,9 +444,116 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	finish = msclock();
 
-	printf("Search: %d msec.\n", (finish - start));
+	printf("Search: %d msec, ", (finish - start));
 
 	totalHArrayTime += (finish - start);
+
+	if(!ha.testContentConsistency())
+	{
+		printf("\n==========> testContentConsistency failed !!!\n");
+
+		return;
+	}
+
+	//DELETE ===========================================
+
+	start = msclock();
+
+	for (uint32 i = 0; i < countKeys; i++)
+	{
+		/*
+		if(i == 2995665)
+		{
+			i = 2995665;
+		}
+
+		if(i == 1833776)
+		{
+			i = 1833776;
+		}
+		*/
+
+		ha.delValueByKey((uint32*)keys[i].Data, sizeof(BinKey));
+
+		/*
+		//test
+		BranchCell& bc = ha.pBranchPages[0]->pBranch[4065];
+
+		if(bc.Offsets[2] == 0 &&
+		   bc.Offsets[3] == 5539098)
+		{
+			printf("found!");
+		}
+
+		if(i >= 2995665)
+
+		if(i % 10000 == 0)
+		{
+			printf("%u\n", i);
+
+			if(!ha.testContentConsistency())
+			{
+				printf("\n!!! testContentConsistency failed !!!\n");
+
+				return;
+			}
+
+			if(!ha.testBranchConsistency())
+			{
+				printf("\n!!! testBranchConsistency failed !!!\n");
+
+				return;
+			}
+
+			if(!ha.testBlockConsistency())
+			{
+				printf("\n!!! testBlockConsistency failed !!!\n");
+
+				return;
+			}
+		}
+		*/
+	}
+
+	finish = msclock();
+
+	/*
+	if(!ha.testContentConsistency())
+	{
+		printf("\n!!! testContentConsistency failed !!!\n");
+
+		return;
+	}
+
+	if(!ha.testBranchConsistency())
+	{
+		printf("\n!!! testBranchConsistency failed !!!\n");
+
+		return;
+	}
+
+	if(!ha.testBlockConsistency())
+	{
+		printf("\n!!! testBlockConsistency failed !!!\n");
+
+		return;
+	}
+
+	//test delete
+	for (uint32 i = 0; i < countKeys; i++)
+	{
+		if (ha.getValueByKey((uint32*)keys[i].Data, sizeof(BinKey)) != 0)
+		{
+			printf("Error\n");
+			break;
+		}
+	}
+	*/
+
+	printf("Delete: %d msec.\n", (finish - start));
+
+	totalHArrayTime += (finish - start);
+
 
 	#ifdef PRINT_MEM
 	ha.printMemory();
@@ -791,7 +903,57 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 	finish = msclock();
 
-	printf("Search: %d msec.\n", (finish - start));
+	printf("Search: %d msec, ", (finish - start));
+
+	totalHArrayTime += (finish - start);
+
+	//DELETE ===========================================
+
+	if(!ha.testContentConsistency())
+	{
+		printf("\n!!! testBranchConsistency failed !!!\n");
+
+		return;
+	}
+
+	start = msclock();
+
+	for (uint32 i = 0; i < countKeys; i++)
+	{
+		const char* str = keys[i].c_str();
+
+		ha.delValueByKey((uint32*)str, STR_KEY_LEN);
+	}
+
+	finish = msclock();
+
+	if(!ha.testBranchConsistency())
+	{
+		printf("\n!!! testBranchConsistency failed !!!\n");
+
+		return;
+	}
+
+	if(!ha.testBlockConsistency())
+	{
+		printf("\n!!! testBlockConsistency failed !!!\n");
+
+		return;
+	}
+
+	/*
+	//test delete
+	for (uint32 i = 0; i < countKeys; i++)
+	{
+		if (ha.getValueByKey((uint32*)keys[i].Data, sizeof(BinKey)) != 0)
+		{
+			printf("Error\n");
+			break;
+		}
+	}
+	*/
+
+	printf("Delete: %d msec.\n", (finish - start));
 
 	totalHArrayTime += (finish - start);
 
@@ -1087,21 +1249,143 @@ void testRange()
 }
 */
 
+void testDelKeys1()
+{
+	HArray ha;
+	ha.init(16);
+ 
+	uint32 key1[] = {100, 200, 1};
+ 	uint32 key2[] = {100, 200, 20};
+ 	uint32 key3[] = {100, 200, 30};
+ 	uint32 key4[] = {100, 200, 40};
+ 	uint32 key5[] = {100, 200, 50};
+
+ 	uint32 key6[] = {100, 200, 2};
+ 	uint32 key7[] = {100, 200, 3};
+ 	uint32 key8[] = {100, 200, 4};
+ 	uint32 key9[] = {100, 200, 5};
+ 	uint32 key10[] = {100, 200, 6};
+ 	uint32 key11[] = {100, 200, 7};
+ 	uint32 key12[] = {100, 200, 8};
+ 	uint32 key13[] = {100, 200, 9};
+
+ 	//uint32 key6[] = {300};
+ 	//uint32 key7[] = {400, 500};
+
+	ha.insert(key1, sizeof(key1), 1);
+	ha.insert(key2, sizeof(key2), 2);
+	ha.insert(key3, sizeof(key3), 3);
+ 	ha.insert(key4, sizeof(key4), 4);
+ 	ha.insert(key5, sizeof(key5), 5);
+ 	ha.insert(key6, sizeof(key6), 6);
+ 	ha.insert(key7, sizeof(key7), 7);
+ 	ha.insert(key8, sizeof(key8), 8);
+ 	ha.insert(key9, sizeof(key9), 9);
+ 	ha.insert(key10, sizeof(key10), 10);
+ 	ha.insert(key11, sizeof(key11), 11);
+ 	ha.insert(key12, sizeof(key12), 12);
+ 	ha.insert(key13, sizeof(key13), 13);
+
+ 	ha.delValueByKey(key2, sizeof(key2));
+ 	ha.delValueByKey(key3, sizeof(key3));
+ 	ha.delValueByKey(key4, sizeof(key4));
+ 	ha.delValueByKey(key5, sizeof(key5));
+ 	ha.delValueByKey(key6, sizeof(key6));
+ 	ha.delValueByKey(key7, sizeof(key7));
+ 	ha.delValueByKey(key8, sizeof(key8));
+ 	ha.delValueByKey(key9, sizeof(key9));
+ 	ha.delValueByKey(key10, sizeof(key10));
+ 	ha.delValueByKey(key11, sizeof(key11));
+ 	ha.delValueByKey(key12, sizeof(key12));
+ 	ha.delValueByKey(key13, sizeof(key13));
+
+ 	uint32* val;
+
+ 	val = ha.getValueByKey(key1, sizeof(key1));
+ 	val = ha.getValueByKey(key2, sizeof(key2));
+ 	val = ha.getValueByKey(key3, sizeof(key3));
+ 	val = ha.getValueByKey(key4, sizeof(key4));
+ 	val = ha.getValueByKey(key5, sizeof(key5));
+ 	val = ha.getValueByKey(key6, sizeof(key6));
+ 	val = ha.getValueByKey(key7, sizeof(key7));
+ 	val = ha.getValueByKey(key8, sizeof(key8));
+ 	val = ha.getValueByKey(key9, sizeof(key9));
+ 	val = ha.getValueByKey(key10, sizeof(key10));
+ 	val = ha.getValueByKey(key11, sizeof(key11));
+ 	val = ha.getValueByKey(key12, sizeof(key12));
+ 	val = ha.getValueByKey(key13, sizeof(key13));
+ 
+ 	/*
+ 	HArrayPair* pairs = new HArrayPair[10];
+
+ 	uint32 count = ha.getKeysAndValuesByRange(pairs,
+								   		   10,
+										   key6,
+										   8,
+										   key2,
+										   4);
+
+	for(uint32 i=0; i<count; i++)
+	{
+		printf("%u\n", pairs[i].Value);
+	}
+	*/
+}
+
+void testDelKeys2()
+{
+	HArray ha;
+	ha.init(16);
+ 
+	uint32 key1[] = {100, 200, 100};
+ 	uint32 key2[] = {100, 200};
+
+ 	//uint32 key6[] = {300};
+ 	//uint32 key7[] = {400, 500};
+
+ 	ha.insert(key2, sizeof(key2), 2);
+ 	ha.insert(key1, sizeof(key1), 1);
+
+ 	ha.delValueByKey(key1, sizeof(key1));
+ 	ha.delValueByKey(key2, sizeof(key2));
+
+ 	uint32* val;
+
+ 	val = ha.getValueByKey(key1, sizeof(key1));
+ 	val = ha.getValueByKey(key2, sizeof(key2));
+
+ 	/*
+ 	HArrayPair* pairs = new HArrayPair[10];
+
+ 	uint32 count = ha.getKeysAndValuesByRange(pairs,
+								   		   10,
+										   key6,
+										   8,
+										   key2,
+										   4);
+
+	for(uint32 i=0; i<count; i++)
+	{
+		printf("%u\n", pairs[i].Value);
+	}
+	*/
+}
+
 int main()
 {
 	HArrayInt_VS_StdMap_IntKey(1000000,   //start
 							   2000000,   //step
 							   10000000); //stop
-	
-	HArray_VS_StdMap_BinKey(1000000,   //start
-							2000000,   //step
-							10000000,  //stop
-							false); 	 //shuffle
-	
-	HArray_VS_StdMap_StrKey(1000000,   //start
-							  	  1000000,   //step
-							  	  3000000);  //stop
+		
+	HArray_VS_StdMap_BinKey(1000000, //start
+							2000000, //step
+							10000000,//stop
+							false);  //shuffle
 
+	HArray_VS_StdMap_StrKey(1000000,  //start
+							1000000,   //step
+							5000000);  //stop
+	
 	printf("COEF Map VS HArray: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 	printf("COEF Unordered Map VS HArray: %.2f\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);
 	printf("COEF Dense VS HArray: %.2f\n", (double)totalDenseTime / (double)totalHArrayTime);

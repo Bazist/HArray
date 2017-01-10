@@ -114,7 +114,7 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 
 void HArray::shrinkContentPages()
 {
-	uint32 shrinkLastPage = ((lastContentOffset >> 16) - 1);
+	uint32 shrinkLastPage = (((lastContentOffset - 1) >> 16) - 1);
 	uint32 shrinkLastContentOffset = shrinkLastPage << 16; //begin of previous page
 
 	uint32 currMovedLen = 0;
@@ -279,22 +279,29 @@ void HArray::shrinkContentPages()
 			if (contentOffset < shrinkLastContentOffset) //next
 			{
 				contentOffset = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
+
+				prevContentOffset = contentOffset;
 			}
 			else
 			{
 				if (contentOffset == tailReleasedContentOffsets[i]) //remove tail
 				{
 					contentOffset = tailReleasedContentOffsets[i] = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
+
+					prevContentOffset = contentOffset;
 				}
 				else //remove in middle
 				{
-					pContentPages[prevContentOffset >> 16]->pContent[prevContentOffset & 0xFFFF].Value = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
+					pContentPages[prevContentOffset >> 16]->
+					pContent[prevContentOffset & 0xFFFF].Value = 
+							pContentPages[contentOffset >> 16]->
+							pContent[contentOffset & 0xFFFF].Value;
+
+					contentOffset = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
 				}
 
 				countReleasedContentCells -= (i + 1);
 			}
-
-			prevContentOffset = contentOffset;
 		}
 	}
 	
@@ -325,7 +332,7 @@ EXIT:
 		lastContentOffset = shrinkLastContentOffset;
 	}
 
-	ContentPagesCount = shrinkLastPage + 1;
+	ContentPagesCount = shrinkLastPage;
 }
 
 void HArray::shrinkBranchPages()

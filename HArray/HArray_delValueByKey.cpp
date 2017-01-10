@@ -1077,14 +1077,12 @@ DISMANTLING:
 	{
 		shrinkContentPages();
 
-		/*
 		if(!testContentConsistency())
 		{
 			printf("\n!!! 1111111 testContentConsistency failed !!!\n");
 
 			return true;
 		}
-		*/
 	}
 
 	if (countReleasedBranchCells > MAX_COUNT_RELEASED_BRANCH_CELLS)

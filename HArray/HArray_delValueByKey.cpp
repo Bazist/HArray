@@ -170,8 +170,6 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 					releaseBranchOffsets[countReleaseBranchCells] = pCurrBlockCell->ValueOrOffset;
 					countReleaseBranchCells++;
 				}
-
-				count += pCurrBlockCell->Type;
 			}
 		}
 	}
@@ -1077,7 +1075,7 @@ DISMANTLING:
 	//SHRINK =============================================================================================
 	if (countReleasedContentCells > MAX_COUNT_RELEASED_CONTENT_CELLS)
 	{
-		//shrinkContentPages();
+		shrinkContentPages();
 
 		/*
 		if(!testContentConsistency())

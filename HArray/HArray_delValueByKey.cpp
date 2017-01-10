@@ -189,7 +189,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 
 			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 
-			return dismantlingContentCells(path, currPathLen);
+			return !dismantlingContentCells(path, currPathLen);
 		}
 		else if (count == 1) //remove block, create CURRENT_VALUE_TYPE
 		{
@@ -1075,14 +1075,16 @@ DISMANTLING:
 	//SHRINK =============================================================================================
 	if (countReleasedContentCells > MAX_COUNT_RELEASED_CONTENT_CELLS)
 	{
-		shrinkContentPages();
+		//shrinkContentPages();
 
+		/*
 		if(!testContentConsistency())
 		{
 			printf("\n!!! 1111111 testContentConsistency failed !!!\n");
 
 			return true;
 		}
+		*/
 	}
 
 	if (countReleasedBranchCells > MAX_COUNT_RELEASED_BRANCH_CELLS)

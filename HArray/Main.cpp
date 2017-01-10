@@ -27,8 +27,8 @@
 #include "HArray.h"
 
 #define SEQUENCE_TESTS
-#define RANDOM_TESTS
-#define PERIOD_TESTS
+//#define RANDOM_TESTS
+//#define PERIOD_TESTS
 
 #define HARRAY_TESTS
 //#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
@@ -909,23 +909,56 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 	//DELETE ===========================================
 
-	if(!ha.testContentConsistency())
-	{
-		printf("\n!!! testBranchConsistency failed !!!\n");
-
-		return;
-	}
-
 	start = msclock();
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
+		if(i == 4887101)
+		{
+			i = 4887101;
+		}
+
 		const char* str = keys[i].c_str();
 
 		ha.delValueByKey((uint32*)str, STR_KEY_LEN);
+
+		if(i >= 4887101)
+		if(i % 1 == 0)
+		{
+			printf("%u\n", i);
+
+			if(!ha.testContentConsistency())
+			{
+				printf("\n!!! testContentConsistency failed !!!\n");
+
+				return;
+			}
+
+			if(!ha.testBranchConsistency())
+			{
+				printf("\n!!! testBranchConsistency failed !!!\n");
+
+				return;
+			}
+
+			if(!ha.testBlockConsistency())
+			{
+				printf("\n!!! testBlockConsistency failed !!!\n");
+
+				return;
+			}
+		}
+
 	}
 
 	finish = msclock();
+
+	if(!ha.testContentConsistency())
+	{
+		printf("\n!!! testContentConsistency failed !!!\n");
+
+		return;
+	}
 
 	if(!ha.testBranchConsistency())
 	{
@@ -1373,6 +1406,7 @@ void testDelKeys2()
 
 int main()
 {
+	/*
 	HArrayInt_VS_StdMap_IntKey(1000000,   //start
 							   2000000,   //step
 							   10000000); //stop
@@ -1381,8 +1415,9 @@ int main()
 							2000000, //step
 							10000000,//stop
 							false);  //shuffle
+	*/
 
-	HArray_VS_StdMap_StrKey(1000000,  //start
+	HArray_VS_StdMap_StrKey(5000000,  //start
 							1000000,   //step
 							5000000);  //stop
 	

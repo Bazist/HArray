@@ -931,6 +931,8 @@ public:
 	void shrinkBlockPages();
 	void shrinkVarPages();
 
+	void shrink();
+
 	uint32* tailReleasedContentOffsets;
 	uint32 tailReleasedBranchOffset;
 	uint32 tailReleasedBlockOffset;

@@ -47,5 +47,7 @@
     <Compile Include="HArray_insert.cpp" />
     <Compile Include="HArray_rebuild.cpp" />
     <Compile Include="HArray_scanKeysAndValues.cpp" />
+    <Compile Include="HArray_shrink.cpp" />
+    <Compile Include="HArray_test.cpp" />
   </ItemGroup>
 </Project>

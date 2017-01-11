@@ -387,7 +387,7 @@ void HArray::shrinkBranchPages()
 			{
 				if (contentCell.Value >= shrinkLastBranchOffset)
 				{
-					uint32 newBranchOffset;
+					uint32 newBranchOffset = 0xFFFFFFFF;
 
 					//find free var cell
 					while (countReleasedBranchCells)
@@ -406,6 +406,13 @@ void HArray::shrinkBranchPages()
 						{
 							tailReleasedBranchOffset = pBranchPages[tailReleasedBranchOffset >> 16]->pBranch[tailReleasedBranchOffset & 0xFFFF].Values[0];
 						}
+					}
+
+					if (newBranchOffset == 0xFFFFFFFF)
+					{
+						printf("\nFAIL STATE (shrinkBranchPages)\n");
+
+						return;
 					}
 
 					//get cells
@@ -432,7 +439,7 @@ void HArray::shrinkBranchPages()
 				{
 					if (varCell.ContCell.Value >= shrinkLastBranchOffset)
 					{
-						uint32 newBranchOffset;
+						uint32 newBranchOffset = 0xFFFFFFFF;
 
 						//find free var cell
 						while (countReleasedBranchCells)
@@ -451,6 +458,13 @@ void HArray::shrinkBranchPages()
 							{
 								tailReleasedBranchOffset = pBranchPages[tailReleasedBranchOffset >> 16]->pBranch[tailReleasedBranchOffset & 0xFFFF].Values[0];
 							}
+						}
+
+						if (newBranchOffset == 0xFFFFFFFF)
+						{
+							printf("\nFAIL STATE (shrinkBranchPages)\n");
+
+							return;
 						}
 
 						//get cells
@@ -502,7 +516,7 @@ void HArray::shrinkBranchPages()
 					//first barnch
 					if (blockCell.Offset >= shrinkLastBranchOffset)
 					{
-						uint32 newBranchOffset;
+						uint32 newBranchOffset = 0xFFFFFFFF;
 
 						//find free branch cell
 						while (countReleasedBranchCells)
@@ -521,6 +535,13 @@ void HArray::shrinkBranchPages()
 							{
 								tailReleasedBranchOffset = pBranchPages[tailReleasedBranchOffset >> 16]->pBranch[tailReleasedBranchOffset & 0xFFFF].Values[0];
 							}
+						}
+
+						if (newBranchOffset == 0xFFFFFFFF)
+						{
+							printf("\nFAIL STATE (shrinkBranchPages)\n");
+
+							return;
 						}
 
 						//get cells
@@ -544,7 +565,7 @@ void HArray::shrinkBranchPages()
 					//first branch
 					if (blockCell.Offset >= shrinkLastBranchOffset)
 					{
-						uint32 newBranchOffset;
+						uint32 newBranchOffset = 0xFFFFFFFF;
 
 						//find free branch cell
 						while (countReleasedBranchCells)
@@ -563,6 +584,13 @@ void HArray::shrinkBranchPages()
 							{
 								tailReleasedBranchOffset = pBranchPages[tailReleasedBranchOffset >> 16]->pBranch[tailReleasedBranchOffset & 0xFFFF].Values[0];
 							}
+						}
+
+						if (newBranchOffset == 0xFFFFFFFF)
+						{
+							printf("\nFAIL STATE (shrinkBranchPages)\n");
+
+							return;
 						}
 
 						//get cells
@@ -622,6 +650,21 @@ void HArray::shrinkBranchPages()
 					}
 				}
 			}
+		}
+	}
+
+	//check state
+	for (uint32 i = 0; i < countReleasedBranchCells; i++)
+	{
+		if (tailReleasedBranchOffset < shrinkLastBranchOffset)
+		{
+			printf("\nFAIL STATE (shrinkBranchPages)\n");
+
+			return;
+		}
+		else
+		{
+			tailReleasedBranchOffset = pBlockPages[tailReleasedBranchOffset >> 16]->pBlock[tailReleasedBranchOffset & 0xFFFF].Offset;
 		}
 	}
 
@@ -704,7 +747,7 @@ void HArray::shrinkBlockPages()
 			{
 				if (contentCell.Value >= shrinkLastBlockOffset)
 				{
-					uint32 newBlockOffset;
+					uint32 newBlockOffset = 0xFFFFFFFF;
 
 					//find free block cell
 					while (countReleasedBlockCells)
@@ -723,6 +766,13 @@ void HArray::shrinkBlockPages()
 						{
 							tailReleasedBlockOffset = pBlockPages[tailReleasedBlockOffset >> 16]->pBlock[tailReleasedBlockOffset & 0xFFFF].Offset;
 						}
+					}
+
+					if (newBlockOffset == 0xFFFFFFFF)
+					{
+						printf("\nFAIL STATE (shrinkBlockPages)\n");
+
+						return;
 					}
 
 					uint32 oldBlockOffset = contentCell.Value;
@@ -770,7 +820,7 @@ void HArray::shrinkBlockPages()
 			{
 				if (blockCell.Offset >= shrinkLastBlockOffset)
 				{
-					uint32 newBlockOffset;
+					uint32 newBlockOffset = 0xFFFFFFFF;
 
 					//find free block cell
 					while (countReleasedBlockCells)
@@ -791,6 +841,13 @@ void HArray::shrinkBlockPages()
 						}
 					}
 
+					if (newBlockOffset == 0xFFFFFFFF)
+					{
+						printf("\nFAIL STATE (shrinkBlockPages)\n");
+
+						return;
+					}
+
 					uint32 oldBlockOffset = blockCell.Offset;
 					blockCell.Offset = newBlockOffset;
 
@@ -807,6 +864,21 @@ void HArray::shrinkBlockPages()
 					}
 				}
 			}
+		}
+	}
+
+	//check state
+	for (uint32 i = 0; i < countReleasedBlockCells; i += BLOCK_ENGINE_SIZE)
+	{
+		if (tailReleasedBlockOffset < shrinkLastBlockOffset)
+		{
+			printf("\nFAIL STATE (shrinkBlockPages)\n");
+			
+			return;
+		}
+		else
+		{
+			tailReleasedBlockOffset = pBlockPages[tailReleasedBlockOffset >> 16]->pBlock[tailReleasedBlockOffset & 0xFFFF].Offset;
 		}
 	}
 
@@ -888,7 +960,7 @@ void HArray::shrinkVarPages()
 			{
 				if (contentCell.Value >= shrinkLastVarOffset) //should be moved
 				{
-					uint32 newVarOffset;
+					uint32 newVarOffset = 0xFFFFFFFF;
 
 					//find free var cell
 					while (countReleasedVarCells)
@@ -907,6 +979,11 @@ void HArray::shrinkVarPages()
 						{
 							tailReleasedVarOffset = pVarPages[tailReleasedVarOffset >> 16]->pVar[tailReleasedVarOffset & 0xFFFF].ValueContCell.Value;
 						}
+					}
+
+					if (newVarOffset == 0xFFFFFFFF)
+					{
+						printf("\nFAIL STATE (shrinkVarPages)\n");
 					}
 
 					//get cells

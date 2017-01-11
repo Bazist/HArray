@@ -342,3 +342,154 @@ bool HArray::testVarConsistency()
 	return (count + countReleasedVarCells) == lastVarOffset;
 }
 
+bool HArray::testBlockPages()
+{
+	if (!countReleasedBlockCells)
+	{
+		return true;
+	}
+
+	uint32 shrinkLastBlockOffset = lastBlockOffset - countReleasedBlockCells;
+
+	uint32 currTailReleasedBlockOffset = tailReleasedBlockOffset;
+	uint32 currCountReleasedBlockCells = countReleasedBlockCells;
+
+	//content ===================================================================================================================
+	uint32 lastPage = ContentPagesCount - 1;
+
+	for (uint32 page = 0; page < ContentPagesCount; page++)
+	{
+		ContentPage* pContentPage = pContentPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			ContentCell& contentCell = pContentPage->pContent[cell];
+
+			if (MIN_BLOCK_TYPE <= contentCell.Type && contentCell.Type <= MAX_BLOCK_TYPE) //in content
+			{
+				if (contentCell.Value >= shrinkLastBlockOffset)
+				{
+					uint32 newBlockOffset = 0xFFFFFFFF;
+
+					//find free block cell
+					while (currCountReleasedBlockCells)
+					{
+						currCountReleasedBlockCells -= BLOCK_ENGINE_SIZE;
+
+						if (currTailReleasedBlockOffset < shrinkLastBlockOffset)
+						{
+							newBlockOffset = currTailReleasedBlockOffset;
+
+							currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
+
+							break;
+						}
+						else
+						{
+							currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
+						}
+					}
+
+					if (newBlockOffset == 0xFFFFFFFF)
+					{
+						return false;
+					}
+
+					if (!currCountReleasedBlockCells)
+					{
+						goto EXIT;
+					}
+				}
+			}
+		}
+	}
+
+	//sub blocks ===================================================================================================================
+	lastPage = BlockPagesCount - 1;
+
+	for (uint32 page = 0; page < BlockPagesCount; page++)
+	{
+		BlockPage* pBlockPage = pBlockPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = ((lastBlockOffset - 1) & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+			if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
+			{
+				if (blockCell.Offset >= shrinkLastBlockOffset)
+				{
+					uint32 newBlockOffset = 0xFFFFFFFF;
+
+					//find free block cell
+					while (currCountReleasedBlockCells)
+					{
+						currCountReleasedBlockCells -= BLOCK_ENGINE_SIZE;
+
+						if (currTailReleasedBlockOffset < shrinkLastBlockOffset)
+						{
+							newBlockOffset = currTailReleasedBlockOffset;
+
+							currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
+
+							break;
+						}
+						else
+						{
+							currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
+						}
+					}
+
+					if (newBlockOffset == 0xFFFFFFFF)
+					{
+						return false;
+					}
+
+					if (!currCountReleasedBlockCells)
+					{
+						goto EXIT;
+					}
+				}
+			}
+		}
+	}
+
+	//check state
+	for (uint32 i = 0; i < currCountReleasedBlockCells; i += BLOCK_ENGINE_SIZE)
+	{
+		if (currTailReleasedBlockOffset < shrinkLastBlockOffset)
+		{
+			return false;
+		}
+		else
+		{
+			currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
+		}
+	}
+
+	EXIT:
+
+	return true;
+}

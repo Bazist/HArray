@@ -956,6 +956,7 @@ public:
 	bool testBlockConsistency();
 	bool testBranchConsistency();
 	bool testVarConsistency();
+	bool testBlockPages();
 
 	uint32 getFullContentLen(uint32 contentOffset);
 

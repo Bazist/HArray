@@ -56,5 +56,11 @@
     <ClCompile Include="HArray_scanKeysAndValues.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HArray_shrink.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HArray_test.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -104,6 +104,8 @@
     <ClCompile Include="HArray_insert.cpp" />
     <ClCompile Include="HArray_rebuild.cpp" />
     <ClCompile Include="HArray_scanKeysAndValues.cpp" />
+    <ClCompile Include="HArray_shrink.cpp" />
+    <ClCompile Include="HArray_test.cpp" />
     <ClCompile Include="Main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>

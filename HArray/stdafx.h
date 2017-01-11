@@ -49,8 +49,9 @@ typedef uint8_t uchar8;
 typedef uint8_t ucode8;
 #endif
 
-const uint32 MAX_SHORT = 65536;
 const uint32 MAX_CHAR = 256;
+const uint32 MAX_SHORT = 65536;
+
 const uint32 INIT_MAX_PAGES = 1024;
 const uint32 PAGE_SIZE = MAX_SHORT*2;
 const uchar8 BLOCK_SIZE = 16;

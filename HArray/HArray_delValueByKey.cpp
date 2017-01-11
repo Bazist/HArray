@@ -98,8 +98,8 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 	uint32 offsets[BRANCH_ENGINE_SIZE * 2];
 	uint32 count = 0;
 
-	BranchCell* releaseBranchCells[4];
-	uint32 releaseBranchOffsets[4];
+	BranchCell* releaseBranchCells[BRANCH_ENGINE_SIZE * 2];
+	uint32 releaseBranchOffsets[BRANCH_ENGINE_SIZE * 2];
 	uint32 countReleaseBranchCells = 0;
 
 	uint32 subOffset = 0;
@@ -111,15 +111,15 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 		{
 			if (pCurrBlockCell->Type == CURRENT_VALUE_TYPE)
 			{
+				if (count >= BRANCH_ENGINE_SIZE * 2) //leave block, do nothing, exit
+				{
+					return false;
+				}
+
 				values[count] = pCurrBlockCell->ValueOrOffset;
 				offsets[count] = pCurrBlockCell->Offset;
 
 				count++;
-
-				if (count > BRANCH_ENGINE_SIZE * 2) //leave block, do nothing, exit
-				{
-					return false;
-				}
 			}
 			else
 			{
@@ -189,7 +189,9 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 
 			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 
-			return !dismantlingContentCells(path, currPathLen);
+			//dismantlingContentCells(path, currPathLen);
+
+			return true;
 		}
 		else if (count == 1) //remove block, create CURRENT_VALUE_TYPE
 		{
@@ -353,6 +355,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 			//set content cell
 			prevSP.pBlockCell->Type = MIN_BRANCH_TYPE1 + count - 1;
 			prevSP.pBlockCell->Offset = branchOffset;
+			prevSP.pBlockCell->ValueOrOffset = 0;
 
 			//release block
 			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
@@ -1030,10 +1033,8 @@ bool HArray::delValueByKey(uint32* key,
 				//save path
 				SegmentPath& sp = path[pathLen++];
 				sp.Type = BLOCK_OFFSET_SEGMENT_TYPE;
-				sp.pContentCell = &contentCell;
 				sp.pBlockCell = &blockCell;
-				sp.StartBlockOffset = startOffset;
-
+				
 				goto NEXT_BLOCK;
 			}
 			else

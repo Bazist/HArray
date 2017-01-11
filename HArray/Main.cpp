@@ -918,9 +918,30 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 			i = 4887101;
 		}
 
+		if (i == 3494577)
+		{
+			i = i;
+		}
+
+		if (i == 3470685)
+		{
+			i = 3470685;
+		}
+
 		const char* str = keys[i].c_str();
 
 		ha.delValueByKey((uint32*)str, STR_KEY_LEN);
+
+		if (i >= 3470000)
+		//if (i % 1000 == 0)
+		{
+			if (!ha.testBlockPages())
+			{
+				printf("\n!!! testBlockPages failed !!!\n");
+
+				return;
+			}
+		}
 
 		if(i >= 4887101)
 		if(i % 1 == 0)

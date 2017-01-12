@@ -189,7 +189,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 
 			releaseBlockCells(sp.pBlockCell - sp.BlockSubOffset, sp.StartBlockOffset);
 
-			//dismantlingContentCells(path, currPathLen);
+			dismantlingContentCells(path, currPathLen);
 
 			return true;
 		}
@@ -1104,6 +1104,13 @@ DISMANTLING:
 
 	if (countReleasedBlockCells > MAX_COUNT_RELEASED_BLOCK_CELLS)
 	{
+		if (!testBlockPages())
+		{
+			printf("\n!!! testBlockPages failed !!!\n");
+
+			return true;
+		}
+
 		shrinkBlockPages();
 
 		/*

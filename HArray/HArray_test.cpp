@@ -115,7 +115,7 @@ bool HArray::testContentConsistency()
 		}
 		else //last page
 		{
-			countCells = ((lastBlockOffset - 1) & 0xFFFF) + 1;
+			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 		}
 
 		for (uint32 cell = 0; cell < countCells; cell++)
@@ -218,7 +218,7 @@ bool HArray::testBranchConsistency()
 		}
 		else //last page
 		{
-			countCells = ((lastBlockOffset - 1) & 0xFFFF) + 1;
+			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 		}
 
 		for (uint32 cell = 0; cell < countCells; cell++)
@@ -290,7 +290,7 @@ bool HArray::testBlockConsistency()
 		}
 		else //last page
 		{
-			countCells = ((lastBlockOffset - 1) & 0xFFFF) + 1;
+			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 		}
 
 		for (uint32 cell = 0; cell < countCells; cell++)
@@ -349,6 +349,11 @@ bool HArray::testBlockPages()
 		return true;
 	}
 
+	uint32 count1 = 0;
+	uint32 count2 = 0;
+	uint32 count3 = 0;
+	uint32 count4 = 0;
+
 	uint32 shrinkLastBlockOffset = lastBlockOffset - countReleasedBlockCells;
 
 	uint32 currTailReleasedBlockOffset = tailReleasedBlockOffset;
@@ -378,37 +383,17 @@ bool HArray::testBlockPages()
 
 			if (MIN_BLOCK_TYPE <= contentCell.Type && contentCell.Type <= MAX_BLOCK_TYPE) //in content
 			{
-				if (contentCell.Value >= shrinkLastBlockOffset)
+				if (contentCell.Value < shrinkLastBlockOffset)
 				{
-					uint32 newBlockOffset = 0xFFFFFFFF;
+					count1++;
+				}
+				else
+				{
+					count2++;
 
-					//find free block cell
-					while (currCountReleasedBlockCells)
+					if (2176272 - 17744 <= contentCell.Value && contentCell.Value < 2176272 - 17728)
 					{
-						currCountReleasedBlockCells -= BLOCK_ENGINE_SIZE;
-
-						if (currTailReleasedBlockOffset < shrinkLastBlockOffset)
-						{
-							newBlockOffset = currTailReleasedBlockOffset;
-
-							currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
-
-							break;
-						}
-						else
-						{
-							currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
-						}
-					}
-
-					if (newBlockOffset == 0xFFFFFFFF)
-					{
-						return false;
-					}
-
-					if (!currCountReleasedBlockCells)
-					{
-						goto EXIT;
+						printf("\n cont ==> %u %u %u\n", page, cell, contentCell.Value);
 					}
 				}
 			}
@@ -430,46 +415,31 @@ bool HArray::testBlockPages()
 		}
 		else //last page
 		{
-			countCells = ((lastBlockOffset - 1) & 0xFFFF) + 1;
+			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 		}
 
 		for (uint32 cell = 0; cell < countCells; cell++)
 		{
 			BlockCell& blockCell = pBlockPage->pBlock[cell];
 
+			if (page == 5 && cell == 13505)
+			{
+				page = 5;
+			}
+
 			if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
 			{
-				if (blockCell.Offset >= shrinkLastBlockOffset)
+				if (blockCell.Offset < shrinkLastBlockOffset)
 				{
-					uint32 newBlockOffset = 0xFFFFFFFF;
+					count1++;
+				}
+				else
+				{
+					count2++;
 
-					//find free block cell
-					while (currCountReleasedBlockCells)
+					if (2176272 - 17744 <= blockCell.Offset && blockCell.Offset < 2176272 - 17728)
 					{
-						currCountReleasedBlockCells -= BLOCK_ENGINE_SIZE;
-
-						if (currTailReleasedBlockOffset < shrinkLastBlockOffset)
-						{
-							newBlockOffset = currTailReleasedBlockOffset;
-
-							currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
-
-							break;
-						}
-						else
-						{
-							currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
-						}
-					}
-
-					if (newBlockOffset == 0xFFFFFFFF)
-					{
-						return false;
-					}
-
-					if (!currCountReleasedBlockCells)
-					{
-						goto EXIT;
+						printf("\n sub ==> %u %u %u\n", page, cell, blockCell.Offset);
 					}
 				}
 			}
@@ -481,15 +451,15 @@ bool HArray::testBlockPages()
 	{
 		if (currTailReleasedBlockOffset < shrinkLastBlockOffset)
 		{
-			return false;
+			count3++;
 		}
 		else
 		{
-			currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
+			count4++;
 		}
+
+		currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
 	}
 
-	EXIT:
-
-	return true;
+	return (count2 == count3);
 }

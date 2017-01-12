@@ -207,7 +207,7 @@ void HArray::shrinkContentPages()
 		}
 		else //last page
 		{
-			countCells = ((lastBlockOffset - 1) & 0xFFFF) + 1;
+			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 		}
 
 		for (uint32 cell = 0; cell < countCells; cell++)
@@ -502,7 +502,7 @@ void HArray::shrinkBranchPages()
 		}
 		else //last page
 		{
-			countCells = ((lastBlockOffset - 1) & 0xFFFF) + 1;
+			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 		}
 
 		for (uint32 cell = 0; cell < countCells; cell++)
@@ -612,7 +612,7 @@ void HArray::shrinkBranchPages()
 					//second branch
 					if (blockCell.ValueOrOffset >= shrinkLastBranchOffset)
 					{
-						uint32 newBranchOffset;
+						uint32 newBranchOffset = 0xFFFFFFFF;
 
 						//find free branch cell
 						while (countReleasedBranchCells)
@@ -631,6 +631,13 @@ void HArray::shrinkBranchPages()
 							{
 								tailReleasedBranchOffset = pBranchPages[tailReleasedBranchOffset >> 16]->pBranch[tailReleasedBranchOffset & 0xFFFF].Values[0];
 							}
+						}
+
+						if (newBranchOffset == 0xFFFFFFFF)
+						{
+							printf("\nFAIL STATE (shrinkBranchPages)\n");
+
+							return;
 						}
 
 						//get cells
@@ -797,6 +804,8 @@ void HArray::shrinkBlockPages()
 	//sub blocks ===================================================================================================================
 	lastPage = BlockPagesCount - 1;
 
+	int count = 0;
+
 	for (uint32 page = 0; page < BlockPagesCount; page++)
 	{
 		BlockPage* pBlockPage = pBlockPages[page];
@@ -809,9 +818,9 @@ void HArray::shrinkBlockPages()
 		}
 		else //last page
 		{
-			countCells = ((lastBlockOffset - 1) & 0xFFFF) + 1;
+			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 		}
-
+				
 		for (uint32 cell = 0; cell < countCells; cell++)
 		{
 			BlockCell& blockCell = pBlockPage->pBlock[cell];
@@ -847,6 +856,8 @@ void HArray::shrinkBlockPages()
 
 						return;
 					}
+
+					count++;
 
 					uint32 oldBlockOffset = blockCell.Offset;
 					blockCell.Offset = newBlockOffset;

@@ -656,7 +656,14 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 
 		case BLOCK_OFFSET_SEGMENT_TYPE:
 		{
-			break; //skip
+			if (tryReleaseBlock(path, pathLen, currPathLen))
+			{
+				break;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		case VAR_SHUNT_SEGMENT_TYPE:
@@ -1034,7 +1041,11 @@ bool HArray::delValueByKey(uint32* key,
 				SegmentPath& sp = path[pathLen++];
 				sp.Type = BLOCK_OFFSET_SEGMENT_TYPE;
 				sp.pBlockCell = &blockCell;
-				
+				sp.pContentCell = &contentCell;
+				sp.StartBlockOffset = startOffset;
+				sp.ContentOffset = contentOffset;
+				sp.BlockSubOffset = subOffset;
+
 				goto NEXT_BLOCK;
 			}
 			else
@@ -1104,13 +1115,6 @@ DISMANTLING:
 
 	if (countReleasedBlockCells > MAX_COUNT_RELEASED_BLOCK_CELLS)
 	{
-		if (!testBlockPages())
-		{
-			printf("\n!!! testBlockPages failed !!!\n");
-
-			return true;
-		}
-
 		shrinkBlockPages();
 
 		/*

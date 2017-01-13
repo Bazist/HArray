@@ -349,6 +349,8 @@ bool HArray::testBlockPages()
 		return true;
 	}
 
+	bool xx = false;
+
 	uint32 count1 = 0;
 	uint32 count2 = 0;
 	uint32 count3 = 0;
@@ -391,10 +393,8 @@ bool HArray::testBlockPages()
 				{
 					count2++;
 
-					if (2176272 - 17744 <= contentCell.Value && contentCell.Value < 2176272 - 17728)
-					{
-						printf("\n cont ==> %u %u %u\n", page, cell, contentCell.Value);
-					}
+					if (xx)
+						printf("%u\n", contentCell.Value);
 				}
 			}
 		}
@@ -437,10 +437,8 @@ bool HArray::testBlockPages()
 				{
 					count2++;
 
-					if (2176272 - 17744 <= blockCell.Offset && blockCell.Offset < 2176272 - 17728)
-					{
-						printf("\n sub ==> %u %u %u\n", page, cell, blockCell.Offset);
-					}
+					if (xx)
+						printf("%u\n", blockCell.Offset);
 				}
 			}
 		}

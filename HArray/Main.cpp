@@ -913,13 +913,14 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (i == 4771462)
+		if (i == 4987712)
 		{
-			i = 4771462;
+			i = 4987712;
 		}
 		
 		const char* str = keys[i].c_str();
 
+		/*
 		if (i >= 4771463)
 			//if (i % 10000 == 0)
 		{
@@ -930,9 +931,11 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 				return;
 			}
 		}
+		*/
 
 		ha.delValueByKey((uint32*)str, STR_KEY_LEN);
 
+		/*
 		if (i >= 4771463)
 		//if (i % 10000 == 0)
 		{
@@ -943,9 +946,10 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 				return;
 			}
 		}
+		*/
 		
-		if(i >= 4771463)
-		//if(i % 100 == 0)
+		if (i >= 4987712)
+		//if(i % 10000 == 0)
 		{
 			printf("%u\n", i);
 

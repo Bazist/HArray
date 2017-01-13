@@ -959,7 +959,9 @@ public:
 	bool testBlockPages();
 
 	uint32 getFullContentLen(uint32 contentOffset);
-
+	bool shrinkBlock(uint32 startBlockOffset,
+					 uint32 shrinkLastBlockOffset);
+	
 	//=============================================================================================================
 
 	void destroy()

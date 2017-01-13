@@ -134,9 +134,9 @@ void HArray::shrinkContentPages()
 			headerCell.Type == HEADER_JUMP_TYPE)
 		{
 			currMovedLen += moveContentCells(headerCell.Offset, //changed
-				&pNewContentPage,
-				shrinkLastContentOffset,
-				lastContentOffsetOnNewPage);
+											 &pNewContentPage,
+											 shrinkLastContentOffset,
+											 lastContentOffsetOnNewPage);
 
 			if (currMovedLen >= totalMovedLen)
 			{
@@ -421,6 +421,7 @@ void HArray::shrinkBranchPages()
 
 					//copy
 					destBranchCell = srcBranchCell;
+					memset(&srcBranchCell, 0, sizeof(BranchCell));
 
 					//set content cell
 					contentCell.Value = newBranchOffset;
@@ -473,6 +474,7 @@ void HArray::shrinkBranchPages()
 
 						//copy
 						destBranchCell = srcBranchCell;
+						memset(&srcBranchCell, 0, sizeof(BranchCell));
 
 						//set content cell
 						varCell.ContCell.Value = newBranchOffset;
@@ -550,6 +552,7 @@ void HArray::shrinkBranchPages()
 
 						//copy
 						destBranchCell = srcBranchCell;
+						memset(&srcBranchCell, 0, sizeof(BranchCell));
 
 						//set block cell
 						blockCell.Offset = newBranchOffset;
@@ -599,6 +602,7 @@ void HArray::shrinkBranchPages()
 
 						//copy
 						destBranchCell = srcBranchCell;
+						memset(&srcBranchCell, 0, sizeof(BranchCell));
 
 						//set block cell
 						blockCell.Offset = newBranchOffset;
@@ -646,6 +650,7 @@ void HArray::shrinkBranchPages()
 
 						//copy
 						destBranchCell = srcBranchCell;
+						memset(&srcBranchCell, 0, sizeof(BranchCell));
 
 						//set block cell
 						blockCell.ValueOrOffset = newBranchOffset;
@@ -702,6 +707,80 @@ EXIT:
 	return;
 }
 
+
+bool HArray::shrinkBlock(uint32 startBlockOffset,
+						 uint32 shrinkLastBlockOffset)
+{
+	//sub blocks ===================================================================================================================
+	BlockPage* pBlockPage = pBlockPages[startBlockOffset >> 16];
+	uint32 startOffset = startBlockOffset & 0xFFFF;
+	uint32 endOffset = startOffset + BLOCK_ENGINE_SIZE;
+
+	for (uint32 cell = startOffset; cell < endOffset; cell++)
+	{
+		BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+		if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
+		{
+			if (blockCell.Offset >= shrinkLastBlockOffset)
+			{
+				uint32 newBlockOffset = 0xFFFFFFFF;
+
+				//find free block cell
+				while (countReleasedBlockCells)
+				{
+					countReleasedBlockCells -= BLOCK_ENGINE_SIZE;
+
+					if (tailReleasedBlockOffset < shrinkLastBlockOffset)
+					{
+						newBlockOffset = tailReleasedBlockOffset;
+
+						tailReleasedBlockOffset = pBlockPages[tailReleasedBlockOffset >> 16]->pBlock[tailReleasedBlockOffset & 0xFFFF].Offset;
+
+						break;
+					}
+					else
+					{
+						tailReleasedBlockOffset = pBlockPages[tailReleasedBlockOffset >> 16]->pBlock[tailReleasedBlockOffset & 0xFFFF].Offset;
+					}
+				}
+
+				if (newBlockOffset == 0xFFFFFFFF)
+				{
+					printf("\nFAIL STATE (shrinkBlockPages)\n");
+
+					return false;
+				}
+
+				uint32 oldBlockOffset = blockCell.Offset;
+				blockCell.Offset = newBlockOffset;
+
+				//get cells
+				BlockCell& srcBlockCell = pBlockPages[oldBlockOffset >> 16]->pBlock[oldBlockOffset & 0xFFFF];
+				BlockCell& destBlockCell = pBlockPages[newBlockOffset >> 16]->pBlock[newBlockOffset & 0xFFFF];
+
+				//copy data
+				memcpy(&destBlockCell, &srcBlockCell, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
+				memset(&srcBlockCell, 0, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
+
+				if (!countReleasedBlockCells)
+				{
+					return true;
+				}
+
+				//after move block, we need check position and rescan range
+				if (newBlockOffset < startBlockOffset)
+				{
+					if (shrinkBlock(newBlockOffset, shrinkLastBlockOffset))
+						return true;
+				}
+			}
+		}
+	}
+	
+	return false;
+}
+
 void HArray::shrinkBlockPages()
 {
 	uint32 shrinkLastBlockOffset = lastBlockOffset - countReleasedBlockCells;
@@ -727,6 +806,8 @@ void HArray::shrinkBlockPages()
 
 		return;
 	}
+
+	bool xx = false;
 
 	//content ===================================================================================================================
 	int32 lastPage = ContentPagesCount - 1;
@@ -782,6 +863,9 @@ void HArray::shrinkBlockPages()
 						return;
 					}
 
+					if (xx)
+						printf("%u\n", contentCell.Value);
+
 					uint32 oldBlockOffset = contentCell.Value;
 					contentCell.Value = newBlockOffset;
 
@@ -791,6 +875,7 @@ void HArray::shrinkBlockPages()
 
 					//copy data
 					memcpy(&destBlockCell, &srcBlockCell, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
+					memset(&srcBlockCell, 0, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
 
 					if (!countReleasedBlockCells)
 					{
@@ -859,6 +944,9 @@ void HArray::shrinkBlockPages()
 
 					count++;
 
+					if (xx)
+						printf("%u\n", blockCell.Offset);
+
 					uint32 oldBlockOffset = blockCell.Offset;
 					blockCell.Offset = newBlockOffset;
 
@@ -868,10 +956,20 @@ void HArray::shrinkBlockPages()
 
 					//copy data
 					memcpy(&destBlockCell, &srcBlockCell, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
+					memset(&srcBlockCell, 0, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
 
 					if (!countReleasedBlockCells)
 					{
 						goto EXIT;
+					}
+
+					//after move block, we need check position and rescan range
+					uint32 currBlockOffset = (page << 16) | cell;
+
+					if (newBlockOffset < currBlockOffset)
+					{
+						if (shrinkBlock(newBlockOffset, shrinkLastBlockOffset))
+							goto EXIT;
 					}
 				}
 			}
@@ -1003,6 +1101,7 @@ void HArray::shrinkVarPages()
 
 					//copy
 					destVarCell = srcVarCell;
+					memset(&srcVarCell, 0, sizeof(VarCell));
 
 					//set content cell
 					contentCell.Value = newVarOffset;

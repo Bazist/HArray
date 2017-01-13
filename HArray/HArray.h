@@ -127,11 +127,16 @@ public:
             HeaderBits = 32-headerBase;
             HeaderSize = (0xFFFFFFFF>>HeaderBits) + 1;
 
+			tailReleasedContentOffsets = 0;
+			tailReleasedBranchOffset = 0;
+			tailReleasedBlockOffset = 0;
+			tailReleasedVarOffset = 0;
+
             countReleasedContentCells = 0;
             countReleasedBranchCells = 0;
 			countReleasedBlockCells = 0;
 			countReleasedVarCells = 0;
-
+			
             MAX_SAFE_SHORT = MAX_SHORT - ValueLen;
 
             pHeader = new HeaderCell[HeaderSize];
@@ -196,10 +201,6 @@ public:
 
             for(uint32 i=0; i<MAX_KEY_SEGMENTS; i++)
             	tailReleasedContentOffsets[i] = 0;
-
-            tailReleasedBranchOffset = 0;
-            tailReleasedBlockOffset = 0;
-			tailReleasedVarOffset = 0;
 		}
 		catch(...)
 		{
@@ -956,7 +957,9 @@ public:
 	bool testBlockConsistency();
 	bool testBranchConsistency();
 	bool testVarConsistency();
-	bool testBlockPages();
+	
+	bool testFillBlockPages();
+	bool testFillBranchPages();
 
 	uint32 getFullContentLen(uint32 contentOffset);
 	bool shrinkBlock(uint32 startBlockOffset,

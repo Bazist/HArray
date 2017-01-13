@@ -342,19 +342,128 @@ bool HArray::testVarConsistency()
 	return (count + countReleasedVarCells) == lastVarOffset;
 }
 
-bool HArray::testBlockPages()
+bool HArray::testFillBranchPages()
+{
+	if (!countReleasedBranchCells)
+	{
+		return true;
+	}
+
+	char* control = new char[lastBranchOffset];
+	memset(control, 0, lastBranchOffset);
+
+	uint32 shrinkLastBranchOffset = lastBranchOffset - countReleasedBranchCells;
+
+	uint32 currTailReleasedBranchOffset = tailReleasedBranchOffset;
+	uint32 currCountReleasedBranchCells = countReleasedBranchCells;
+
+	//content ===================================================================================================================
+	int32 lastPage = ContentPagesCount - 1;
+
+	for (uint32 page = 0; page < ContentPagesCount; page++)
+	{
+		ContentPage* pContentPage = pContentPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			ContentCell& contentCell = pContentPage->pContent[cell];
+
+			if (MIN_BRANCH_TYPE1 <= contentCell.Type && contentCell.Type <= MAX_BRANCH_TYPE1) //in content
+			{
+				control[contentCell.Value]++;
+			}
+			else if (contentCell.Type == VAR_TYPE) //shunted in var cell
+			{
+				VarCell& varCell = pVarPages[contentCell.Value >> 16]->pVar[contentCell.Value & 0xFFFF];
+
+				if (MIN_BRANCH_TYPE1 <= varCell.ContCell.Type && varCell.ContCell.Type <= MAX_BRANCH_TYPE1) //in content
+				{
+					control[varCell.ContCell.Value]++;
+				}
+			}
+		}
+	}
+
+	//blocks ===================================================================================================================
+	lastPage = BlockPagesCount - 1;
+
+	for (uint32 page = 0; page < BlockPagesCount; page++)
+	{
+		BlockPage* pBlockPage = pBlockPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+			if (blockCell.Type >= MIN_BRANCH_TYPE1)
+			{
+				if (blockCell.Type <= MAX_BRANCH_TYPE1) //one branch found
+				{
+					control[blockCell.Offset]++;
+				}
+				else if (blockCell.Type <= MAX_BRANCH_TYPE2) //one branch found
+				{
+					control[blockCell.Offset]++;
+					control[blockCell.ValueOrOffset]++;
+				}
+			}
+		}
+	}
+
+	//check state
+	for (uint32 i = 0; i < currCountReleasedBranchCells; i++)
+	{
+		control[currTailReleasedBranchOffset]++;
+
+		currTailReleasedBranchOffset = pBranchPages[currTailReleasedBranchOffset >> 16]->pBranch[currTailReleasedBranchOffset & 0xFFFF].Values[0];
+	}
+
+	for (uint32 i = 0; i < lastBranchOffset; i++)
+	{
+		if (control[i] != 1)
+		{
+			delete[] control;
+
+			return false;
+		}
+	}
+
+	delete[] control;
+
+	return true;
+}
+
+bool HArray::testFillBlockPages()
 {
 	if (!countReleasedBlockCells)
 	{
 		return true;
 	}
 
-	bool xx = false;
-
-	uint32 count1 = 0;
-	uint32 count2 = 0;
-	uint32 count3 = 0;
-	uint32 count4 = 0;
+	char* control = new char[lastBlockOffset / BLOCK_ENGINE_SIZE];
+	memset(control, 0, lastBlockOffset / BLOCK_ENGINE_SIZE);
 
 	uint32 shrinkLastBlockOffset = lastBlockOffset - countReleasedBlockCells;
 
@@ -385,17 +494,7 @@ bool HArray::testBlockPages()
 
 			if (MIN_BLOCK_TYPE <= contentCell.Type && contentCell.Type <= MAX_BLOCK_TYPE) //in content
 			{
-				if (contentCell.Value < shrinkLastBlockOffset)
-				{
-					count1++;
-				}
-				else
-				{
-					count2++;
-
-					if (xx)
-						printf("%u\n", contentCell.Value);
-				}
+				control[contentCell.Value / BLOCK_ENGINE_SIZE]++;
 			}
 		}
 	}
@@ -422,24 +521,9 @@ bool HArray::testBlockPages()
 		{
 			BlockCell& blockCell = pBlockPage->pBlock[cell];
 
-			if (page == 5 && cell == 13505)
-			{
-				page = 5;
-			}
-
 			if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
 			{
-				if (blockCell.Offset < shrinkLastBlockOffset)
-				{
-					count1++;
-				}
-				else
-				{
-					count2++;
-
-					if (xx)
-						printf("%u\n", blockCell.Offset);
-				}
+				control[blockCell.Offset / BLOCK_ENGINE_SIZE]++;
 			}
 		}
 	}
@@ -447,17 +531,22 @@ bool HArray::testBlockPages()
 	//check state
 	for (uint32 i = 0; i < currCountReleasedBlockCells; i += BLOCK_ENGINE_SIZE)
 	{
-		if (currTailReleasedBlockOffset < shrinkLastBlockOffset)
-		{
-			count3++;
-		}
-		else
-		{
-			count4++;
-		}
+		control[currTailReleasedBlockOffset / BLOCK_ENGINE_SIZE]++;
 
 		currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
 	}
 
-	return (count2 == count3);
+	for (uint32 i = 0; i < lastBlockOffset / BLOCK_ENGINE_SIZE; i++)
+	{
+		if (control[i] != 1)
+		{
+			delete[] control;
+
+			return false;
+		}
+	}
+
+	delete[] control;
+
+	return true;
 }

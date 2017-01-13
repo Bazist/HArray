@@ -26,8 +26,8 @@
 #include "HArrayInt.h"
 #include "HArray.h"
 
-#define SEQUENCE_TESTS
-//#define RANDOM_TESTS
+//#define SEQUENCE_TESTS
+#define RANDOM_TESTS
 //#define PERIOD_TESTS
 
 #define HARRAY_TESTS
@@ -913,9 +913,9 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (i == 4987712)
+		if (i == 4971422)
 		{
-			i = 4987712;
+			i = 4971422;
 		}
 		
 		const char* str = keys[i].c_str();
@@ -948,8 +948,8 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 		}
 		*/
 		
-		if (i >= 4987712)
-		//if(i % 10000 == 0)
+		if (i >= 4971422)
+		if(i % 1 == 0)
 		{
 			printf("%u\n", i);
 
@@ -970,6 +970,20 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 			if(!ha.testBlockConsistency())
 			{
 				printf("\n!!! testBlockConsistency failed !!!\n");
+
+				return;
+			}
+
+			if (!ha.testFillBlockPages())
+			{
+				printf("\n!!! 111111 testBlockPages failed !!!\n");
+
+				return;
+			}
+
+			if (!ha.testFillBranchPages())
+			{
+				printf("\n!!! 111111 testBlockPages failed !!!\n");
 
 				return;
 			}

@@ -1033,10 +1033,6 @@ bool HArray::delValueByKey(uint32* key,
 			}
 			else if (blockCell.Type <= MAX_BLOCK_TYPE)
 			{
-				//go to block
-				idxKeyValue = (blockCell.Type - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
-				startOffset = blockCell.Offset;
-
 				//save path
 				SegmentPath& sp = path[pathLen++];
 				sp.Type = BLOCK_OFFSET_SEGMENT_TYPE;
@@ -1046,6 +1042,10 @@ bool HArray::delValueByKey(uint32* key,
 				sp.ContentOffset = contentOffset;
 				sp.BlockSubOffset = subOffset;
 
+				//go to block
+				idxKeyValue = (blockCell.Type - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
+				startOffset = blockCell.Offset;
+								
 				goto NEXT_BLOCK;
 			}
 			else
@@ -1115,6 +1115,15 @@ DISMANTLING:
 
 	if (countReleasedBlockCells > MAX_COUNT_RELEASED_BLOCK_CELLS)
 	{
+		/*
+		if (!testBlockPages())
+		{
+			printf("\n!!! 111111 testBlockPages failed !!!\n");
+
+			return true;
+		}
+		*/
+
 		shrinkBlockPages();
 
 		/*

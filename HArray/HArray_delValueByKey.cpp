@@ -1087,7 +1087,7 @@ DISMANTLING:
 	//SHRINK =============================================================================================
 	if (countReleasedContentCells > MAX_COUNT_RELEASED_CONTENT_CELLS)
 	{
-		//shrinkContentPages();
+		shrinkContentPages();
 
 		/*
 		if(!testContentConsistency())

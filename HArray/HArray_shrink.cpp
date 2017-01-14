@@ -107,6 +107,7 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 	for (uint32 i = 0; i <= keyLen; i++, pSourceStartContentCell++, pDestStartContentCell++)
 	{
 		*pDestStartContentCell = *pSourceStartContentCell;
+		pSourceStartContentCell->Type = 0;
 	}
 
 	return (keyLen + ValueLen);
@@ -676,7 +677,7 @@ void HArray::shrinkBranchPages()
 		}
 		else
 		{
-			tailReleasedBranchOffset = pBlockPages[tailReleasedBranchOffset >> 16]->pBlock[tailReleasedBranchOffset & 0xFFFF].Offset;
+			tailReleasedBranchOffset = pBranchPages[tailReleasedBranchOffset >> 16]->pBranch[tailReleasedBranchOffset & 0xFFFF].Values[0];
 		}
 	}
 

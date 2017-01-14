@@ -913,9 +913,9 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (i == 4971422)
+		if (i == 8080)
 		{
-			i = 4971422;
+			printf("%u\n", i);
 		}
 		
 		const char* str = keys[i].c_str();
@@ -948,8 +948,8 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 		}
 		*/
 		
-		if (i >= 4971422)
-		if(i % 1 == 0)
+		if (i >= 8080)
+		if (i % 1 == 0)
 		{
 			printf("%u\n", i);
 
@@ -1456,9 +1456,9 @@ int main()
 							false);  //shuffle
 	*/
 
-	HArray_VS_StdMap_StrKey(5000000,  //start
+	HArray_VS_StdMap_StrKey(1000000,  //start
 							1000000,   //step
-							5000000);  //stop
+							1000000);  //stop
 	
 	printf("COEF Map VS HArray: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 	printf("COEF Unordered Map VS HArray: %.2f\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);

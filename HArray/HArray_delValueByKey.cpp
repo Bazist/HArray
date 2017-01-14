@@ -27,13 +27,15 @@ void HArray::releaseContentCells(ContentCell* pContentCell, uint32 contentOffset
 
 	#endif
 
-	memset(pContentCell, 0, sizeof(ContentCell));
+	uint32 dataLen = (keyLen + ValueLen) * sizeof(ContentCell);
+
+	memset(pContentCell, 0, dataLen);
 
 	pContentCell->Value = tailReleasedContentOffsets[keyLen];
 
 	tailReleasedContentOffsets[keyLen] = contentOffset;
 
-	countReleasedContentCells += (keyLen + ValueLen);
+	countReleasedContentCells += dataLen;
 }
 
 void HArray::releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset)

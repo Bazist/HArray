@@ -948,7 +948,7 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 		}
 		*/
 		
-		if (i >= 8080)
+		if (i >= 1011)
 		if (i % 1 == 0)
 		{
 			printf("%u\n", i);

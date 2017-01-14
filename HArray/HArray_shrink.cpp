@@ -104,12 +104,10 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 	}
 
 	//copy data
-	for (uint32 i = 0; i <= keyLen; i++, pSourceStartContentCell++, pDestStartContentCell++)
-	{
-		*pDestStartContentCell = *pSourceStartContentCell;
-		pSourceStartContentCell->Type = 0;
-	}
-
+	uint32 dataLen = (keyLen + ValueLen) * sizeof(ContentCell);
+	memcpy(pDestStartContentCell, pSourceStartContentCell, dataLen);
+	memset(pDestStartContentCell, 0, dataLen);
+	
 	return (keyLen + ValueLen);
 }
 
@@ -175,9 +173,9 @@ void HArray::shrinkContentPages()
 					if (branchCell.Offsets[i] >= shrinkLastContentOffset)
 					{
 						currMovedLen += moveContentCells(branchCell.Offsets[i], //changed
-							&pNewContentPage,
-							shrinkLastContentOffset,
-							lastContentOffsetOnNewPage);
+														&pNewContentPage,
+														shrinkLastContentOffset,
+														lastContentOffsetOnNewPage);
 
 						if (currMovedLen >= totalMovedLen)
 						{
@@ -268,7 +266,7 @@ void HArray::shrinkContentPages()
 			}
 		}
 	}
-
+	
 	//5. clear shrinked spaces in pool ===========================================================================
 	for (uint32 i = 0; i < MAX_KEY_SEGMENTS; i++)
 	{

@@ -958,6 +958,7 @@ public:
 	bool testBranchConsistency();
 	bool testVarConsistency();
 	
+	bool testFillContentPages();
 	bool testFillBlockPages();
 	bool testFillBranchPages();
 

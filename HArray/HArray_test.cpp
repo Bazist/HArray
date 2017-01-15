@@ -342,6 +342,171 @@ bool HArray::testVarConsistency()
 	return (count + countReleasedVarCells) == lastVarOffset;
 }
 
+bool HArray::testFillContentPages()
+{
+	char* control = new char[lastContentOffset];
+	memset(control, 0, lastContentOffset);
+
+	//1. scan header ==============================================================================================
+	for (uint32 cell = 0; cell < HeaderSize; cell++)
+	{
+		HeaderCell& headerCell = pHeader[cell];
+
+		if (headerCell.Type == HEADER_JUMP_TYPE)
+		{
+			uint32 len = getFullContentLen(headerCell.Offset);
+
+			for (uint32 j = headerCell.Offset; j < headerCell.Offset + len; j++)
+			{
+				control[j]++;
+			}
+		}
+	}
+
+	//2. scan branches =============================================================================================
+	uint32 lastPage = BranchPagesCount - 1;
+
+	for (uint32 page = 0; page < BranchPagesCount; page++)
+	{
+		BranchPage* pBranchPage = pBranchPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = ((lastBranchOffset - 1) & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			BranchCell& branchCell = pBranchPage->pBranch[cell];
+
+			for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+			{
+				if (branchCell.Offsets[i]) //not empty
+				{
+					uint32 len = getFullContentLen(branchCell.Offsets[i]);
+
+					for (uint32 j = branchCell.Offsets[i]; j < branchCell.Offsets[i] + len; j++)
+					{
+						control[j]++;
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+	}
+
+	//3. scan blocks ===============================================================================================
+	lastPage = BlockPagesCount - 1;
+
+	for (uint32 page = 0; page < BlockPagesCount; page++)
+	{
+		BlockPage* pBlockPage = pBlockPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+			if (blockCell.Type == CURRENT_VALUE_TYPE)
+			{
+				uint32 len = getFullContentLen(blockCell.Offset);
+
+				for (uint32 j = blockCell.Offset; j < blockCell.Offset + len; j++)
+				{
+					control[j]++;
+				}
+			}
+		}
+	}
+
+	//4. var cells =================================================================================================
+	lastPage = VarPagesCount - 1;
+
+	for (uint32 page = 0; page < VarPagesCount; page++)
+	{
+		VarPage* pVarPage = pVarPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = ((lastVarOffset - 1) & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			VarCell& varCell = pVarPage->pVar[cell];
+
+			if (varCell.ContCell.Type == CONTINUE_VAR_TYPE)
+			{
+				uint32 len = getFullContentLen(varCell.ContCell.Value);
+
+				for (uint32 j = varCell.ContCell.Value; j < varCell.ContCell.Value + len; j++)
+				{
+					control[j]++;
+				}
+			}
+		}
+	}
+
+	//5. content cells =================================================================================================
+	for (uint32 i = 0; i < MAX_KEY_SEGMENTS; i++)
+	{
+		uint32 contentOffset = tailReleasedContentOffsets[i];
+
+		while (contentOffset)
+		{
+			uint32 len = i + 1;
+
+			for (uint32 j = contentOffset; j < contentOffset + len; j++)
+			{
+				control[j]++;
+			}
+
+			contentOffset = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
+		}
+	}
+
+	//check control values
+	for (uint32 i = 1; i < lastBranchOffset; i++)
+	{
+		if (control[i] != 1)
+		{
+			delete[] control;
+
+			return false;
+		}
+	}
+
+	delete[] control;
+
+	return true;
+}
+
+
 bool HArray::testFillBranchPages()
 {
 	if (!countReleasedBranchCells)

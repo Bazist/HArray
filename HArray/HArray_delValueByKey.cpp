@@ -27,9 +27,9 @@ void HArray::releaseContentCells(ContentCell* pContentCell, uint32 contentOffset
 
 	#endif
 
-	uint32 dataLen = (keyLen + ValueLen) * sizeof(ContentCell);
+	uint32 dataLen = keyLen + ValueLen;
 
-	memset(pContentCell, 0, dataLen);
+	memset(pContentCell, 0, dataLen * sizeof(ContentCell));
 
 	pContentCell->Value = tailReleasedContentOffsets[keyLen];
 
@@ -1117,15 +1117,6 @@ DISMANTLING:
 
 	if (countReleasedBlockCells > MAX_COUNT_RELEASED_BLOCK_CELLS)
 	{
-		/*
-		if (!testBlockPages())
-		{
-			printf("\n!!! 111111 testBlockPages failed !!!\n");
-
-			return true;
-		}
-		*/
-
 		shrinkBlockPages();
 
 		/*

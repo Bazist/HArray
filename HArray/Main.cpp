@@ -26,9 +26,9 @@
 #include "HArrayInt.h"
 #include "HArray.h"
 
-//#define SEQUENCE_TESTS
+#define SEQUENCE_TESTS
 #define RANDOM_TESTS
-//#define PERIOD_TESTS
+#define PERIOD_TESTS
 
 #define HARRAY_TESTS
 //#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
@@ -36,6 +36,7 @@
 #define STD_UNORDERED_MAP_TESTS
 //#define PRINT_MEM
 //#define PRINT_STAT
+//#define TESTS
 
 #ifdef DENSE_HASH_MAP_TESTS
 #include <google/dense_hash_map>
@@ -461,100 +462,66 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		/*
-		if(i == 2995665)
-		{
-			i = 2995665;
-		}
-
-		if(i == 1833776)
-		{
-			i = 1833776;
-		}
-		*/
-
 		ha.delValueByKey((uint32*)keys[i].Data, sizeof(BinKey));
 
-		/*
-		//test
-		BranchCell& bc = ha.pBranchPages[0]->pBranch[4065];
-
-		if(bc.Offsets[2] == 0 &&
-		   bc.Offsets[3] == 5539098)
-		{
-			printf("found!");
-		}
-
-		if(i >= 2995665)
-
-		if(i % 10000 == 0)
+		#ifdef TESTS
+		
+		if (i % 10000 == 0)
 		{
 			printf("%u\n", i);
 
-			if(!ha.testContentConsistency())
+			if (!ha.testFillContentPages())
+			{
+				printf("\n!!! 111111 testFillContentPages failed !!!\n");
+
+				return;
+			}
+
+			if (!ha.testFillBlockPages())
+			{
+				printf("\n!!! 111111 testBlockPages failed !!!\n");
+
+				return;
+			}
+
+			if (!ha.testFillBranchPages())
+			{
+				printf("\n!!! 111111 testFillBranchPages failed !!!\n");
+
+				return;
+			}
+
+			if (!ha.testContentConsistency())
 			{
 				printf("\n!!! testContentConsistency failed !!!\n");
 
 				return;
 			}
 
-			if(!ha.testBranchConsistency())
+			if (!ha.testBranchConsistency())
 			{
 				printf("\n!!! testBranchConsistency failed !!!\n");
 
 				return;
 			}
 
-			if(!ha.testBlockConsistency())
+			if (!ha.testBlockConsistency())
 			{
 				printf("\n!!! testBlockConsistency failed !!!\n");
 
 				return;
 			}
 		}
-		*/
+
+		#endif
 	}
 
 	finish = msclock();
-
-	/*
-	if(!ha.testContentConsistency())
-	{
-		printf("\n!!! testContentConsistency failed !!!\n");
-
-		return;
-	}
-
-	if(!ha.testBranchConsistency())
-	{
-		printf("\n!!! testBranchConsistency failed !!!\n");
-
-		return;
-	}
-
-	if(!ha.testBlockConsistency())
-	{
-		printf("\n!!! testBlockConsistency failed !!!\n");
-
-		return;
-	}
-
-	//test delete
-	for (uint32 i = 0; i < countKeys; i++)
-	{
-		if (ha.getValueByKey((uint32*)keys[i].Data, sizeof(BinKey)) != 0)
-		{
-			printf("Error\n");
-			break;
-		}
-	}
-	*/
-
+	
 	printf("Delete: %d msec.\n", (finish - start));
 
 	totalHArrayTime += (finish - start);
-
-
+	
 	#ifdef PRINT_MEM
 	ha.printMemory();
 	#endif
@@ -913,45 +880,36 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if (i == 8080)
-		{
-			printf("%u\n", i);
-		}
-		
 		const char* str = keys[i].c_str();
-
-		/*
-		if (i >= 4771463)
-			//if (i % 10000 == 0)
-		{
-			if (!ha.testBlockPages())
-			{
-				printf("\n!!! testBlockPages failed !!!\n");
-
-				return;
-			}
-		}
-		*/
 
 		ha.delValueByKey((uint32*)str, STR_KEY_LEN);
 
-		/*
-		if (i >= 4771463)
-		//if (i % 10000 == 0)
+		#ifdef TESTS
+
+		if (i % 10000 == 0)
 		{
-			if (!ha.testBlockPages())
+			printf("%u\n", i);
+
+			if (!ha.testFillContentPages())
 			{
-				printf("\n!!! testBlockPages failed !!!\n");
+				printf("\n!!! 111111 testFillContentPages failed !!!\n");
 
 				return;
 			}
-		}
-		*/
-		
-		if (i >= 1011)
-		if (i % 1 == 0)
-		{
-			printf("%u\n", i);
+
+			if (!ha.testFillBlockPages())
+			{
+				printf("\n!!! 111111 testBlockPages failed !!!\n");
+
+				return;
+			}
+
+			if (!ha.testFillBranchPages())
+			{
+				printf("\n!!! 111111 testFillBranchPages failed !!!\n");
+
+				return;
+			}
 
 			if(!ha.testContentConsistency())
 			{
@@ -973,21 +931,9 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 				return;
 			}
-
-			if (!ha.testFillBlockPages())
-			{
-				printf("\n!!! 111111 testBlockPages failed !!!\n");
-
-				return;
-			}
-
-			if (!ha.testFillBranchPages())
-			{
-				printf("\n!!! 111111 testBlockPages failed !!!\n");
-
-				return;
-			}
 		}
+
+		#endif
 	}
 
 	finish = msclock();
@@ -1445,20 +1391,18 @@ void testDelKeys2()
 
 int main()
 {
-	/*
 	HArrayInt_VS_StdMap_IntKey(1000000,   //start
 							   2000000,   //step
 							   10000000); //stop
-		
+	
 	HArray_VS_StdMap_BinKey(1000000, //start
 							2000000, //step
 							10000000,//stop
 							false);  //shuffle
-	*/
-
+	
 	HArray_VS_StdMap_StrKey(1000000,  //start
 							1000000,   //step
-							1000000);  //stop
+							5000000);  //stop
 	
 	printf("COEF Map VS HArray: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 	printf("COEF Unordered Map VS HArray: %.2f\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);

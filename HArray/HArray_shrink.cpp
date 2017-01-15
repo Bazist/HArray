@@ -63,6 +63,8 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 		keyLen = pEndContentCell - pSourceStartContentCell;
 	}
 
+	uint32 dataLen = (keyLen + ValueLen);
+
 	//get key from pool
 	ContentCell* pDestStartContentCell = 0;
 
@@ -76,7 +78,7 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 
 		tailReleasedContentOffsets[keyLen] = contentCell.Value;
 
-		countReleasedContentCells -= (keyLen + ValueLen);
+		countReleasedContentCells -= dataLen;
 
 		if (startContentOffset < shrinkLastContentOffset) //skip spaces on shrink page
 		{
@@ -100,13 +102,17 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 
 		pDestStartContentCell = &(*pNewContentPage)->pContent[startContentOffset & 0xFFFF];
 
-		lastContentOffsetOnNewPage += (keyLen + ValueLen);
+		lastContentOffsetOnNewPage += dataLen;
+
+		if (lastContentOffsetOnNewPage > MAX_SHORT)
+		{
+			printf("\nFAIL STATE (moveContentCells)\n");
+		}
 	}
 
 	//copy data
-	uint32 dataLen = (keyLen + ValueLen) * sizeof(ContentCell);
-	memcpy(pDestStartContentCell, pSourceStartContentCell, dataLen);
-	memset(pDestStartContentCell, 0, dataLen);
+	memcpy(pDestStartContentCell, pSourceStartContentCell, dataLen * sizeof(ContentCell));
+	memset(pSourceStartContentCell, 0, dataLen * sizeof(ContentCell));
 	
 	return (keyLen + ValueLen);
 }
@@ -277,26 +283,24 @@ void HArray::shrinkContentPages()
 		{
 			if (contentOffset < shrinkLastContentOffset) //next
 			{
-				contentOffset = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
-
 				prevContentOffset = contentOffset;
+
+				contentOffset = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
 			}
 			else
 			{
 				if (contentOffset == tailReleasedContentOffsets[i]) //remove tail
 				{
-					contentOffset = tailReleasedContentOffsets[i] = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
-
 					prevContentOffset = contentOffset;
+
+					contentOffset = tailReleasedContentOffsets[i] = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
 				}
 				else //remove in middle
 				{
-					pContentPages[prevContentOffset >> 16]->
-					pContent[prevContentOffset & 0xFFFF].Value = 
-							pContentPages[contentOffset >> 16]->
-							pContent[contentOffset & 0xFFFF].Value;
-
 					contentOffset = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF].Value;
+
+					pContentPages[prevContentOffset >> 16]->
+						pContent[prevContentOffset & 0xFFFF].Value = contentOffset;					
 				}
 
 				countReleasedContentCells -= (i + 1);
@@ -325,13 +329,15 @@ EXIT:
 		pContentPages[shrinkLastPage] = pNewContentPage;
 
 		lastContentOffset = shrinkLastContentOffset + lastContentOffsetOnNewPage;
+
+		ContentPagesCount = shrinkLastPage + 1;
 	}
 	else //all content were moved to existing pages
 	{
 		lastContentOffset = shrinkLastContentOffset;
-	}
 
-	ContentPagesCount = shrinkLastPage;
+		ContentPagesCount = shrinkLastPage;
+	}
 }
 
 void HArray::shrinkBranchPages()

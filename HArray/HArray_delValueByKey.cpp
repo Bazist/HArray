@@ -1087,51 +1087,31 @@ DISMANTLING:
 	}
 
 	//SHRINK =============================================================================================
-	if (countReleasedContentCells > MAX_COUNT_RELEASED_CONTENT_CELLS)
+	if (autoShrinkOnPercents)
 	{
-		shrinkContentPages();
+		ulong64 stepReleaseMemory = getUsedMemory() * autoShrinkOnPercents / 100;
 
-		/*
-		if(!testContentConsistency())
+		//MAX_COUNT_RELEASED_CONTENT_CELLS
+		if (countReleasedContentCells * sizeof(ContentCell) > stepReleaseMemory &&
+			countReleasedContentCells * sizeof(ContentCell) > MIN_COUNT_RELEASED_CONTENT_CELLS * sizeof(ContentCell))
 		{
-			printf("\n!!! 1111111 testContentConsistency failed !!!\n");
-
-			return true;
+			shrinkContentPages();
 		}
-		*/
-	}
-
-	if (countReleasedBranchCells > MAX_COUNT_RELEASED_BRANCH_CELLS)
-	{
-		shrinkBranchPages();
-
-		/*
-		if(!testBranchConsistency())
+		else if (countReleasedBranchCells * sizeof(BranchCell) > stepReleaseMemory &&
+			countReleasedBranchCells * sizeof(BranchCell) > MIN_COUNT_RELEASED_BRANCH_CELLS * sizeof(BranchCell))
 		{
-			printf("\n!!! 111111 testBranchConsistency failed !!!\n");
-
-			return true;
+			shrinkBranchPages();
 		}
-		*/
-	}
-
-	if (countReleasedBlockCells > MAX_COUNT_RELEASED_BLOCK_CELLS)
-	{
-		shrinkBlockPages();
-
-		/*
-		if(!testBlockConsistency())
+		else if (countReleasedBlockCells * sizeof(BlockCell) > stepReleaseMemory &&
+			countReleasedBlockCells * sizeof(BlockCell) > MIN_COUNT_RELEASED_BLOCK_CELLS * sizeof(BlockCell))
 		{
-			printf("\n!!! 111111 testBranchConsistency failed !!!\n");
-
-			return true;
+			shrinkBlockPages();
 		}
-		*/
-	}
-
-	if (countReleasedVarCells > MAX_COUNT_RELEASED_VAR_CELLS)
-	{
-		shrinkVarPages();
+		else if (countReleasedVarCells * sizeof(VarCell) > stepReleaseMemory &&
+			countReleasedVarCells * sizeof(VarCell) > MIN_COUNT_RELEASED_VAR_CELLS * sizeof(VarCell))
+		{
+			shrinkVarPages();
+		}
 	}
 
 	return true;

@@ -89,6 +89,8 @@ public:
 	uint32 lastBranchOffset;
 	uint32 lastBlockOffset;
 
+	uint32 autoShrinkOnPercents;
+
 	void init(uchar8 headerBase)
 	{
 		init(headerBase,
@@ -119,6 +121,8 @@ public:
 		pBranchPages = 0;
 		pBlockPages = 0;
 
+		autoShrinkOnPercents = 1; //1 percent by default
+		
 		try
         {
             ValueLen = 1;
@@ -431,37 +435,37 @@ public:
 			   lastBlockOffset;
 	}
 
-	uint32 getHeaderSize()
+	ulong64 getHeaderSize()
 	{
 		return HeaderSize * sizeof(uint32);
 	}
 
-	uint32 getHeaderBranchSize()
+	ulong64 getHeaderBranchSize()
 	{
 		return HeaderBranchPagesSize * sizeof(uint32);
 	}
 
-	uint32 getContentSize()
+	ulong64 getContentSize()
 	{
 		return ContentPagesCount * sizeof(ContentPage);
 	}
 
-	uint32 getVarSize()
+	ulong64 getVarSize()
 	{
 		return VarPagesCount * sizeof(VarPage);
 	}
 
-	uint32 getBranchSize()
+	ulong64 getBranchSize()
 	{
 		return BranchPagesCount * sizeof(BranchPage);
 	}
 
-	uint32 getBlockSize()
+	ulong64 getBlockSize()
 	{
 		return BlockPagesCount * sizeof(BlockPage);
 	}
 
-	uint32 getUsedMemory()
+	ulong64 getUsedMemory()
 	{
 		return	getHeaderSize() +
 				getHeaderBranchSize() +
@@ -471,7 +475,7 @@ public:
 				getBlockSize();
 	}
 
-	uint32 getTotalMemory()
+	ulong64 getTotalMemory()
 	{
 		return	getHeaderSize() +
 				getHeaderBranchSize() +
@@ -922,6 +926,11 @@ public:
 
 	//DISMANTLING ====================================================================================================
 
+	void autoShrinkIfCouldBeReleasedAtLeast(uint32 percents)
+	{
+		autoShrinkOnPercents = percents;
+	}
+
 	void releaseContentCells(ContentCell* pContentCell, uint32 contentOffset, uint32 len);
 	void releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset);
 	void releaseVarCell(VarCell* pVarCell, uint32 varOffset);
@@ -948,9 +957,10 @@ public:
 	bool dismantling(SegmentPath* path, uint32 pathLen);
 	bool dismantlingContentCells(SegmentPath* path, int32& currPathLen);
 	uint32 moveContentCells(uint32& startContentOffset,
-							ContentPage** pNewContentPage,
+							ContentPage** newContentPages,
+							uint32& countNewContentPages,
 							uint32 shrinkLastContentOffset,
-							uint32& lastContentOffsetOnNewPage);
+							uint32* lastContentOffsetOnNewPages);
 
 	//for testing
 	bool testContentConsistency();

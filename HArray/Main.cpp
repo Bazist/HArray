@@ -36,7 +36,7 @@
 #define STD_UNORDERED_MAP_TESTS
 //#define PRINT_MEM
 //#define PRINT_STAT
-//#define TESTS
+//#define CONSISTENCY_TESTS
 
 #ifdef DENSE_HASH_MAP_TESTS
 #include <google/dense_hash_map>
@@ -464,8 +464,9 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 	{
 		ha.delValueByKey((uint32*)keys[i].Data, sizeof(BinKey));
 
-		#ifdef TESTS
+		#ifdef CONSISTENCY_TESTS
 		
+		//if(i >= 213573)
 		if (i % 10000 == 0)
 		{
 			printf("%u\n", i);
@@ -884,7 +885,7 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 		ha.delValueByKey((uint32*)str, STR_KEY_LEN);
 
-		#ifdef TESTS
+		#ifdef CONSISTENCY_TESTS
 
 		if (i % 10000 == 0)
 		{

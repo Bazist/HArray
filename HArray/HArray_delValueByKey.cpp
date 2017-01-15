@@ -1085,7 +1085,7 @@ DISMANTLING:
 		headerCell.Type = EMPTY_TYPE;
 		headerCell.Offset = 0;
 	}
-
+	
 	//SHRINK =============================================================================================
 	if (autoShrinkOnPercents)
 	{
@@ -1108,7 +1108,7 @@ DISMANTLING:
 			shrinkBlockPages();
 		}
 		else if (countReleasedVarCells * sizeof(VarCell) > stepReleaseMemory &&
-			countReleasedVarCells * sizeof(VarCell) > MIN_COUNT_RELEASED_VAR_CELLS * sizeof(VarCell))
+				 countReleasedVarCells * sizeof(VarCell) > MIN_COUNT_RELEASED_VAR_CELLS * sizeof(VarCell))
 		{
 			shrinkVarPages();
 		}

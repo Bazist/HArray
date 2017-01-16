@@ -748,7 +748,15 @@ bool HArray::delValueByKey(uint32* key,
 
 		uint32 keyOffset = 0;
 
+		bool isVarContCell;
+
 	NEXT_KEY_PART:
+
+		if (pathLen == 28)
+		{
+			pathLen = 28;
+		}
+
 		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
 		ushort16 contentIndex = contentOffset & 0xFFFF;
 
@@ -789,6 +797,8 @@ bool HArray::delValueByKey(uint32* key,
 		uint32& keyValue = key[keyOffset];
 		uint32* pContentCellValueOrOffset = &contentCell.Value;
 
+		isVarContCell = false;
+
 		if (contentCellType == VAR_TYPE) //VAR =====================================================================
 		{
 			VarPage* pVarPage = pVarPages[(*pContentCellValueOrOffset) >> 16];
@@ -814,6 +824,8 @@ bool HArray::delValueByKey(uint32* key,
 				else
 				{
 					pContentCellValueOrOffset = &varCell.ContCell.Value;
+
+					isVarContCell = true;
 				}
 			}
 			else
@@ -1059,11 +1071,14 @@ bool HArray::delValueByKey(uint32* key,
 		{
 			if (*pContentCellValueOrOffset == keyValue)
 			{
-				//save path
-				SegmentPath& sp = path[pathLen++];
-				sp.Type = CURRENT_VALUE_SEGMENT_TYPE;
-				sp.pContentCell = &contentCell;
-				sp.ContentOffset = contentOffset;
+				if (!isVarContCell) //do not add content cell from VarCell
+				{
+					//save path
+					SegmentPath& sp = path[pathLen++];
+					sp.Type = CURRENT_VALUE_SEGMENT_TYPE;
+					sp.pContentCell = &contentCell;
+					sp.ContentOffset = contentOffset;
+				}
 
 				contentOffset++;
 				keyOffset++;

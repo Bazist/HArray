@@ -1016,27 +1016,35 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 
 #ifdef CONSISTENCY_TESTS
 
+		if (i >= 326492)
 		if (i % 1 == 0)
 		{
 			printf("%u\n", i);
 
 			if (!ha.testFillContentPages())
 			{
-				printf("\n!!! 111111 testFillContentPages failed !!!\n");
+				printf("\n!!! testFillContentPages failed !!!\n");
 
 				return;
 			}
 
 			if (!ha.testFillBlockPages())
 			{
-				printf("\n!!! 111111 testBlockPages failed !!!\n");
+				printf("\n!!! testBlockPages failed !!!\n");
 
 				return;
 			}
 
 			if (!ha.testFillBranchPages())
 			{
-				printf("\n!!! 111111 testFillBranchPages failed !!!\n");
+				printf("\n!!! testFillBranchPages failed !!!\n");
+
+				return;
+			}
+
+			if (!ha.testFillVarPages())
+			{
+				printf("\n!!! testFillVarPages failed !!!\n");
 
 				return;
 			}
@@ -1056,6 +1064,13 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 			}
 
 			if (!ha.testBlockConsistency())
+			{
+				printf("\n!!! testBlockConsistency failed !!!\n");
+
+				return;
+			}
+
+			if (!ha.testVarConsistency())
 			{
 				printf("\n!!! testBlockConsistency failed !!!\n");
 
@@ -1526,9 +1541,9 @@ int main()
 							1000000); //stop
 	*/
 
-	HArray_VS_StdMap_StrKey_Var(5000000,  //start
+	HArray_VS_StdMap_StrKey_Var(1000000,  //start
 								1000000,  //step
-								5000000); //stop
+								1000000); //stop
 	
 	printf("COEF Map VS HArray: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 	printf("COEF Unordered Map VS HArray: %.2f\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);

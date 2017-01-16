@@ -506,7 +506,6 @@ bool HArray::testFillContentPages()
 	return true;
 }
 
-
 bool HArray::testFillBranchPages()
 {
 	if (!countReleasedBranchCells)
@@ -702,6 +701,71 @@ bool HArray::testFillBlockPages()
 	}
 
 	for (uint32 i = 0; i < lastBlockOffset / BLOCK_ENGINE_SIZE; i++)
+	{
+		if (control[i] != 1)
+		{
+			delete[] control;
+
+			return false;
+		}
+	}
+
+	delete[] control;
+
+	return true;
+}
+
+bool HArray::testFillVarPages()
+{
+	if (!countReleasedVarCells)
+	{
+		return true;
+	}
+
+	char* control = new char[lastVarOffset];
+	memset(control, 0, lastVarOffset);
+
+	uint32 currTailReleasedVarOffset = tailReleasedVarOffset;
+	uint32 currCountReleasedVarCells = countReleasedVarCells;
+
+	//content ===================================================================================================================
+	int32 lastPage = ContentPagesCount - 1;
+
+	for (uint32 page = 0; page < ContentPagesCount; page++)
+	{
+		ContentPage* pContentPage = pContentPages[page];
+
+		uint32 countCells;
+
+		if (page < lastPage) //not last page
+		{
+			countCells = MAX_SHORT;
+		}
+		else //last page
+		{
+			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
+		}
+
+		for (uint32 cell = 0; cell < countCells; cell++)
+		{
+			ContentCell& contentCell = pContentPage->pContent[cell];
+
+			if (contentCell.Type == VAR_TYPE) //in content
+			{
+				control[contentCell.Value]++;
+			}
+		}
+	}
+
+	//check state
+	for (uint32 i = 0; i < currCountReleasedVarCells; i++)
+	{
+		control[currTailReleasedVarOffset]++;
+
+		currTailReleasedVarOffset = pVarPages[currTailReleasedVarOffset >> 16]->pVar[currTailReleasedVarOffset & 0xFFFF].ValueContCell.Value;
+	}
+
+	for (uint32 i = 0; i < lastVarOffset; i++)
 	{
 		if (control[i] != 1)
 		{

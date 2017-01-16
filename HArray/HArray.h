@@ -971,6 +971,7 @@ public:
 	bool testFillContentPages();
 	bool testFillBlockPages();
 	bool testFillBranchPages();
+	bool testFillVarPages();
 
 	uint32 getFullContentLen(uint32 contentOffset);
 	bool shrinkBlock(uint32 startBlockOffset,

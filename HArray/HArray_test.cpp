@@ -37,7 +37,10 @@ uint32 HArray::getFullContentLen(uint32 contentOffset)
 		{
 			VarCell& varCell = pVarPages[pEndContentCell->Value >> 16]->pVar[pEndContentCell->Value & 0xFFFF];
 
-			if (varCell.ContCell.Type == CONTINUE_VAR_TYPE)
+			if (varCell.ContCell.Type == CONTINUE_VAR_TYPE ||
+				varCell.ContCell.Type == VALUE_TYPE ||
+				(MIN_BRANCH_TYPE1 <= varCell.ContCell.Type && varCell.ContCell.Type <= MAX_BRANCH_TYPE1) ||
+				(MIN_BLOCK_TYPE <= varCell.ContCell.Type && varCell.ContCell.Type <= MAX_BLOCK_TYPE))
 			{
 				break; //end of key
 			}
@@ -491,7 +494,7 @@ bool HArray::testFillContentPages()
 	}
 
 	//check control values
-	for (uint32 i = 1; i < lastBranchOffset; i++)
+	for (uint32 i = 1; i < lastContentOffset; i++)
 	{
 		if (control[i] != 1)
 		{

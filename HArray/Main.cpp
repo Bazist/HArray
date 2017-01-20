@@ -975,7 +975,7 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 	{
 		const char* str = keys[i / 15].c_str();
 
-		ha.insert((uint32*)str, STR_KEY_LEN - (i % 15) * 4, str[0]);
+		ha.insert((uint32*)str, (i % 15) * 4 + 4, str[0]);
 	}
 
 	finish = msclock();
@@ -991,7 +991,7 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 	{
 		const char* str = keys[i / 15].c_str();
 
-		if (*ha.getValueByKey((uint32*)str, STR_KEY_LEN - (i % 15) * 4) != str[0])
+		if (*ha.getValueByKey((uint32*)str, (i % 15) * 4 + 4) != str[0])
 		{
 			printf("Error\n");
 			break;
@@ -1012,11 +1012,44 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 	{
 		const char* str = keys[i / 15].c_str();
 
-		ha.delValueByKey((uint32*)str, STR_KEY_LEN - (i % 15) * 4);
+		if (i == 326492)
+		{
+			//i = 326492;
+		}
+
+		ha.delValueByKey((uint32*)str, (i % 15) * 4 + 4);
+
+		if (i % 1 == 0)
+		{
+			printf("%u\n", i);
+
+			uint32 j = 0;
+			for (; j <= i; j++)
+			{
+				const char* str2 = keys[j / 15].c_str();
+
+				if (ha.getValueByKey((uint32*)str2, (j % 15) * 4 + 4) != 0)
+				{
+					printf("Error\n");
+					return;
+				}
+			}
+
+			for (; j < countKeys; j++)
+			{
+				const char* str2 = keys[j / 15].c_str();
+
+				if (*ha.getValueByKey((uint32*)str2, (j % 15) * 4 + 4) != str2[0])
+				{
+					printf("Error\n");
+					return;
+				}
+			}
+		}
 
 #ifdef CONSISTENCY_TESTS
 
-		if (i >= 326492)
+		//if (i >= 326492)
 		if (i % 1 == 0)
 		{
 			printf("%u\n", i);

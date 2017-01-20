@@ -274,6 +274,24 @@ struct SegmentPath
 	uint32 BranchIndex;
 	uint32 ContentOffset;
 	uint32 BlockSubOffset;
+
+	void print()
+	{
+		/*
+		printf("Type: %u, ", Type);
+		
+		if(pContentCell)
+			printf("ContentCell: Type=%u, Value=%u, ", pContentCell->Type, pContentCell->Value);
+
+		if(pBlockCell)
+			printf("BlockCell: Type=%u, Offset=%u, ValueOrOffset=%u, ", pBlockCell->Type, pBlockCell->Offset, pBlockCell->ValueOrOffset);
+
+		printf("StartBlockOffset: %u, ", StartBlockOffset);
+
+		if (pBranchCell1)
+			printf("pBranchCell1: Type=%u, Offset=%u, ValueOrOffset=%u, ", pBlockCell->Type, pBlockCell->Offset, pBlockCell->ValueOrOffset);
+		*/
+	}
 };
 
 typedef uint32 (*NormalizeFunc)(void* key);

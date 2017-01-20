@@ -52,7 +52,10 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 			{
 				VarCell& varCell = pVarPages[pEndContentCell->Value >> 16]->pVar[pEndContentCell->Value & 0xFFFF];
 
-				if (varCell.ContCell.Type == CONTINUE_VAR_TYPE)
+				if (varCell.ContCell.Type == CONTINUE_VAR_TYPE ||
+					varCell.ContCell.Type == VALUE_TYPE ||
+					(MIN_BRANCH_TYPE1 <= varCell.ContCell.Type && varCell.ContCell.Type <= MAX_BRANCH_TYPE1) ||
+					(MIN_BLOCK_TYPE <= varCell.ContCell.Type && varCell.ContCell.Type <= MAX_BLOCK_TYPE))
 				{
 					break; //end of key
 				}
@@ -118,11 +121,25 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 		}
 
 		//modify
-		startContentOffset = shrinkLastContentOffset + lastContentOffsetOnNewPages[index];
+		uint32 subOffset = 0;
+		
+		if (index)
+		{
+			subOffset += index * MAX_SHORT;
+		}
+
+		subOffset += lastContentOffsetOnNewPages[index];
+
+		startContentOffset = shrinkLastContentOffset + subOffset;
 
 		pDestStartContentCell = &newContentPages[index]->pContent[lastContentOffsetOnNewPages[index]];
 
 		lastContentOffsetOnNewPages[index] += dataLen;
+	}
+
+	if (startContentOffset == 851968)
+	{
+		startContentOffset = startContentOffset;
 	}
 
 	//copy data

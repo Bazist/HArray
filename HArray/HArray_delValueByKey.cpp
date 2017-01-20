@@ -682,6 +682,7 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 			else
 			{
 				//delete continue way, value was deleted earlier
+				releaseContentCells(sp.pContentCell, sp.ContentOffset, 0);
 
 				releaseVarCell(sp.pVarCell, sp.VarOffset);
 
@@ -810,10 +811,13 @@ bool HArray::delValueByKey(uint32* key,
 				SegmentPath& sp = path[pathLen++];
 				sp.Type = VAR_SHUNT_SEGMENT_TYPE;
 				sp.pContentCell = &contentCell;
+				sp.ContentOffset = contentOffset;
 				sp.pVarCell = &varCell;
 				sp.VarOffset = *pContentCellValueOrOffset;
 
 				contentCellType = varCell.ContCell.Type; //read from var cell
+
+				isVarContCell = true;
 
 				if (contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
 				{
@@ -824,8 +828,6 @@ bool HArray::delValueByKey(uint32* key,
 				else
 				{
 					pContentCellValueOrOffset = &varCell.ContCell.Value;
-
-					isVarContCell = true;
 				}
 			}
 			else
@@ -836,6 +838,7 @@ bool HArray::delValueByKey(uint32* key,
 					SegmentPath& sp = path[pathLen++];
 					sp.Type = VAR_VALUE_SEGMENT_TYPE;
 					sp.pContentCell = &contentCell;
+					sp.ContentOffset = contentOffset;
 					sp.pVarCell = &varCell;
 					sp.VarOffset = *pContentCellValueOrOffset;
 

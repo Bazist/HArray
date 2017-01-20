@@ -1012,14 +1012,15 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 	{
 		const char* str = keys[i / 15].c_str();
 
-		if (i == 326492)
+		if (i == 14)
 		{
-			//i = 326492;
+			i = 14;
 		}
 
 		ha.delValueByKey((uint32*)str, (i % 15) * 4 + 4);
 
-		if (i % 1 == 0)
+		//if (i >= 3000)
+		if (i % 10 == 0)
 		{
 			printf("%u\n", i);
 
@@ -1050,7 +1051,7 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 #ifdef CONSISTENCY_TESTS
 
 		//if (i >= 326492)
-		if (i % 1 == 0)
+		if (i % 10 == 0)
 		{
 			printf("%u\n", i);
 

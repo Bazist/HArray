@@ -370,6 +370,8 @@ EXIT:
 
 		lastContentOffset = ((ContentPagesCount - 1) << 16) | lastContentOffsetOnNewPages[countNewContentPages - 1];
 	
+		notMovedContentCellsAfterLastShrink = lastContentOffset - shrinkLastContentOffset;
+
 		//release rest content cells
 		for (uint32 i = 0, currPage = shrinkLastPage; i < countNewContentPages - 1; i++, currPage++)
 		{
@@ -382,9 +384,14 @@ EXIT:
 					restLen - 1);
 			}
 		}
+
+		
+		
 	}
 	else //all content were moved to existing pages
 	{
+		notMovedContentCellsAfterLastShrink = 0;
+
 		ContentPagesCount = shrinkLastPage;
 
 		lastContentOffset = shrinkLastContentOffset;

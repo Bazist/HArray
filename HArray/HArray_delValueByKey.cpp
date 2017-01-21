@@ -1110,8 +1110,8 @@ DISMANTLING:
 		ulong64 stepReleaseMemory = getUsedMemory() * autoShrinkOnPercents / 100;
 
 		//MAX_COUNT_RELEASED_CONTENT_CELLS
-		if (countReleasedContentCells * sizeof(ContentCell) > stepReleaseMemory &&
-			countReleasedContentCells * sizeof(ContentCell) > MIN_COUNT_RELEASED_CONTENT_CELLS * sizeof(ContentCell))
+		if ((countReleasedContentCells - notMovedContentCellsAfterLastShrink) * sizeof(ContentCell) > stepReleaseMemory &&
+			(countReleasedContentCells - notMovedContentCellsAfterLastShrink) * sizeof(ContentCell) > MIN_COUNT_RELEASED_CONTENT_CELLS * sizeof(ContentCell))
 		{
 			shrinkContentPages();
 		}

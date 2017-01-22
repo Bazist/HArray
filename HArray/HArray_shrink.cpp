@@ -72,75 +72,78 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 	//get key from pool
 	ContentCell* pDestStartContentCell = 0;
 
-	while (tailReleasedContentOffsets[keyLen]) //to existing page
+	//key not found, try get key from bigger slots
+	for (uint32 currKeyLen = keyLen; currKeyLen < MAX_KEY_SEGMENTS; currKeyLen++)
 	{
-		//release content cells
-		startContentOffset = tailReleasedContentOffsets[keyLen];
-
-		ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
-		ContentCell& contentCell = pContentPage->pContent[startContentOffset & 0xFFFF];
-
-		tailReleasedContentOffsets[keyLen] = contentCell.Value;
-
-		countReleasedContentCells -= dataLen;
-
-		if (startContentOffset < shrinkLastContentOffset) //skip spaces on shrink page
+		while (tailReleasedContentOffsets[keyLen]) //to existing page
 		{
-			pDestStartContentCell = &contentCell;
+			//release content cells
+			startContentOffset = tailReleasedContentOffsets[keyLen];
 
-			break;
+			ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
+			ContentCell& contentCell = pContentPage->pContent[startContentOffset & 0xFFFF];
+
+			tailReleasedContentOffsets[keyLen] = contentCell.Value;
+
+			countReleasedContentCells -= dataLen;
+
+			if (startContentOffset < shrinkLastContentOffset) //skip spaces on shrink page
+			{
+				pDestStartContentCell = &contentCell;
+
+				if (keyLen < currKeyLen)
+				{
+					uint32 len = keyLen + 1;
+
+					releaseContentCells(pDestStartContentCell + len,
+						startContentOffset + len,
+						currKeyLen - len);
+				}
+
+				goto MOVE_KEY;
+			}
 		}
 	}
 
-	if (!pDestStartContentCell)
+	//slot not found, insert in new page
+	//create first new page
+	if (!countNewContentPages) //create new page
 	{
-		//ContentPage** newContentPages,
-		//uint32& countNewContentPages,
-		//uint32 shrinkLastContentOffset,
-		//uint32* lastContentOffsetOnNewPages
+		newContentPages[countNewContentPages] = new ContentPage();
+		lastContentOffsetOnNewPages[countNewContentPages] = 0;
 
-		//create first new page
-		if (!countNewContentPages) //create new page
-		{
-			newContentPages[countNewContentPages] = new ContentPage();
-			lastContentOffsetOnNewPages[countNewContentPages] = 0;
-
-			countNewContentPages++;
-		}
-
-		//create next new page
-		uint32 index = countNewContentPages - 1;
-
-		if (lastContentOffsetOnNewPages[index] + dataLen > MAX_SHORT)
-		{
-			newContentPages[countNewContentPages] = new ContentPage();
-			lastContentOffsetOnNewPages[countNewContentPages] = 0;
-
-			countNewContentPages++;
-			index++;
-		}
-
-		//modify
-		uint32 subOffset = 0;
-		
-		if (index)
-		{
-			subOffset += index * MAX_SHORT;
-		}
-
-		subOffset += lastContentOffsetOnNewPages[index];
-
-		startContentOffset = shrinkLastContentOffset + subOffset;
-
-		pDestStartContentCell = &newContentPages[index]->pContent[lastContentOffsetOnNewPages[index]];
-
-		lastContentOffsetOnNewPages[index] += dataLen;
+		countNewContentPages++;
 	}
 
-	if (startContentOffset == 851968)
+	//create next new page
+	uint32 index = countNewContentPages - 1;
+
+	if (lastContentOffsetOnNewPages[index] + dataLen > MAX_SHORT)
 	{
-		startContentOffset = startContentOffset;
+		newContentPages[countNewContentPages] = new ContentPage();
+		lastContentOffsetOnNewPages[countNewContentPages] = 0;
+
+		countNewContentPages++;
+		index++;
 	}
+
+	//modify
+	uint32 subOffset = 0;
+
+	if (index)
+	{
+		subOffset += index * MAX_SHORT;
+	}
+
+	subOffset += lastContentOffsetOnNewPages[index];
+
+	startContentOffset = shrinkLastContentOffset + subOffset;
+
+	pDestStartContentCell = &newContentPages[index]->pContent[lastContentOffsetOnNewPages[index]];
+
+	lastContentOffsetOnNewPages[index] += dataLen;
+
+MOVE_KEY:
 
 	//copy data
 	memcpy(pDestStartContentCell, pSourceStartContentCell, dataLen * sizeof(ContentCell));
@@ -177,10 +180,10 @@ void HArray::shrinkContentPages()
 			headerCell.Type == HEADER_JUMP_TYPE)
 		{
 			currMovedLen += moveContentCells(headerCell.Offset, //changed
-											newContentPages,
-											countNewContentPages,
-											shrinkLastContentOffset,
-											lastContentOffsetOnNewPages);
+				newContentPages,
+				countNewContentPages,
+				shrinkLastContentOffset,
+				lastContentOffsetOnNewPages);
 
 			if (currMovedLen >= totalMovedLen)
 			{
@@ -218,10 +221,10 @@ void HArray::shrinkContentPages()
 					if (branchCell.Offsets[i] >= shrinkLastContentOffset)
 					{
 						currMovedLen += moveContentCells(branchCell.Offsets[i], //changed
-														newContentPages,
-														countNewContentPages,
-														shrinkLastContentOffset,
-														lastContentOffsetOnNewPages);
+							newContentPages,
+							countNewContentPages,
+							shrinkLastContentOffset,
+							lastContentOffsetOnNewPages);
 
 						if (currMovedLen >= totalMovedLen)
 						{
@@ -263,10 +266,10 @@ void HArray::shrinkContentPages()
 				blockCell.Offset >= shrinkLastContentOffset)
 			{
 				currMovedLen += moveContentCells(blockCell.Offset, //changed
-												newContentPages,
-												countNewContentPages,
-												shrinkLastContentOffset,
-												lastContentOffsetOnNewPages);
+					newContentPages,
+					countNewContentPages,
+					shrinkLastContentOffset,
+					lastContentOffsetOnNewPages);
 
 				if (currMovedLen >= totalMovedLen)
 				{
@@ -302,10 +305,10 @@ void HArray::shrinkContentPages()
 				varCell.ContCell.Value >= shrinkLastContentOffset)
 			{
 				currMovedLen += moveContentCells(varCell.ContCell.Value, //changed
-												newContentPages,
-												countNewContentPages,
-												shrinkLastContentOffset,
-												lastContentOffsetOnNewPages);
+					newContentPages,
+					countNewContentPages,
+					shrinkLastContentOffset,
+					lastContentOffsetOnNewPages);
 
 				if (currMovedLen >= totalMovedLen)
 				{
@@ -351,7 +354,7 @@ void HArray::shrinkContentPages()
 	}
 
 EXIT:
-	
+
 	//6. remove pages ==============================================================================================
 	for (uint32 i = 0, currPage = shrinkLastPage; i < amountShrinkPages; i++, currPage++)
 	{
@@ -369,14 +372,14 @@ EXIT:
 		ContentPagesCount = shrinkLastPage + countNewContentPages;
 
 		lastContentOffset = ((ContentPagesCount - 1) << 16) | lastContentOffsetOnNewPages[countNewContentPages - 1];
-	
+
 		notMovedContentCellsAfterLastShrink = lastContentOffset - shrinkLastContentOffset;
 
 		//release rest content cells
 		for (uint32 i = 0, currPage = shrinkLastPage; i < countNewContentPages - 1; i++, currPage++)
 		{
 			uint32 restLen = MAX_SHORT - lastContentOffsetOnNewPages[i];
-			
+
 			if (restLen)
 			{
 				releaseContentCells(newContentPages[i]->pContent + lastContentOffsetOnNewPages[i],
@@ -385,8 +388,8 @@ EXIT:
 			}
 		}
 
-		
-		
+
+
 	}
 	else //all content were moved to existing pages
 	{
@@ -425,6 +428,13 @@ void HArray::shrinkBranchPages()
 	}
 
 	//content ===================================================================================================================
+	memset(tailReleasedContentOffsets, 0, sizeof(uint32*) * MAX_KEY_SEGMENTS);
+	countReleasedContentCells = 0;
+
+	ContentCell* pStartReleasedContentCells = 0;
+	uint32 countReleasedContentCells = 0;
+	uint32 startReleasedContentCellsOffset = 0;
+
 	int32 lastPage = ContentPagesCount - 1;
 
 	for (uint32 page = 0; page < ContentPagesCount; page++)
@@ -442,7 +452,7 @@ void HArray::shrinkBranchPages()
 			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 		}
 
-		for (uint32 cell = 0; cell < countCells; cell++)
+		for (uint32 cell = (page == 0 ? 1 : 0); cell < countCells; cell++)
 		{
 			ContentCell& contentCell = pContentPage->pContent[cell];
 
@@ -541,15 +551,53 @@ void HArray::shrinkBranchPages()
 
 						//set content cell
 						varCell.ContCell.Value = newBranchOffset;
-
-						if (!countReleasedBranchCells)
-						{
-							goto EXIT;
-						}
 					}
 				}
 			}
+
+			//scan released content cells
+			if (contentCell.Type == EMPTY_TYPE)
+			{
+				if (!pStartReleasedContentCells)
+				{
+					pStartReleasedContentCells = &contentCell;
+					startReleasedContentCellsOffset = (page << 16) | cell;
+					countReleasedContentCells = 0;
+				}
+				else
+				{
+					countReleasedContentCells++;
+				}
+
+				if (countReleasedContentCells == MAX_KEY_SEGMENTS - 1 ||
+					cell == MAX_SHORT - 1)
+				{
+					releaseContentCells(pStartReleasedContentCells,
+						startReleasedContentCellsOffset,
+						countReleasedContentCells);
+
+					pStartReleasedContentCells = 0;
+				}
+			}
+			else if (pStartReleasedContentCells)
+			{
+				releaseContentCells(pStartReleasedContentCells,
+					startReleasedContentCellsOffset,
+					countReleasedContentCells);
+
+				pStartReleasedContentCells = 0;
+			}
 		}
+	}
+
+	//last release
+	if (pStartReleasedContentCells)
+	{
+		releaseContentCells(pStartReleasedContentCells,
+							startReleasedContentCellsOffset,
+							countReleasedContentCells);
+
+		pStartReleasedContentCells = 0;
 	}
 
 	//blocks ===================================================================================================================
@@ -871,6 +919,13 @@ void HArray::shrinkBlockPages()
 	}
 
 	//content ===================================================================================================================
+	memset(tailReleasedContentOffsets, 0, sizeof(uint32*) * MAX_KEY_SEGMENTS);
+	countReleasedContentCells = 0;
+
+	ContentCell* pStartReleasedContentCells = 0;
+	uint32 countReleasedContentCells = 0;
+	uint32 startReleasedContentCellsOffset = 0;
+
 	int32 lastPage = ContentPagesCount - 1;
 
 	for (uint32 page = 0; page < ContentPagesCount; page++)
@@ -888,7 +943,7 @@ void HArray::shrinkBlockPages()
 			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 		}
 
-		for (uint32 cell = 0; cell < countCells; cell++)
+		for (uint32 cell = (page == 0 ? 1 : 0); cell < countCells; cell++)
 		{
 			ContentCell& contentCell = pContentPage->pContent[cell];
 
@@ -934,14 +989,52 @@ void HArray::shrinkBlockPages()
 					//copy data
 					memcpy(&destBlockCell, &srcBlockCell, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
 					memset(&srcBlockCell, 0, sizeof(BlockCell) * BLOCK_ENGINE_SIZE);
-
-					if (!countReleasedBlockCells)
-					{
-						goto EXIT;
-					}
 				}
 			}
+
+			//scan released content cells
+			if (contentCell.Type == EMPTY_TYPE)
+			{
+				if (!pStartReleasedContentCells)
+				{
+					pStartReleasedContentCells = &contentCell;
+					startReleasedContentCellsOffset = (page << 16) | cell;
+					countReleasedContentCells = 0;
+				}
+				else
+				{
+					countReleasedContentCells++;
+				}
+
+				if (countReleasedContentCells == MAX_KEY_SEGMENTS - 1 ||
+					cell == MAX_SHORT - 1)
+				{
+					releaseContentCells(pStartReleasedContentCells,
+										startReleasedContentCellsOffset,
+										countReleasedContentCells);
+
+					pStartReleasedContentCells = 0;
+				}
+			}
+			else if (pStartReleasedContentCells)
+			{
+				releaseContentCells(pStartReleasedContentCells,
+									startReleasedContentCellsOffset,
+									countReleasedContentCells);
+
+				pStartReleasedContentCells = 0;
+			}
 		}
+	}
+
+	//last release
+	if (pStartReleasedContentCells)
+	{
+		releaseContentCells(pStartReleasedContentCells,
+							startReleasedContentCellsOffset,
+							countReleasedContentCells);
+
+		pStartReleasedContentCells = 0;
 	}
 
 	//sub blocks ===================================================================================================================
@@ -1095,6 +1188,14 @@ void HArray::shrinkVarPages()
 		return;
 	}
 
+	//content ====================================================================================
+	memset(tailReleasedContentOffsets, 0, sizeof(uint32*) * MAX_KEY_SEGMENTS);
+	countReleasedContentCells = 0;
+
+	ContentCell* pStartReleasedContentCells = 0;
+	uint32 countReleasedContentCells = 0;
+	uint32 startReleasedContentCellsOffset = 0;
+	
 	int32 lastPage = ContentPagesCount - 1;
 
 	for (uint32 page = 0; page < ContentPagesCount; page++)
@@ -1112,7 +1213,7 @@ void HArray::shrinkVarPages()
 			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 		}
 
-		for (uint32 cell = 0; cell < countCells; cell++)
+		for (uint32 cell = (page == 0 ? 1 : 0); cell < countCells; cell++)
 		{
 			ContentCell& contentCell = pContentPage->pContent[cell];
 
@@ -1156,14 +1257,52 @@ void HArray::shrinkVarPages()
 
 					//set content cell
 					contentCell.Value = newVarOffset;
-
-					if (!countReleasedVarCells)
-					{
-						goto EXIT;
-					}
 				}
 			}
+
+			//scan released content cells
+			if (contentCell.Type == EMPTY_TYPE)
+			{
+				if (!pStartReleasedContentCells)
+				{
+					pStartReleasedContentCells = &contentCell;
+					startReleasedContentCellsOffset = (page << 16) | cell;
+					countReleasedContentCells = 0;
+				}
+				else
+				{
+					countReleasedContentCells++;
+				}
+
+				if (countReleasedContentCells == MAX_KEY_SEGMENTS - 1 ||
+					cell == MAX_SHORT - 1)
+				{
+					releaseContentCells(pStartReleasedContentCells,
+										startReleasedContentCellsOffset,
+										countReleasedContentCells);
+
+					pStartReleasedContentCells = 0;
+				}
+			}
+			else if (pStartReleasedContentCells)
+			{
+				releaseContentCells(pStartReleasedContentCells,
+									startReleasedContentCellsOffset,
+									countReleasedContentCells);
+
+				pStartReleasedContentCells = 0;
+			}
 		}
+	}
+
+	//last release
+	if (pStartReleasedContentCells)
+	{
+		releaseContentCells(pStartReleasedContentCells,
+							startReleasedContentCellsOffset,
+							countReleasedContentCells);
+
+		pStartReleasedContentCells = 0;
 	}
 
 	tailReleasedVarOffset = 0;

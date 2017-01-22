@@ -1012,11 +1012,6 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 	{
 		const char* str = keys[i / 15].c_str();
 
-		if (i == 2850)
-		{
-			i = 2850;
-		}
-
 		ha.delValueByKey((uint32*)str, (i % 15) * 4 + 4);
 
 		/*
@@ -1582,9 +1577,9 @@ int main()
 							1000000); //stop
 	*/
 
-	HArray_VS_StdMap_StrKey_Var(1000000,  //start
+	HArray_VS_StdMap_StrKey_Var(3000000,  //start
 								1000000,  //step
-								1000000); //stop
+								3000000); //stop
 	
 	printf("COEF Map VS HArray: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 	printf("COEF Unordered Map VS HArray: %.2f\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);

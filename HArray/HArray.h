@@ -90,7 +90,7 @@ public:
 	uint32 lastBlockOffset;
 
 	uint32 autoShrinkOnPercents;
-	uint32 notMovedContentCellsAfterShrink;
+	uint32 notMovedContentCellsAfterLastShrink;
 
 	void init(uchar8 headerBase)
 	{
@@ -123,7 +123,7 @@ public:
 		pBlockPages = 0;
 
 		autoShrinkOnPercents = 1; //1 percent by default
-		notMovedContentCellsAfterShrink = 0;
+		notMovedContentCellsAfterLastShrink = 0;
 
 		try
         {

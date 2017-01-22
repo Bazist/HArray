@@ -36,7 +36,7 @@
 #define STD_UNORDERED_MAP_TESTS
 //#define PRINT_MEM
 //#define PRINT_STAT
-#define CONSISTENCY_TESTS
+//#define CONSISTENCY_TESTS
 
 #ifdef DENSE_HASH_MAP_TESTS
 #include <google/dense_hash_map>
@@ -1561,7 +1561,6 @@ void testDelKeys2()
 
 int main()
 {
-	/*
 	HArrayInt_VS_StdMap_IntKey(1000000,   //start
 							   2000000,   //step
 							   10000000); //stop
@@ -1575,12 +1574,12 @@ int main()
 	HArray_VS_StdMap_StrKey(1000000,  //start
 							1000000,  //step
 							1000000); //stop
-	*/
-
+	/*
 	HArray_VS_StdMap_StrKey_Var(3000000,  //start
 								1000000,  //step
 								3000000); //stop
-	
+	*/
+
 	printf("COEF Map VS HArray: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 	printf("COEF Unordered Map VS HArray: %.2f\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);
 	printf("COEF Dense VS HArray: %.2f\n", (double)totalDenseTime / (double)totalHArrayTime);

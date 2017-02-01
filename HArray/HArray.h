@@ -860,6 +860,8 @@ public:
 
 	//REBUILD =========================================================================================================
 
+	void resizeHeader();
+
 	static bool rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
 
 	uint32 rebuild(uint32 headerBase = 0, bool removeEmptyKeys = false);

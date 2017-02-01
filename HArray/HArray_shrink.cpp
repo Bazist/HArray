@@ -72,6 +72,9 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 	//get key from pool
 	ContentCell* pDestStartContentCell = 0;
 
+	uint32 index;
+	uint32 subOffset = 0;
+
 	//key not found, try get key from bigger slots
 	for (uint32 currKeyLen = keyLen; currKeyLen < MAX_KEY_SEGMENTS; currKeyLen++)
 	{
@@ -116,7 +119,7 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 	}
 
 	//create next new page
-	uint32 index = countNewContentPages - 1;
+	index = countNewContentPages - 1;
 
 	if (lastContentOffsetOnNewPages[index] + dataLen > MAX_SHORT)
 	{
@@ -128,8 +131,6 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 	}
 
 	//modify
-	uint32 subOffset = 0;
-
 	if (index)
 	{
 		subOffset += index * MAX_SHORT;

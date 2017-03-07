@@ -89,6 +89,8 @@ const uint32 MIN_COUNT_RELEASED_BLOCK_CELLS = MAX_SHORT;
 const uint32 MIN_COUNT_RELEASED_VAR_CELLS = MAX_SHORT;
 
 const uchar8 MAX_KEY_SEGMENTS = MAX_CHAR - ONLY_CONTENT_TYPE;
+const uchar8 MIN_HEADER_BASE_BITS = 14;		  //16384 slots
+const uchar8 MAX_HEADER_FILL_FACTOR_BITS = 4; //fill factor 1/16 of header size
 
 typedef bool HARRAY_ITEM_VISIT_FUNC(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
 

@@ -23,8 +23,9 @@
 void HArray::resizeHeader()
 {
 	uint32 newHeaderBase = HeaderBase + 2; //in four times bigger
-    uint32 newHeaderBits = 32-HeaderBase;
-    uint32 newHeaderSize = (0xFFFFFFFF>>HeaderBits) + 1;
+    uint32 newHeaderBits = 32-newHeaderBase;
+    uint32 newHeaderSize = (0xFFFFFFFF>>newHeaderBits) + 1;
+	uint32 newAmountFreeSlotsBeforeHeaderResize = newHeaderSize >> MAX_HEADER_FILL_FACTOR_BITS;
 
 	HeaderCell* pNewHeader = new HeaderCell[newHeaderSize];
 
@@ -33,10 +34,70 @@ void HArray::resizeHeader()
 	{
 		HeaderCell& headerCell = pHeader[i];
 
-		pNewHeader[j++] = headerCell;
-		pNewHeader[j++] = headerCell;
-		pNewHeader[j++] = headerCell;
-		pNewHeader[j++] = headerCell;
+		if (headerCell.Type)
+		{
+			ContentCell& contentCell = pContentPages[headerCell.Offset >> 16]->pContent[headerCell.Offset & 0xFFFF];
+
+			if(contentCell.Type <= MAX_BRANCH_TYPE1)
+			{
+				/*BranchCell& branchCell = pBranchPages[contentCell.Value >> 16]->pBranch[contentCell.Value & 0xFFFF];
+
+				for (uint32 k = 0; k < contentCell.Type; k++)
+				{
+					uint32 headerOffset;
+
+					if (!normalizeFunc)
+					{
+						headerOffset = contentCell.Value >> newHeaderBits;
+					}
+					else
+					{
+						headerOffset = (*normalizeFunc)(&contentCell.Value) >> newHeaderBits;
+					}
+
+					pNewHeader[headerOffset] = headerCell;
+				}*/
+
+				pNewHeader[j++] = headerCell;
+				pNewHeader[j++] = headerCell;
+				pNewHeader[j++] = headerCell;
+				pNewHeader[j++] = headerCell;
+			}
+			else if (contentCell.Type <= MAX_BLOCK_TYPE)
+			{
+				pNewHeader[j++] = headerCell;
+				pNewHeader[j++] = headerCell;
+				pNewHeader[j++] = headerCell;
+				pNewHeader[j++] = headerCell;
+			}
+			else //only content
+			{
+				pNewHeader[j++].Type = 0;
+				pNewHeader[j++].Type = 0;
+				pNewHeader[j++].Type = 0;
+				pNewHeader[j++].Type = 0;
+
+				uint32 headerOffset;
+
+				if (!normalizeFunc)
+				{
+					headerOffset = contentCell.Value >> newHeaderBits;
+				}
+				else
+				{
+					headerOffset = (*normalizeFunc)(&contentCell.Value) >> newHeaderBits;
+				}
+
+				pNewHeader[headerOffset] = headerCell;
+			}
+		}
+		else
+		{
+			pNewHeader[j++].Type = 0;
+			pNewHeader[j++].Type = 0;
+			pNewHeader[j++].Type = 0;
+			pNewHeader[j++].Type = 0;
+		}
 	}
 
 	//copy members
@@ -46,4 +107,8 @@ void HArray::resizeHeader()
 	HeaderBase = newHeaderBase;
 	HeaderBits = newHeaderBits;
 	HeaderSize = newHeaderSize;
+
+	amountFreeSlotsBeforeHeaderResize = newAmountFreeSlotsBeforeHeaderResize;
+
+	printf("Resize: %u\n", newHeaderBase);
 }

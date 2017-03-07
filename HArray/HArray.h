@@ -91,6 +91,17 @@ public:
 
 	uint32 autoShrinkOnPercents;
 	uint32 notMovedContentCellsAfterLastShrink;
+	uint32 amountFreeSlotsBeforeHeaderResize;
+
+	void init()
+	{
+		init(MIN_HEADER_BASE_BITS,
+			INIT_MAX_PAGES,
+			INIT_MAX_PAGES,
+			INIT_MAX_PAGES,
+			INIT_MAX_PAGES,
+			INIT_MAX_PAGES);
+	}
 
 	void init(uchar8 headerBase)
 	{
@@ -132,6 +143,11 @@ public:
             HeaderBase = headerBase;
             HeaderBits = 32-headerBase;
             HeaderSize = (0xFFFFFFFF>>HeaderBits) + 1;
+
+			if (headerBase == MIN_HEADER_BASE_BITS) //header resizable
+				amountFreeSlotsBeforeHeaderResize = HeaderSize >> MAX_HEADER_FILL_FACTOR_BITS;
+			else
+				amountFreeSlotsBeforeHeaderResize = 0xFFFFFFFF;
 
 			tailReleasedContentOffsets = 0;
 			tailReleasedBranchOffset = 0;

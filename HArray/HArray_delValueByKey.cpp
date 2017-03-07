@@ -1102,6 +1102,8 @@ DISMANTLING:
 	{
 		headerCell.Type = EMPTY_TYPE;
 		headerCell.Offset = 0;
+
+		amountFreeSlotsBeforeHeaderResize++;
 	}
 	
 	//SHRINK =============================================================================================

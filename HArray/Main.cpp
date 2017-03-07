@@ -26,9 +26,9 @@
 #include "HArrayInt.h"
 #include "HArray.h"
 
-#define SEQUENCE_TESTS
+//#define SEQUENCE_TESTS
 #define RANDOM_TESTS
-#define PERIOD_TESTS
+//#define PERIOD_TESTS
 
 #define HARRAY_TESTS
 //#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
@@ -397,7 +397,7 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 	printf("HArray => ");
 
 	HArray ha;
-	ha.init(26);
+	ha.init(14);
 
 	clock_t start, finish;
 
@@ -412,11 +412,6 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		if(i == countKeys - 1)
-		{
-			i = countKeys - 1;
-		}
-
 		ha.insert((uint32*)keys[i].Data, sizeof(BinKey), keys[i].Data[0]);
 	}
 
@@ -1561,19 +1556,19 @@ void testDelKeys2()
 
 int main()
 {
-	HArrayInt_VS_StdMap_IntKey(1000000,   //start
-							   2000000,   //step
-							   10000000); //stop
+	//HArrayInt_VS_StdMap_IntKey(1000000,   //start
+	//						   2000000,   //step
+	//						   10000000); //stop
 	
 
-	HArray_VS_StdMap_BinKey(1000000, //start
+	HArray_VS_StdMap_BinKey(10000000, //start
 							2000000, //step
 							10000000,//stop
 							false);  //shuffle
 	
-	HArray_VS_StdMap_StrKey(1000000,  //start
-							1000000,  //step
-							1000000); //stop
+	//HArray_VS_StdMap_StrKey(1000000,  //start
+	//						1000000,  //step
+	//						1000000); //stop
 	/*
 	HArray_VS_StdMap_StrKey_Var(3000000,  //start
 								1000000,  //step

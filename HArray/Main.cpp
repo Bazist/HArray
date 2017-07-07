@@ -26,14 +26,14 @@
 #include "HArrayInt.h"
 #include "HArray.h"
 
-//#define SEQUENCE_TESTS
+#define SEQUENCE_TESTS
 #define RANDOM_TESTS
-//#define PERIOD_TESTS
+#define PERIOD_TESTS
 
 #define HARRAY_TESTS
 //#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
-#define STD_MAP_TESTS
-#define STD_UNORDERED_MAP_TESTS
+//#define STD_MAP_TESTS
+//#define STD_UNORDERED_MAP_TESTS
 //#define PRINT_MEM
 //#define PRINT_STAT
 //#define CONSISTENCY_TESTS

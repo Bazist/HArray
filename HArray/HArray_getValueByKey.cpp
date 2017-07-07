@@ -47,7 +47,7 @@ NEXT_KEY_PART:
 		ContentPage* pContentPage = pContentPages[contentOffset>>16];
 		ushort16 contentIndex = contentOffset&0xFFFF;
 
-		uchar8 contentCellType = pContentPage->pContent[contentIndex].Type; //move to type part
+		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
 
 		if(contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
@@ -58,15 +58,15 @@ NEXT_KEY_PART:
 
 			for(; keyOffset < keyLen; contentIndex++, keyOffset++)
 			{
-				if(pContentPage->pContent[contentIndex].Value != key[keyOffset])
+				if(pContentPage->pContent[contentIndex] != key[keyOffset])
 					return 0;
 			}
 
-			return &pContentPage->pContent[contentIndex].Value; //return value
+			return &pContentPage->pContent[contentIndex]; //return value
 		}
 
 		uint32& keyValue = key[keyOffset];
-		uint32* pContentCellValueOrOffset = &pContentPage->pContent[contentIndex].Value;
+		uint32* pContentCellValueOrOffset = &pContentPage->pContent[contentIndex];
 
 		if(contentCellType == VAR_TYPE) //VAR =====================================================================
 		{
@@ -75,24 +75,24 @@ NEXT_KEY_PART:
 
 			if(keyOffset < keyLen)
 			{
-				contentCellType = varCell.ContCell.Type; //read from var cell
+				contentCellType = varCell.ContCellType; //read from var cell
 
 				if(contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
 				{
-					contentOffset = varCell.ContCell.Value;
+					contentOffset = varCell.ContCellValue;
 
 					goto NEXT_KEY_PART;
 				}
 				else
 				{
-					pContentCellValueOrOffset = &varCell.ContCell.Value;
+					pContentCellValueOrOffset = &varCell.ContCellValue;
 				}
 			}
 			else
 			{
-				if(varCell.ValueContCell.Type)
+				if(varCell.ValueContCellType)
                 {
-                	return &varCell.ValueContCell.Value;
+                	return &varCell.ValueContCellValue;
                 }
                 else
                 {

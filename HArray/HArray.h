@@ -872,7 +872,8 @@ public:
 
 	bool allocateHeaderBlock(uint32 keyValue,
 							 uint32 keyOffset,
-							 ContentCell* pContentCell);
+							 uchar8* pContentCellType,
+							 uint32* pContentCellValue);
 
 	//REBUILD =========================================================================================================
 
@@ -951,7 +952,7 @@ public:
 		autoShrinkOnPercents = percents;
 	}
 
-	void releaseContentCells(ContentCell* pContentCell, uint32 contentOffset, uint32 len);
+	void releaseContentCells(uint32* pContentCell, uint32 contentOffset, uint32 len);
 	void releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset);
 	void releaseVarCell(VarCell* pVarCell, uint32 varOffset);
 	void releaseBlockCells(BlockCell* pBlockCell, uint32 startBlockOffset);

@@ -210,7 +210,8 @@ bool HArray::finHeaderBlockPlace(CompactPage* pRootCompactPage,
 
 bool HArray::allocateHeaderBlock(uint32 keyValue,
 									   uint32 keyOffset,
-									   ContentCell* pContentCell)
+									   uchar8* pContentCellType,
+									   uint32* pContentCellValue)
 {
 	return false;
 
@@ -223,7 +224,7 @@ bool HArray::allocateHeaderBlock(uint32 keyValue,
 
 	uint32 count = 1;
 
-	scanBlocks(count, pContentCell->Value, pCompactPage);
+	scanBlocks(count, *pContentCellValue, pCompactPage);
 
 	//return false;
 
@@ -401,8 +402,8 @@ bool HArray::allocateHeaderBlock(uint32 keyValue,
 	*/
 
 	//4. Set content cell
-	pContentCell->Type = headerBlockType;
-	pContentCell->Value = baseHeaderOffset;
+	*pContentCellType = headerBlockType;
+	*pContentCellValue = baseHeaderOffset;
 
 	//5. Remove old header blocks
 

@@ -63,8 +63,8 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 				}
 			}
 
-			(*pEndContentCellType)++;
-			(*pEndContentCellValue)++;
+			pEndContentCellType++;
+			pEndContentCellValue++;
 		}
 
 		keyLen = pEndContentCellValue - pSourceStartContentCellValue;

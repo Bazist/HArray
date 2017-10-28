@@ -1,23 +1,3 @@
-## Probably, this is most optimized Trie structure in the World ! Thats all what you need know about this project :)
-
-**HArrayInt** - Key\Value In Memory structure for 32bit keys
-
-**HArrayVarRAM** - Key\Value In Memory structure for keys with variety size
-
-------------------
-
-## Why we love Trie ? Because it has much more functionality and stability than Hashtables and much more faster than Binary Trees. Let's compare properties:
-
-![alt tag](https://s16.postimg.org/6zis60mol/functionality.png)
-
-------------------
-
-## Trie ? I heard about Trees and Hastables but don't know anything about Trie
-
-# [Explain me as for Beginners](https://github.com/Bazist/HArray/blob/master/Trie_for_beginners.md)
-
-------------------
-
 ## Result of Benchmarks
 
 **Configuration**

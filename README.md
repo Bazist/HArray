@@ -6,18 +6,7 @@
 
 ------------------
 
-## Why we love Trie ? Because it has much more functionality and stability than Hashtables and much more faster than Binary Trees. Let's compare properties:
-
-![alt tag](https://s16.postimg.org/6zis60mol/functionality.png)
-
-------------------
-
 # [Start overview from Benchmarks](https://github.com/Bazist/HArray/blob/master/Benchmarks.md)
-
-------------------
-
-## Trie ? I heard about Trees and Hastables but don't know anything about Trie
-# [Explain me as for Beginners](https://github.com/Bazist/HArray/blob/master/Trie_for_beginners.md)
 
 ------------------
 ### Overview
@@ -31,6 +20,18 @@
 - **Predictable** behaviour even in worst case: smoothly consuming memory, almost constantly latency on insert/lookup
 - **Fair Delete** operation with smoothly dismantling each Key. 
   (Dead fibres are used for insert new keys, so structure perfect works in massive insert/delete scenarios)
+
+------------------
+
+## Why we love Trie ? Because it has much more functionality and stability than Hashtables and much more faster than Binary Trees. Let's compare properties:
+
+![alt tag](https://s16.postimg.org/6zis60mol/functionality.png)
+
+------------------
+
+## Trie ? I heard about Trees and Hastables but don't know anything about Trie
+# [Explain me as for Beginners](https://github.com/Bazist/HArray/blob/master/Trie_for_beginners.md)
+
 
 ### Examples
 

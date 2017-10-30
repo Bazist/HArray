@@ -85,7 +85,7 @@ for (uint32 i = 0; i < count; i++)
 }
 ```
 
-Get value by key. Will return 0 if key is not found
+Scan all keys through visitor
 
 ```c++
 bool visitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)

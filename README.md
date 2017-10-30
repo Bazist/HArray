@@ -37,8 +37,86 @@
 
 ### Examples
 
+Initialize container
+
 ```c++
-Comming soon ...
+#include "HArray.h"
+
+HArray ha;
+ha.init(); //ha.init(24) set your custom capacity for big datasets
+```
+Insert a key
+
+```c++
+uint32 key[] = { 10, 20, 30, 40 };
+uint32 keyLen = sizeof(key);
+uint32 value = 1;
+
+ha.insert(key, keyLen, value);
+```
+
+Get value by key. Will return 0 if key is not found
+
+```c++
+uint32* pValue = ha.getValueByKey(key, keyLen);
+```
+
+Get all keys by range from min key to max key. 
+
+```c++
+HArrayPair pairs[5];
+uint32 pairsSize = 5;
+
+uint32 minKey[] = { 10, 10 };
+uint32 minKeyLen = sizeof(minKey);
+
+uint32 maxKey[] = { 20, 20 };
+uint32 maxKeyLen = sizeof(maxKey);
+
+uint32 count = ha.getKeysAndValuesByRange(pairs, pairsSize, minKey, minKeyLen, maxKey, maxKeyLen);
+for (uint32 i = 0; i < count; i++)
+{
+	uint32* key = pairs[i].Key;
+	uint32 keyLen = pairs[i].KeyLen;
+
+  uint32 value = pairs[i].Value;
+
+	//...
+}
+```
+
+Get value by key. Will return 0 if key is not found
+
+```c++
+bool visitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
+{
+	//handle founded key here
+	// ...
+
+	//return true to continue scaning or false otherwise
+	return true;
+}
+
+//Start scanning
+
+void* pData = 0;
+
+ha.scanKeysAndValues(&visitor,
+						         pData);
+```
+
+Serialize/Deserialize containter from/to file
+
+```c++
+ha.saveToFile("c:\\dump");
+
+ha.loadFromFile("c:\\dump");
+```
+
+Delete Key and Value from container
+
+```c++
+ha.delValueByKey(key, keyLen);
 ```
 
 ### License

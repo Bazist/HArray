@@ -76,12 +76,12 @@ uint32 maxKeyLen = sizeof(maxKey);
 uint32 count = ha.getKeysAndValuesByRange(pairs, pairsSize, minKey, minKeyLen, maxKey, maxKeyLen);
 for (uint32 i = 0; i < count; i++)
 {
-	uint32* key = pairs[i].Key;
-	uint32 keyLen = pairs[i].KeyLen;
+   uint32* key = pairs[i].Key;
+   uint32 keyLen = pairs[i].KeyLen;
 
-  uint32 value = pairs[i].Value;
-
-	//...
+   uint32 value = pairs[i].Value;
+   
+   //here your code
 }
 ```
 
@@ -90,19 +90,18 @@ Get value by key. Will return 0 if key is not found
 ```c++
 bool visitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
 {
-	//handle founded key here
-	// ...
+   //handle founded key here
+   // ...
 
-	//return true to continue scaning or false otherwise
-	return true;
+   //return true to continue scaning or false otherwise
+   return true;
 }
 
 //Start scanning
 
-void* pData = 0;
+void* pData = 0; //useful data in context
 
-ha.scanKeysAndValues(&visitor,
-						         pData);
+ha.scanKeysAndValues(&visitor, pData);
 ```
 
 Serialize/Deserialize containter from/to file
@@ -111,6 +110,35 @@ Serialize/Deserialize containter from/to file
 ha.saveToFile("c:\\dump");
 
 ha.loadFromFile("c:\\dump");
+```
+
+Check if container has part of key
+
+```c++
+uint32 key[] = { 10, 20, 30 };
+uint32 keyLen = sizeof(key);
+
+if(ha.hasPartKey(key, keyLen))
+{
+   //code here
+}
+```
+
+Set specific comparator to redefine order of keys in the container.
+
+```c++
+float key[] = { 10.0, 20.0, 30.0 };
+uint32 keyLen = sizeof(key);
+
+uint32 value = 1;
+
+//Set float comparator for right sorting
+//Another options: setStrComparator, setInt32Comparator, setUInt32Comparator 
+//or define your custom comparator through setCustomComparator
+ha.setFloatComparator();
+
+ha.insert((uint32*)key, keyLen, value);
+
 ```
 
 Delete Key and Value from container

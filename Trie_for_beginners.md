@@ -12,8 +12,8 @@ ___
 
 ## In Trie these keys will be arranged as ordered data and sometimes it requires a little bit less space.
 <img src="https://s16.postimg.org/uw1mjevvp/inside_trie.png" width="50%" height="50%" />
-___
 
+___
 # INSERT
 ## OK. What happens if we want insert a new key into each structure ?
 <img src="https://s16.postimg.org/wmknkwdet/new_key.png" width="50%" height="50%" />
@@ -26,8 +26,8 @@ ___
 
 ## If you insert a new key into Trie, you needn't reallocate or balancing data and you can use existing segments as part of your new key.
 <img src="https://s16.postimg.org/4ii56mf39/insert_new_key_trie.png" width="50%" height="50%" />
-___
 
+___
 # LOOKUP
 ## If you search a key in Binary Tree you need always makes long jumps. If you have 1 million keys these jumps will be about 20.
 <img src="https://s16.postimg.org/j0fcem6ed/lookup_new_key_binary_tree.png" width="50%" height="50%" />
@@ -37,8 +37,8 @@ ___
 
 ## In Trie you always scan key only once. It could costs several long jumps, but maximum amount of jumps always constant. It like a maze - you need find right way.
 <img src="https://s16.postimg.org/ua829kbfp/lookup_new_key_trie.png" width="50%" height="50%" />
-___
 
+___
 # SCAN BY RANGE
 ## What happens if we want scan range of keys ?
 <img src="https://s16.postimg.org/uygwsia5h/scan_range_from_to.png" width="50%" height="50%" />

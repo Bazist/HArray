@@ -440,7 +440,7 @@ void HArray::shrinkBranchPages()
 	}
 
 	//content ===================================================================================================================
-	memset(tailReleasedContentOffsets, 0, sizeof(uint32*) * MAX_KEY_SEGMENTS);
+	memset(tailReleasedContentOffsets, 0, sizeof(uint32) * MAX_KEY_SEGMENTS);
 	countReleasedContentCells = 0;
 
 	uchar8* pStartReleasedContentCellsType = 0;
@@ -939,7 +939,7 @@ void HArray::shrinkBlockPages()
 	}
 
 	//content ===================================================================================================================
-	memset(tailReleasedContentOffsets, 0, sizeof(uint32*) * MAX_KEY_SEGMENTS);
+	memset(tailReleasedContentOffsets, 0, sizeof(uint32) * MAX_KEY_SEGMENTS);
 	countReleasedContentCells = 0;
 
 	uchar8* pStartReleasedContentCellsType = 0;
@@ -1217,7 +1217,7 @@ void HArray::shrinkVarPages()
 	}
 
 	//content ====================================================================================
-	memset(tailReleasedContentOffsets, 0, sizeof(uint32*) * MAX_KEY_SEGMENTS);
+	memset(tailReleasedContentOffsets, 0, sizeof(uint32) * MAX_KEY_SEGMENTS);
 	countReleasedContentCells = 0;
 
 	uchar8* pStartReleasedContentCellsType = 0;

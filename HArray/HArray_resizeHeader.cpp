@@ -22,6 +22,7 @@
 
 void HArray::resizeHeader()
 {
+	/*
 	uint32 newHeaderBase = HeaderBase + 2; //in four times bigger
     uint32 newHeaderBits = 32-newHeaderBase;
     uint32 newHeaderSize = (0xFFFFFFFF>>newHeaderBits) + 1;
@@ -40,7 +41,7 @@ void HArray::resizeHeader()
 
 			if(contentCell.Type <= MAX_BRANCH_TYPE1)
 			{
-				/*BranchCell& branchCell = pBranchPages[contentCell.Value >> 16]->pBranch[contentCell.Value & 0xFFFF];
+				BranchCell& branchCell = pBranchPages[contentCell.Value >> 16]->pBranch[contentCell.Value & 0xFFFF];
 
 				for (uint32 k = 0; k < contentCell.Type; k++)
 				{
@@ -56,7 +57,7 @@ void HArray::resizeHeader()
 					}
 
 					pNewHeader[headerOffset] = headerCell;
-				}*/
+				}
 
 				pNewHeader[j++] = headerCell;
 				pNewHeader[j++] = headerCell;
@@ -111,4 +112,6 @@ void HArray::resizeHeader()
 	amountFreeSlotsBeforeHeaderResize = newAmountFreeSlotsBeforeHeaderResize;
 
 	printf("Resize: %u\n", newHeaderBase);
+
+	*/
 }

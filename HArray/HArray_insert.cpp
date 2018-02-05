@@ -47,6 +47,9 @@ uint32 HArray::insert(uint32* key,
 
 		uint32 headerOffset;
 
+		uchar8* pContentCellType;
+		uint32* pContentCellValue;
+
 		if (!normalizeFunc)
 		{
 			headerOffset = key[0] >> HeaderBits;
@@ -583,8 +586,8 @@ uint32 HArray::insert(uint32* key,
 
 		keyValue = key[keyOffset];
 
-		uchar8* pContentCellType = &pContentPage->pType[contentIndex];
-		uint32* pContentCellValue = &pContentPage->pContent[contentIndex];
+		pContentCellType = &pContentPage->pType[contentIndex];
+		pContentCellValue = &pContentPage->pContent[contentIndex];
 
 		uint32 contentCellValueOrOffset;
 

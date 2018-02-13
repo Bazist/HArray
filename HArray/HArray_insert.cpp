@@ -573,7 +573,7 @@ uint32 HArray::insert(uint32* key,
 				}
 				else //key is exists, update
 				{
-					pContentPage->pContent[contentIndex] = pContentPage->pContent[contentIndex];
+					pContentPage->pContent[contentIndex] = value;
 
 					return 0;
 				}

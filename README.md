@@ -149,4 +149,4 @@ ha.delValueByKey(key, keyLen);
 
 ### License
 
-The code is licensed under the GNU GPL license, see the [LICENSE file](LICENSE) for details.
+The code is licensed under the GNU General Public License v3.0, see the [LICENSE file](LICENSE) for details.

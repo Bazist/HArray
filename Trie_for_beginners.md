@@ -2,7 +2,7 @@
 ___
 # MEMORY
 ## Best way understand difference between associative arrays if you realise how several keys will be arranged inside. We have only three Keys - each with four segments (one segment could be 1 byte or 4 byte or 8 bytes - it doesn't matter in our explanation).
-<img src=http://www.booben.com/keys.png" width="50%" height="50%" />
+<img src="http://www.booben.com/keys.png" width="50%" height="50%" />
 
 ## In Binary Tree these keys will be arranged as ordered data
 <img src="http://www.booben.com/inside_binary_tree.png" width="50%" height="50%" />
@@ -16,10 +16,10 @@ ___
 ___
 # INSERT
 ## OK. What happens if we want insert a new key into each structure ?
-<img src="https://s16.postimg.org/wmknkwdet/new_key.png" width="50%" height="50%" />
+<img src="http://www.booben.com/new_key.png" width="50%" height="50%" />
 
 ## In Binary Tree we need find right place in ordered sequence and insert our key there. Sometimes we need split our page to do balancing of tree.
-<img src="https://s16.postimg.org/uglrcnkkl/insert_new_key_binary_tree.png" width="50%" height="50%" />
+<img src="http://www.booben.com/insert_new_key_binary_tree.png" width="50%" height="50%" />
 
 ## If you have a good hash function in almost cases you just filled new empty space in Address Table. But if you have much data, even with good hash function you will have much collisions. Here illustrated Best Case for Hashtable without any collisions. 
 <img src="http://www.booben.com/insert_new_key_hashtable.png" width="50%" height="50%" />

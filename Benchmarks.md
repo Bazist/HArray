@@ -9,7 +9,7 @@
 | RAM | 8 GB |
 | SSD | 256 GB |
 
-![alt tag](https://s15.postimg.org/gzww2zhor/i_Core5.png)
+![alt tag](http://www.booben.com/i_Core5.png)
 
 **Notes**: All results in tables below in milliseconds. In green color best results. In each benchmark Value size is 4 bytes (emulates a memory pointer of Value object). SEQUENCE cases always illustrate Worst Case for VyMa/Trie algorithm.
 

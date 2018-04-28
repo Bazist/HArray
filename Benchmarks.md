@@ -27,17 +27,17 @@ What is *SEQUENCE* key generation ?
 What is *PERIOD* key generation ?
 <br>Keys such as: 0, 17, 289, 4913, 83521 ... N * 17 etc.
 
-![alt tag](https://s16.postimg.org/j96eaew9h/insert_seq_32bits.png)
+![alt tag](http://www.booben.com/insert_seq_32bits.png)
 
-![alt tag](https://s16.postimg.org/fads5bx05/lookup_seq_32bits.png)
+![alt tag](http://www.booben.com/lookup_seq_32bits.png)
 
-![alt tag](https://s16.postimg.org/3wmngdx3p/insert_rand_32bits.png)
+![alt tag](http://www.booben.com/insert_rand_32bits.png)
 
-![alt tag](https://s16.postimg.org/egwkyz1lh/lookup_rand_32bits.png)
+![alt tag](http://www.booben.com/lookup_rand_32bits.png)
 
-![alt tag](https://s16.postimg.org/akenp8r85/insert_period_32bits.png)
+![alt tag](http://www.booben.com/insert_period_32bits.png)
 
-![alt tag](https://s16.postimg.org/q3gp03owl/lookup_period_32bits.png)
+![alt tag](http://www.booben.com/lookup_period_32bits.png)
 
 ------------------
 
@@ -65,17 +65,17 @@ What is *PERIOD* key generation ?
 <br>[4913 4913 4913 4913]
 <br>etc.
 
-![alt tag](https://s16.postimg.org/txa59968l/insert_seq_128bits.png)
+![alt tag](http://www.booben.com/insert_seq_128bits.png)
 
-![alt tag](https://s16.postimg.org/hg82zu0gl/lookup_seq_128bits.png)
+![alt tag](http://www.booben.com/lookup_seq_128bits.png)
 
-![alt tag](https://s16.postimg.org/fbj4l09g5/insert_rand_128bits.png)
+![alt tag](http://www.booben.com/insert_rand_128bits.png)
 
-![alt tag](https://s16.postimg.org/o44omfjyt/lookup_rand_128bits.png)
+![alt tag](http://www.booben.com/lookup_rand_128bits.png)
 
-![alt tag](https://s16.postimg.org/bnys17bv9/insert_period_128bits.png)
+![alt tag](http://www.booben.com/insert_period_128bits.png)
 
-![alt tag](https://s16.postimg.org/r70tc29jp/lookup_period_128bits.png)
+![alt tag](http://www.booben.com/lookup_period_128bits.png)
 
 ------------------
 
@@ -95,13 +95,13 @@ What is *RANDOM* key generation ?
 <br>[UDFdjjfsjhsjhdleE0E9j7sfL5MBNwMZZas22gwwrHHJhfsjsfsJqqJhfhsf95l]
 <br>etc.
 
-![alt tag](https://s16.postimg.org/bvr0bgc7p/insert_similar_64chars.png)
+![alt tag](http://www.booben.com/insert_similar_64chars.png)
 
-![alt tag](https://s16.postimg.org/gf7uapjh1/lookup_similar_64chars.png)
+![alt tag](http://www.booben.com/lookup_similar_64chars.png)
 
-![alt tag](https://s16.postimg.org/ih3qb7s2d/insert_rand_64chars.png)
+![alt tag](http://www.booben.com/insert_rand_64chars.png)
 
-![alt tag](https://s16.postimg.org/fkgpaxm8l/lookup_rand_64chars.png)
+![alt tag](http://www.booben.com/lookup_rand_64chars.png)
 
 ------------------
 

@@ -9,7 +9,7 @@
 | RAM | 8 GB |
 | SSD | 256 GB |
 
-![alt tag](http://www.booben.com/iCore5.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/iCore5.png?raw=true)
 
 **Notes**: All results in tables below in milliseconds. In green color best results. In each benchmark Value size is 4 bytes (emulates a memory pointer of Value object). SEQUENCE cases always illustrate Worst Case for VyMa/Trie algorithm.
 
@@ -27,17 +27,17 @@ What is *SEQUENCE* key generation ?
 What is *PERIOD* key generation ?
 <br>Keys such as: 0, 17, 289, 4913, 83521 ... N * 17 etc.
 
-![alt tag](http://www.booben.com/insert_seq_32bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/insert_seq_32bits.png?raw=true)
 
-![alt tag](http://www.booben.com/lookup_seq_32bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/lookup_seq_32bits.png?raw=true)
 
-![alt tag](http://www.booben.com/insert_rand_32bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/insert_rand_32bits.png?raw=true)
 
-![alt tag](http://www.booben.com/lookup_rand_32bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/lookup_rand_32bits.png?raw=true)
 
-![alt tag](http://www.booben.com/insert_period_32bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/insert_period_32bits.png?raw=true)
 
-![alt tag](http://www.booben.com/lookup_period_32bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/lookup_period_32bits.png?raw=true)
 
 ------------------
 
@@ -65,17 +65,17 @@ What is *PERIOD* key generation ?
 <br>[4913 4913 4913 4913]
 <br>etc.
 
-![alt tag](http://www.booben.com/insert_seq_128bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/insert_seq_128bits.png?raw=true)
 
-![alt tag](http://www.booben.com/lookup_seq_128bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/lookup_seq_128bits.png?raw=true)
 
-![alt tag](http://www.booben.com/insert_rand_128bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/insert_rand_128bits.png?raw=true)
 
-![alt tag](http://www.booben.com/lookup_rand_128bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/lookup_rand_128bits.png?raw=true)
 
-![alt tag](http://www.booben.com/insert_period_128bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/insert_period_128bits.png?raw=true)
 
-![alt tag](http://www.booben.com/lookup_period_128bits.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/lookup_period_128bits.png?raw=true)
 
 ------------------
 
@@ -95,21 +95,18 @@ What is *RANDOM* key generation ?
 <br>[UDFdjjfsjhsjhdleE0E9j7sfL5MBNwMZZas22gwwrHHJhfsjsfsJqqJhfhsf95l]
 <br>etc.
 
-![alt tag](http://www.booben.com/insert_similar_64chars.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/insert_similar_64chars.png?raw=true)
 
-![alt tag](http://www.booben.com/lookup_similar_64chars.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/lookup_similar_64chars.png?raw=true)
 
-![alt tag](http://www.booben.com/insert_rand_64chars.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/insert_rand_64chars.png?raw=true)
 
-![alt tag](http://www.booben.com/lookup_rand_64chars.png)
+![alt tag](https://github.com/Bazist/HArray/blob/master/Images/lookup_rand_64chars.png?raw=true)
 
 ------------------
 
 **Code of benchmarks**
 https://github.com/Bazist/HArray/blob/master/HArray/Main.cpp
-
-**More results of benchmarks**:
-http://wiki.pikosec.com/index.php?title=VymaDB:Benchmarks
 
 ------------------
 Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)

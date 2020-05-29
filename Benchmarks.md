@@ -109,7 +109,7 @@ What is *RANDOM* key generation ?
 https://github.com/Bazist/HArray/blob/master/HArray/Main.cpp
 
 ------------------
-Copyright(C) 2010-2016 Vyacheslav Makoveychuk (email: slv709@gmail.com, skype: vyacheslavm81)
+Copyright(C) 2010-2016 Viacheslav Makoveichuk (email: slv709@gmail.com, skype: vyacheslavm81)
 
 ------------------
 ## ENJOY

@@ -27,7 +27,7 @@
 
 ## Why we love Trie ? Because it has much more functionality and stability than Hashtables and much more faster than Binary Trees. Let's compare properties:
 
-![alt tag](https://raw.githubusercontent.com/Bazist/HArray/master/Images/functionality.png)
+![alt tag](https://raw.githubusercontent.com/Bazist/HArray/master/Images/functionality2.png)
 
 ------------------
 

@@ -26,14 +26,24 @@
 #include "HArrayInt.h"
 #include "HArray.h"
 
+//======== NATURE OF KEYS =============
 #define SEQUENCE_TESTS
 #define RANDOM_TESTS
 #define PERIOD_TESTS
 
+//======== LENGTH OF KEYS =============
+#define KEY_INT_TESTS
+#define KEY_BIN_TESTS
+#define KEY_STR_TESTS
+
+//======== CONTAINERS =================
+#define HARRAY_INT_TESTS
 #define HARRAY_TESTS
 //#define DENSE_HASH_MAP_TESTS //uncomment if you install google::dense_hash_map
 #define STD_MAP_TESTS
 #define STD_UNORDERED_MAP_TESTS
+
+//======== INFO =======================
 //#define PRINT_MEM
 //#define PRINT_STAT
 //#define CONSISTENCY_TESTS
@@ -59,7 +69,7 @@ clock_t msclock()
 
 void testHArrayInt(uint32* keys, uint32 countKeys)
 {
-	#ifdef HARRAY_TESTS
+	#ifdef HARRAY_INT_TESTS
 
 	printf("HArrayInt => ");
 
@@ -253,7 +263,6 @@ void testStdUnorderedMapInt(uint32* keys, uint32 countKeys)
 	#endif
 }
 
-
 void fillSeqInts(uint32* keys, uint32 countKeys)
 {
 	for (uint32 i = 0; i < countKeys; i++)
@@ -280,6 +289,8 @@ void fillPeriodInts(uint32* keys, uint32 countKeys)
 
 void HArrayInt_VS_StdMap_IntKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
 {
+	#ifdef KEY_INT_TESTS
+	
 	printf("=== HArrayInt VS google::dense_hash_map<int,int> VS std::map<int,int> VS std::ordinary_map<int,int> testing===\n");
 
 	uint32* intKeys = new uint32[stopOnAmount];
@@ -333,6 +344,8 @@ void HArrayInt_VS_StdMap_IntKey(uint32 startOnAmount, uint32 stepOfAmount, uint3
 	#endif
 
 	delete[] intKeys;
+
+	#endif
 }
 
 //==== HArray - Binary Keys ===========================================================================================
@@ -746,6 +759,8 @@ void fillPeriodBins(BinKey* keys, uint32 countKeys)
 
 void HArray_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount, bool shuffle = false)
 {
+	#ifdef KEY_BIN_TESTS
+
 	printf("=== HArray VS google::dense_hash_map<BinKey, int> VS std::map<BinKey,int> VS std::ordinary_map<BinKey,int> testing ===\n");
 
 	BinKey* binKeys = new BinKey[stopOnAmount];
@@ -799,6 +814,8 @@ void HArray_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 s
 	#endif
 
 	delete[] binKeys;
+
+	#endif
 }
 
 //==== HArray - String Keys ===========================================================================================
@@ -1317,6 +1334,8 @@ void fillRandStrs(std::string* keys, uint32 countKeys)
 
 void HArray_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
 {
+	#ifdef KEY_STR_TESTS
+
 	printf("=== HArray VS google::dense_hash_map<StrKey, int> VS std::map<std::string,int> VS std::ordinary_map<std::string,int> testing ===\n");
 
 	std::string* strKeys = new std::string[stopOnAmount];
@@ -1354,15 +1373,19 @@ void HArray_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 s
 	#endif
 
 	delete[] strKeys;
+
+	#endif
 }
 
 void HArray_VS_StdMap_StrKey_Var(uint32 startOnAmount, uint32 stepOfAmount, uint32 stopOnAmount)
 {
+	#ifdef KEY_STR_TESTS
+
 	printf("=== HArray VS google::dense_hash_map<StrKey, int> VS std::map<std::string,int> VS std::ordinary_map<std::string,int> testing ===\n");
 
 	std::string* strKeys = new std::string[stopOnAmount];
 
-#ifdef RANDOM_TESTS
+	#ifdef RANDOM_TESTS
 
 	fillRandStrs(strKeys, stopOnAmount);
 
@@ -1373,9 +1396,11 @@ void HArray_VS_StdMap_StrKey_Var(uint32 startOnAmount, uint32 stepOfAmount, uint
 		printf("\n");
 	}
 
-#endif
+	#endif
 
 	delete[] strKeys;
+
+	#endif
 }
 
 /*
@@ -1559,8 +1584,7 @@ int main()
 	HArrayInt_VS_StdMap_IntKey(1000000,   //start
 								2000000,   //step
 								10000000); //stop
-
-
+	
 	HArray_VS_StdMap_BinKey(1000000, //start
 							2000000, //step
 							10000000,//stop

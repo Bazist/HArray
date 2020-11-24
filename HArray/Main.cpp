@@ -275,6 +275,8 @@ void fillSeqInts(uint32* keys, uint32 countKeys)
 
 void fillRandInts(uint32* keys, uint32 countKeys)
 {
+	srand(time(NULL));
+
 	for (uint32 i = 0; i < countKeys; i++)
 	{
 		keys[i] = rand() * rand() * 17;

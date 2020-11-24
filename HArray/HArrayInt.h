@@ -175,7 +175,10 @@ public:
 		printf("\nright two free %d\n", count3);
 	}
 
-	const int BRANCH_SIZE = 16;
+	const static int EMPTY_TYPE = 0;
+	const static int BRANCH_SIZE = 16;
+	const static int BRANCH_ITEM_TYPE = BRANCH_SIZE + 1;
+	const static int BLOCK_TYPE = BRANCH_ITEM_TYPE + 1;
 
 	bool insert(uint32 key, uint32 value)
 	{
@@ -186,16 +189,43 @@ public:
 
 			HeaderCellInt& headerCell = pHeader[leftPart];
 
-			if (headerCell.Type == 0)
+			switch (headerCell.Type)
 			{
-				//embedded value
-				headerCell.Type = 1;
-				headerCell.Code = rightPart;
-				headerCell.Offset = value;
+				case EMPTY_TYPE: //WAVE 1
+				{
+					//embedded value
+					headerCell.Type = 1;
+					headerCell.Code = rightPart;
+					headerCell.Offset = value;
 
-				return true;
+					return true;
+				}
+				case EMPTY_TYPE + 1: //WAVE 2
+				{
+					if (headerCell.Code == rightPart)
+					{
+						headerCell.Offset = value;
+
+						return false;
+					}
+
+					HeaderCellInt& rightFreeHeaderCell = pHeader[leftPart + 1];
+
+					if (rightFreeHeaderCell.Type == EMPTY_TYPE)
+					{
+						//embedded branch
+						headerCell.Type++;
+
+						rightFreeHeaderCell.Type = BRANCH_ITEM_TYPE;
+						rightFreeHeaderCell.Code = rightPart;
+						rightFreeHeaderCell.Offset = value;
+
+						return true;
+					}
+				}
 			}
-			else if (headerCell.Type < BRANCH_SIZE)
+
+			if (headerCell.Type < BRANCH_SIZE)
 			{
 				//update value
 				for (uint32 i = 0; i < headerCell.Type; i++)
@@ -205,33 +235,47 @@ public:
 					if (currHeaderCell.Code == rightPart)
 					{
 						currHeaderCell.Offset = value;
+
 						return false;
 					}
 				}
 
-				HeaderCellInt& rightFreeHeaderCell = pHeader[leftPart + headerCell.Type];
+				HeaderCellInt& rightFreeHeaderCell = pHeader[leftPart + headerCell.Type + 1];
 
 				if (rightFreeHeaderCell.Type == 0)
 				{
-					//embedded branch
-					headerCell.Type++;
+					if (headerCell.Type < BRANCH_SIZE)
+					{
+						//embedded branch
+						headerCell.Type++;
 
-					rightFreeHeaderCell.Type = BRANCH_SIZE + 1;
-					rightFreeHeaderCell.Code = rightPart;
-					rightFreeHeaderCell.Offset = value;
+						rightFreeHeaderCell.Type = BRANCH_ITEM_TYPE;
+						rightFreeHeaderCell.Code = rightPart;
+						rightFreeHeaderCell.Offset = value;
 
-					return true;
+						return true;
+					}
+					else
+					{
+						//extend block
+						headerCell.Type++;
+
+						rightFreeHeaderCell.Type = BLOCK_TYPE;
+						rightFreeHeaderCell.Code = rightPart;
+						rightFreeHeaderCell.Offset = value;
+
+						return true;
+					}
 				}
 				else
 				{
 					//external branch
+					//| 0 | 2 | 17 | 17 | 0 |
 
 
 				}
 			}
 			
-			//extract branch
-
 
 			return true;
 		}

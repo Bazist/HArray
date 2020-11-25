@@ -23,7 +23,6 @@ struct HeaderCellInt
 	uchar8 Type;
 	ushort16 Code;
 	uint32 Offset;
-	
 };
 
 struct MultiplyValueCellInt
@@ -173,12 +172,37 @@ public:
 		printf("\nright or left free %d\n", count2);
 
 		printf("\nright two free %d\n", count3);
+
+		printf("\nExtBranch1 %d\n", ExtBranch1);
+
+		printf("\nExtBranch2 %d\n", ExtBranch2);
+
+		printf("\nExtBranch3 %d\n", ExtBranch3);
+
+		printf("\nExtBlock %d\n", ExtBlock);
+
+		printf("\nCollision1 %d\n", Collision1);
+
+		printf("\nCollisionN %d\n", CollisionN);
 	}
 
-	const static int EMPTY_TYPE = 0;
 	const static int BRANCH_SIZE = 16;
-	const static int BRANCH_ITEM_TYPE = BRANCH_SIZE + 1;
-	const static int BLOCK_TYPE = BRANCH_ITEM_TYPE + 1;
+	const static int MAX_SKIP_ITEMS = 16;
+	const static int MAX_JUMP_ITEMS = 16;
+
+	const static int EMPTY_TYPE = 0;
+	const static int SINGLE_TYPE = 1;
+	const static int BRANCH_TYPE = 2;
+	const static int BRANCH_ITEM_TYPE = BRANCH_TYPE + MAX_SKIP_ITEMS + 1;
+
+	const static int BLOCK_TYPE = BRANCH_ITEM_TYPE + MAX_JUMP_ITEMS + 1;
+
+	int ExtBranch1 = 0;
+	int ExtBranch2 = 0;
+	int ExtBranch3 = 0;
+	int ExtBlock = 0;
+	int Collision1 = 0;
+	int CollisionN = 0;
 
 	bool insert(uint32 key, uint32 value)
 	{
@@ -194,13 +218,13 @@ public:
 				case EMPTY_TYPE: //WAVE 1
 				{
 					//embedded value
-					headerCell.Type = 1;
+					headerCell.Type = SINGLE_TYPE;
 					headerCell.Code = rightPart;
 					headerCell.Offset = value;
 
 					return true;
 				}
-				case EMPTY_TYPE + 1: //WAVE 2
+				case SINGLE_TYPE: //WAVE 2
 				{
 					if (headerCell.Code == rightPart)
 					{
@@ -214,40 +238,7 @@ public:
 					if (rightFreeHeaderCell.Type == EMPTY_TYPE)
 					{
 						//embedded branch
-						headerCell.Type++;
-
-						rightFreeHeaderCell.Type = BRANCH_ITEM_TYPE;
-						rightFreeHeaderCell.Code = rightPart;
-						rightFreeHeaderCell.Offset = value;
-
-						return true;
-					}
-				}
-			}
-
-			if (headerCell.Type < BRANCH_SIZE)
-			{
-				//update value
-				for (uint32 i = 0; i < headerCell.Type; i++)
-				{
-					HeaderCellInt& currHeaderCell = pHeader[leftPart + i];
-					
-					if (currHeaderCell.Code == rightPart)
-					{
-						currHeaderCell.Offset = value;
-
-						return false;
-					}
-				}
-
-				HeaderCellInt& rightFreeHeaderCell = pHeader[leftPart + headerCell.Type + 1];
-
-				if (rightFreeHeaderCell.Type == 0)
-				{
-					if (headerCell.Type < BRANCH_SIZE)
-					{
-						//embedded branch
-						headerCell.Type++;
+						headerCell.Type = BRANCH_TYPE;
 
 						rightFreeHeaderCell.Type = BRANCH_ITEM_TYPE;
 						rightFreeHeaderCell.Code = rightPart;
@@ -257,26 +248,80 @@ public:
 					}
 					else
 					{
-						//extend block
-						headerCell.Type++;
+						for (uint32 skip = 1; skip < MAX_SKIP_ITEMS; skip++)
+						{
+							if (pHeader[leftPart + skip].Type == EMPTY_TYPE)
+							{
+								headerCell.Type = BRANCH_TYPE + skip;
 
-						rightFreeHeaderCell.Type = BLOCK_TYPE;
-						rightFreeHeaderCell.Code = rightPart;
-						rightFreeHeaderCell.Offset = value;
+								rightFreeHeaderCell.Type = BRANCH_ITEM_TYPE;
+								rightFreeHeaderCell.Code = rightPart;
+								rightFreeHeaderCell.Offset = value;
+
+								return true;
+							}
+						}
+
+						ExtBlock++;
+
+						return false;
+					}
+				}
+				case BRANCH_TYPE: //WAVE3
+				{
+					uint32 i = leftPart;
+
+					while (pHeader[i].Type == BRANCH_ITEM_TYPE)
+					{
+						if (pHeader[i].Code == rightPart)
+						{
+							pHeader[i].Offset = value;
+
+							return false;
+						}
+						else
+						{
+							i++;
+						}
+					}
+
+					//insert value
+					if (pHeader[i].Type == EMPTY_TYPE)
+					{
+						pHeader[i].Type = BRANCH_ITEM_TYPE;
+						pHeader[i].Code = rightPart;
+						pHeader[i].Offset = value;
 
 						return true;
 					}
+
+					for (uint32 j = i + 1, jump = 1; jump <= MAX_JUMP_ITEMS; j++, jump++)
+					{
+						if (pHeader[j].Type == EMPTY_TYPE)
+						{
+							pHeader[j].Type = BRANCH_ITEM_TYPE;
+							pHeader[j].Code = rightPart;
+							pHeader[j].Offset = value;
+
+							pHeader[i].Type = BRANCH_ITEM_TYPE + jump;
+
+							return true;
+						}
+					}
+					
+					//jump
+					ExtBranch1++;
+
 				}
-				else
+				case BRANCH_ITEM_TYPE:
 				{
-					//external branch
-					//| 0 | 2 | 17 | 17 | 0 |
+					headerCell.Type = BRANCH_ITEM_TYPE;
 
+					Collision1++;
 
+					return true;
 				}
 			}
-			
-
 			return true;
 		}
 		catch (...)
@@ -294,18 +339,18 @@ public:
 
 		switch (headerCell.Type)
 		{
-			case 1:
+		case 1:
+		{
+			if (headerCell.Code == rightPart)
 			{
-				if (headerCell.Code == rightPart)
-				{
-					return headerCell.Offset;
+				return headerCell.Offset;
 			}
 
 			break;
 		}
 		case 2:
 		{
-	
+
 			break;
 		}
 		case 3:
@@ -342,7 +387,7 @@ public:
 			delete[] pHeader;
 			pHeader = 0;
 		}
-				
+
 		if (pMultiplyPages)
 		{
 			for (uint32 i = 0; i < CountMultiplyPage; i++)

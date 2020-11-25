@@ -74,7 +74,7 @@ void testHArrayInt(uint32* keys, uint32 countKeys)
 	printf("HArrayInt => ");
 
 	HArrayInt ha;
-	ha.init(26);
+	ha.init(24);
 
 	clock_t start, finish;
 

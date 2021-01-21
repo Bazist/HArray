@@ -125,8 +125,8 @@ bool HArray::finHeaderBlockPlace(CompactPage* pRootCompactPage,
 									   uint32& leftShift,
 									   uint32& rightShift)
 {
-	
-	uchar8 headerCellType = HEADER_CURRENT_VALUE_TYPE << 6 | parentID;
+	//TODO Temporary comment
+	uchar8 headerCellType = 0; // HEADER_CURRENT_VALUE_TYPE << 6 | parentID;
 
 	uint32 minBits;
 	for(minBits = 8; minBits <= 20; minBits+=4)
@@ -140,7 +140,8 @@ bool HArray::finHeaderBlockPlace(CompactPage* pRootCompactPage,
 	//1. Try found without any fails
 	for(baseHeaderOffset = 0; baseHeaderOffset < HeaderSize - (1 << 20); baseHeaderOffset++)
 	{
-		headerBlockType = MIN_HEADER_BLOCK_TYPE;
+		//TODO Temporary comment
+		headerBlockType = 0; // MIN_HEADER_BLOCK_TYPE;
 
 		for(uint32 bits = minBits; bits <= 20; bits+=4)
 		{

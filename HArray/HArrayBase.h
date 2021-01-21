@@ -43,10 +43,6 @@ const uint32 BLOCK_ENGINE_STEP = 4;
 
 const uint32 BRANCH_ENGINE_SIZE = 4; //can be changed
 
-const uchar8 HEADER_JUMP_TYPE = 1;
-const uchar8 HEADER_BRANCH_TYPE = HEADER_JUMP_TYPE + 1;
-const uchar8 HEADER_CURRENT_VALUE_TYPE = HEADER_BRANCH_TYPE + 1;
-
 const uchar8 EMPTY_TYPE = 0;
 const uchar8 MIN_BRANCH_TYPE1 = 1;
 const uchar8 MAX_BRANCH_TYPE1 = BRANCH_ENGINE_SIZE;
@@ -58,9 +54,8 @@ const uchar8 VAR_TYPE = MAX_BLOCK_TYPE + 1; //for var value
 const uchar8 CONTINUE_VAR_TYPE = VAR_TYPE + 1; //for continue var value
 const uchar8 CURRENT_VALUE_TYPE = CONTINUE_VAR_TYPE + 1;
 const uchar8 VALUE_TYPE = CURRENT_VALUE_TYPE + 1;
-const uchar8 MIN_HEADER_BLOCK_TYPE = VALUE_TYPE + 1;
-const uchar8 MAX_HEADER_BLOCK_TYPE = MIN_HEADER_BLOCK_TYPE + 71;
-const uchar8 ONLY_CONTENT_TYPE = MAX_HEADER_BLOCK_TYPE + 1;
+const uchar8 HEADER_JUMP_TYPE = VALUE_TYPE + 1;
+const uchar8 ONLY_CONTENT_TYPE = HEADER_JUMP_TYPE + 1;
 
 const uchar8 MOVES_LEVEL1_STAT = 0;
 const uchar8 MOVES_LEVEL2_STAT = 1;
@@ -171,33 +166,6 @@ struct HeaderCell
 {
 	uchar8 Type;
 	uint32 Offset;
-};
-
-struct HeaderBranchCell
-{
-	HeaderBranchCell()
-	{
-		HeaderOffset = 0;
-
-		for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
-		{
-			ParentIDs[i] = 0;
-		}
-
-		pNextHeaderBranhCell = 0;
-	}
-
-	uint32 HeaderOffset;
-
-	uchar8 ParentIDs[BRANCH_ENGINE_SIZE];
-	uint32 Offsets[BRANCH_ENGINE_SIZE];
-
-	HeaderBranchCell* pNextHeaderBranhCell;
-};
-
-struct HeaderBranchPage
-{
-	HeaderBranchCell pHeaderBranch[MAX_SHORT];
 };
 
 struct VarCell

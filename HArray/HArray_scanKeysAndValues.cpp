@@ -524,19 +524,6 @@ uint32 HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 
 				break;
 			}
-			case HEADER_BRANCH_TYPE:
-			{
-				HeaderBranchCell& headerBranchCell = pHeaderBranchPages[headerCell.Offset >> 16]->pHeaderBranch[headerCell.Offset & 0xFFFF];
-
-				if (headerBranchCell.HeaderOffset)
-				{
-					key[0] = (i << HeaderBits);
-
-					scanKeysAndValues(key, 0, visitor, pData);
-				}
-
-				break;
-			}
 			default: //something else
 			{
 				break;

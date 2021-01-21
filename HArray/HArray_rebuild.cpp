@@ -70,19 +70,16 @@ uint32 HArray::rebuild(uint32 headerBase, bool removeEmptyKeys)
 
 	//copy data from new to old
 	this->pHeader = pNewHA->pHeader;
-	this->pHeaderBranchPages = pNewHA->pHeaderBranchPages;
 	this->pContentPages = pNewHA->pContentPages;
 	this->pVarPages = pNewHA->pVarPages;
 	this->pBranchPages = pNewHA->pBranchPages;
 	this->pBlockPages = pNewHA->pBlockPages;
 
-	this->HeaderBranchPagesCount = pNewHA->HeaderBranchPagesCount;
 	this->ContentPagesCount = pNewHA->ContentPagesCount;
 	this->VarPagesCount = pNewHA->VarPagesCount;
 	this->BranchPagesCount = pNewHA->BranchPagesCount;
 	this->BlockPagesCount = pNewHA->BlockPagesCount;
 	
-	this->HeaderBranchPagesSize = pNewHA->HeaderBranchPagesSize;
 	this->ContentPagesSize = pNewHA->ContentPagesSize;
 	this->VarPagesSize = pNewHA->VarPagesSize;
 	this->BranchPagesSize = pNewHA->BranchPagesSize;

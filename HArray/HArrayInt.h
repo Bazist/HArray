@@ -21,6 +21,7 @@
 struct HeaderCellInt
 {
 	uchar8 Type;
+	uchar8 Type2;
 	ushort16 Code;
 	uint32 Offset;
 };
@@ -187,15 +188,23 @@ public:
 	}
 
 	const static int BRANCH_SIZE = 16;
-	const static int MAX_SKIP_ITEMS = 16;
 	const static int MAX_JUMP_ITEMS = 16;
 
 	const static int EMPTY_TYPE = 0;
 	const static int SINGLE_TYPE = 1;
 	const static int BRANCH_TYPE = 2;
-	const static int BRANCH_ITEM_TYPE = BRANCH_TYPE + MAX_SKIP_ITEMS + 1;
+	const static int BRANCH_ITEM_TYPE = BRANCH_TYPE + MAX_JUMP_ITEMS + 1;
+	//BRANCH_ITEM_TYPE + 16 jumps
+	const static int BRANCH_ITEM_TYPE_AFTER_JUMP = BRANCH_ITEM_TYPE + MAX_JUMP_ITEMS + 1;
 
-	const static int BLOCK_TYPE = BRANCH_ITEM_TYPE + MAX_JUMP_ITEMS + 1;
+	const static int BRANCH_ITEM_TYPE_WITH_COLLISION = BRANCH_ITEM_TYPE_AFTER_JUMP + 1;
+	//BRANCH_ITEM_TYPE + 16 jumps
+
+	const static int BRANCH_ITEM_TYPE_AFTER_JUMP_WITH_COLLISION = BRANCH_ITEM_TYPE_AFTER_JUMP + MAX_JUMP_ITEMS + 1;
+	//BRANCH_ITEM_TYPE + 16 jumps
+
+	const static int BLOCK_TYPE = BRANCH_ITEM_TYPE_AFTER_JUMP_WITH_COLLISION + MAX_JUMP_ITEMS + 1;
+
 
 	int ExtBranch1 = 0;
 	int ExtBranch2 = 0;
@@ -248,15 +257,15 @@ public:
 					}
 					else
 					{
-						for (uint32 skip = 1; skip < MAX_SKIP_ITEMS; skip++)
+						for (uint32 offset = leftPart + 1, jump = 1; jump < MAX_JUMP_ITEMS; offset++, jump++)
 						{
-							if (pHeader[leftPart + skip].Type == EMPTY_TYPE)
+							if (pHeader[offset].Type == EMPTY_TYPE)
 							{
-								headerCell.Type = BRANCH_TYPE + skip;
+								headerCell.Type = BRANCH_TYPE + jump;
 
-								rightFreeHeaderCell.Type = BRANCH_ITEM_TYPE;
-								rightFreeHeaderCell.Code = rightPart;
-								rightFreeHeaderCell.Offset = value;
+								pHeader[offset].Type = BRANCH_ITEM_TYPE_AFTER_JUMP;
+								pHeader[offset].Code = rightPart;
+								pHeader[offset].Offset = value;
 
 								return true;
 							}
@@ -271,17 +280,37 @@ public:
 				{
 					uint32 i = leftPart;
 
-					while (pHeader[i].Type == BRANCH_ITEM_TYPE)
+					while (true)
 					{
-						if (pHeader[i].Code == rightPart)
+						if (pHeader[i].Type == BRANCH_ITEM_TYPE)
 						{
-							pHeader[i].Offset = value;
+							if (pHeader[i].Code == rightPart)
+							{
+								pHeader[i].Offset = value;
 
-							return false;
+								return false;
+							}
+							else
+							{
+								i++;
+							}
+						}
+						else if (BRANCH_ITEM_TYPE < pHeader[i].Type && pHeader[i].Type < BRANCH_ITEM_TYPE_AFTER_JUMP)
+						{
+							if (pHeader[i].Code == rightPart)
+							{
+								pHeader[i].Offset = value;
+
+								return false;
+							}
+							else
+							{
+								i += BRANCH_ITEM_TYPE_AFTER_JUMP - pHeader[i].Type;
+							}
 						}
 						else
 						{
-							i++;
+							break;
 						}
 					}
 
@@ -299,7 +328,7 @@ public:
 					{
 						if (pHeader[j].Type == EMPTY_TYPE)
 						{
-							pHeader[j].Type = BRANCH_ITEM_TYPE;
+							pHeader[j].Type = BRANCH_ITEM_TYPE_AFTER_JUMP;
 							pHeader[j].Code = rightPart;
 							pHeader[j].Offset = value;
 
@@ -315,13 +344,60 @@ public:
 				}
 				case BRANCH_ITEM_TYPE:
 				{
-					headerCell.Type = BRANCH_ITEM_TYPE;
+					//collision
+					for (uint32 offset = leftPart + 1, jump = 1; jump < MAX_JUMP_ITEMS; offset++, jump++)
+					{
+						if (pHeader[offset].Type == EMPTY_TYPE)
+						{
+							headerCell.Type = BRANCH_ITEM_TYPE_WITH_COLLISION + jump;
+
+							pHeader[offset].Type = BRANCH_ITEM_TYPE_AFTER_JUMP;
+							pHeader[offset].Code = rightPart;
+							pHeader[offset].Offset = value;
+
+							return true;
+						}
+					}
+
+					Collision1++;
+
+					return true;
+				}
+				case BRANCH_ITEM_TYPE_AFTER_JUMP:
+				{
+					//collision
+					for (uint32 offset = leftPart + 1, jump = 1; jump < MAX_JUMP_ITEMS; offset++, jump++)
+					{
+						if (pHeader[offset].Type == EMPTY_TYPE)
+						{
+							headerCell.Type = BRANCH_ITEM_TYPE_AFTER_JUMP_WITH_COLLISION + jump;
+
+							pHeader[offset].Type = BRANCH_ITEM_TYPE_AFTER_JUMP;
+							pHeader[offset].Code = rightPart;
+							pHeader[offset].Offset = value;
+
+							return true;
+						}
+					}
 
 					Collision1++;
 
 					return true;
 				}
 			}
+
+			CollisionN++;
+
+			//const static int BRANCH_ITEM_TYPE = BRANCH_TYPE + MAX_JUMP_ITEMS + 1;
+			//BRANCH_ITEM_TYPE + 16 jumps
+			//const static int BRANCH_ITEM_TYPE_AFTER_JUMP = BRANCH_ITEM_TYPE + MAX_JUMP_ITEMS + 1;
+
+			//const static int BRANCH_ITEM_TYPE_WITH_COLLISION = BRANCH_ITEM_TYPE_AFTER_JUMP + 1;
+			//BRANCH_ITEM_TYPE + 16 jumps
+
+			//const static int BRANCH_ITEM_TYPE_AFTER_JUMP_WITH_COLLISION = BRANCH_ITEM_TYPE_AFTER_JUMP + MAX_JUMP_ITEMS + 1;
+			//BRANCH_ITEM_TYPE + 16 jumps
+
 			return true;
 		}
 		catch (...)

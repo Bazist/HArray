@@ -90,22 +90,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="HArrayBase.h" />
-    <ClInclude Include="HArray.h" />
     <ClInclude Include="HArrayInt.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HArray_compact.cpp" />
-    <ClCompile Include="HArray_delValueByKey.cpp" />
-    <ClCompile Include="HArray_getKeysAndValuesByRange.cpp" />
-    <ClCompile Include="HArray_getValueByKey.cpp" />
-    <ClCompile Include="HArray_hasPartKey.cpp" />
-    <ClCompile Include="HArray_insert.cpp" />
-    <ClCompile Include="HArray_rebuild.cpp" />
-    <ClCompile Include="HArray_scanKeysAndValues.cpp" />
-    <ClCompile Include="HArray_shrink.cpp" />
-    <ClCompile Include="HArray_test.cpp" />
     <ClCompile Include="Main.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>

@@ -36,7 +36,7 @@ bool HArray::hasPartKey(uint32* key,
 		headerOffset = (*normalizeFunc)(key);
 	}
 
-	uint32 contentOffset = pHeader[headerOffset].Offset;
+	uint32 contentOffset = pHeader[headerOffset];
 
 	if(contentOffset)
 	{

@@ -53,7 +53,7 @@ public:
 	uint32 BranchPagesSize;
 	uint32 BlockPagesSize;
 
-	HeaderCell* pHeader;
+	uint32* pHeader;
 
 	/*uint32* pActiveContent;
 	ContentTypeCell* pActiveContentType;
@@ -150,10 +150,10 @@ public:
 			
             MAX_SAFE_SHORT = MAX_SHORT - ValueLen;
 
-            pHeader = new HeaderCell[HeaderSize];
+            pHeader = new uint32[HeaderSize];
             for(uint32 i=0; i < HeaderSize; i++)
             {
-                pHeader[i].Type = 0;
+                pHeader[i] = 0;
             }
 
 			#ifndef _RELEASE
@@ -229,7 +229,7 @@ public:
 
     		if(pHeader)
 			{
-				if (fwrite(pHeader, sizeof(HeaderCell), HeaderSize, pFile) != HeaderSize)
+				if (fwrite(pHeader, sizeof(uint32), HeaderSize, pFile) != HeaderSize)
 				{
 					goto ERROR;
 				}
@@ -309,9 +309,9 @@ public:
 
     		if(pHeader)
 			{
-				pHeader = new HeaderCell[HeaderSize];
+				pHeader = new uint32[HeaderSize];
 
-				if(fread (pHeader, sizeof(HeaderCell), HeaderSize, pFile) != HeaderSize)
+				if(fread (pHeader, sizeof(uint32), HeaderSize, pFile) != HeaderSize)
 				{
 					goto ERROR;
 				}
@@ -783,26 +783,9 @@ public:
 	}
 	//INSERT =============================================================================================================
 
-	//returns ha1DocIndex
 	uint32 insert(uint32* key,
 				uint32 keyLen,
 				uint32 value);
-
-	//COMPACT =========================================================================================================
-	bool finHeaderBlockPlace(CompactPage* pRootCompactPage,
-							uint32 count,
-							uchar8 parentID,
-							uint32& headerBlockType,
-							uint32& baseHeaderOffset,
-						    uint32& leftOffset,
-						    uint32& rightOffset);
-
-	CompactPage* scanBlocks(uint32& count, uint32 blockOffset, CompactPage* pCompactPage);
-
-	bool allocateHeaderBlock(uint32 keyValue,
-							 uint32 keyOffset,
-							 uchar8* pContentCellType,
-							 uint32* pContentCellValue);
 
 	//REBUILD =========================================================================================================
 

@@ -96,7 +96,6 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HArray_compact.cpp" />
     <ClCompile Include="HArray_delValueByKey.cpp" />
     <ClCompile Include="HArray_getKeysAndValuesByRange.cpp" />
     <ClCompile Include="HArray_getValueByKey.cpp" />

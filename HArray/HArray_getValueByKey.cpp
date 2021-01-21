@@ -35,12 +35,10 @@ uint32* HArray::getValueByKey(uint32* key,
 		headerOffset = (*normalizeFunc)(key);
 	}
 
-	HeaderCell& headerCell = pHeader[headerOffset];
+	uint32 contentOffset = pHeader[headerOffset];
 
-	if(headerCell.Type)
+	if(contentOffset)
 	{
-		uint32 contentOffset = headerCell.Offset;
-
 		uint32 keyOffset = 0;
 
 NEXT_KEY_PART:

@@ -32,9 +32,6 @@
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArray_compact.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HArray_delValueByKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

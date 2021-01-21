@@ -43,8 +43,6 @@ uint32 HArray::insert(uint32* key,
 
 		//insert value ==========================================================================================
 		uint32 keyOffset = 0;
-		uint32 contentOffset = 0;
-
 		uint32 headerOffset;
 
 		uchar8* pContentCellType;
@@ -59,7 +57,7 @@ uint32 HArray::insert(uint32* key,
 			headerOffset = (*normalizeFunc)(key) >> HeaderBits;
 		}
 
-		HeaderCell& headerCell = pHeader[headerOffset];
+		uint32& contentOffset = pHeader[headerOffset];
 
 		ContentPage* pContentPage;
 		uint32 contentIndex;
@@ -69,7 +67,7 @@ uint32 HArray::insert(uint32* key,
 
 		uint32* pSetLastContentOffset;
 
-		if (!headerCell.Type)
+		if (!contentOffset)
 		{
 #ifndef _RELEASE
 			tempValues[SHORT_WAY_STAT]++;
@@ -92,13 +90,11 @@ uint32 HArray::insert(uint32* key,
 			//}
 
 			//insert key in free slot
-			headerCell.Type = HEADER_JUMP_TYPE;
-
 			if (tailReleasedContentOffsets[keyLen])
 			{
 				uint32 startContentOffset = tailReleasedContentOffsets[keyLen];
 
-				headerCell.Offset = startContentOffset;
+				contentOffset = startContentOffset;
 
 				ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
 				uint32 contentIndex = startContentOffset & 0xFFFF;
@@ -145,7 +141,7 @@ uint32 HArray::insert(uint32* key,
 					contentIndex = 0;						
 				}
 
-				headerCell.Offset = lastContentOffset;
+				contentOffset = lastContentOffset;
 
 				pContentPage->pType[contentIndex] = (ONLY_CONTENT_TYPE + keyLen);
 
@@ -1120,14 +1116,6 @@ uint32 HArray::insert(uint32* key,
 							break;
 						}
 #endif
-
-						//if(level == 3) //max depth
-						//{
-						//	if(allocateHeaderBlock(keyValue, lastContentOffset, pContentCell))
-						//	{
-						//		return 333; //goto FILL_KEY2;
-						//	}
-						//}
 
 						const ushort16 branchesSize = BRANCH_ENGINE_SIZE * 2;
 						const ushort16 countCell = branchesSize + 1;

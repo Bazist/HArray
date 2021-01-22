@@ -448,6 +448,8 @@ void HArray::shrinkBranchPages()
 	uint32 countReleasedContentCells = 0;
 	uint32 startReleasedContentCellsOffset = 0;
 
+	uint32 skipContentCells = 0;
+
 	int32 lastPage = ContentPagesCount - 1;
 
 	for (uint32 page = 0; page < ContentPagesCount; page++)
@@ -570,23 +572,40 @@ void HArray::shrinkBranchPages()
 			}
 
 			//scan released content cells
-			if (contentCellType == EMPTY_TYPE)
+			if (skipContentCells == 0)
 			{
-				if (!pStartReleasedContentCellsType)
+				if (contentCellType == EMPTY_TYPE)
 				{
-					pStartReleasedContentCellsType = &contentCellType;
-					pStartReleasedContentCellsValue = &contentCellValue;
+					if (!pStartReleasedContentCellsType)
+					{
+						pStartReleasedContentCellsType = &contentCellType;
+						pStartReleasedContentCellsValue = &contentCellValue;
 
-					startReleasedContentCellsOffset = (page << 16) | cell;
-					countReleasedContentCells = 0;
-				}
-				else
-				{
-					countReleasedContentCells++;
-				}
+						startReleasedContentCellsOffset = (page << 16) | cell;
+						countReleasedContentCells = 0;
 
-				if (countReleasedContentCells == MAX_KEY_SEGMENTS - 1 ||
-					cell == MAX_SHORT - 1)
+						if (startReleasedContentCellsOffset == 922)
+						{
+							startReleasedContentCellsOffset = startReleasedContentCellsOffset;
+						}
+					}
+					else
+					{
+						countReleasedContentCells++;
+					}
+
+					if (countReleasedContentCells == MAX_KEY_SEGMENTS - 1 ||
+						cell == MAX_SHORT - 1)
+					{
+						releaseContentCells(pStartReleasedContentCellsValue,
+							startReleasedContentCellsOffset,
+							countReleasedContentCells);
+
+						pStartReleasedContentCellsType = 0;
+						pStartReleasedContentCellsValue = 0;
+					}
+				}
+				else if (pStartReleasedContentCellsType)
 				{
 					releaseContentCells(pStartReleasedContentCellsValue,
 						startReleasedContentCellsOffset,
@@ -596,14 +615,15 @@ void HArray::shrinkBranchPages()
 					pStartReleasedContentCellsValue = 0;
 				}
 			}
-			else if (pStartReleasedContentCellsType)
+			else
 			{
-				releaseContentCells(pStartReleasedContentCellsValue,
-					startReleasedContentCellsOffset,
-					countReleasedContentCells);
+				skipContentCells--;
+			}
 
-				pStartReleasedContentCellsType = 0;
-				pStartReleasedContentCellsValue = 0;
+			//skip all empty cells for ONLY_CONTENT_TYPE segment
+			if (contentCellType >= ONLY_CONTENT_TYPE)
+			{
+				skipContentCells = contentCellType - ONLY_CONTENT_TYPE;
 			}
 		}
 	}
@@ -947,6 +967,8 @@ void HArray::shrinkBlockPages()
 	uint32 countReleasedContentCells = 0;
 	uint32 startReleasedContentCellsOffset = 0;
 
+	uint32 skipContentCells = 0;
+
 	int32 lastPage = ContentPagesCount - 1;
 
 	for (uint32 page = 0; page < ContentPagesCount; page++)
@@ -1015,40 +1037,58 @@ void HArray::shrinkBlockPages()
 			}
 
 			//scan released content cells
-			if (contentCellType == EMPTY_TYPE)
+			if (skipContentCells == 0)
 			{
-				if (!pStartReleasedContentCellsType)
+				if (contentCellType == EMPTY_TYPE)
 				{
-					pStartReleasedContentCellsType = &contentCellType;
-					pStartReleasedContentCellsValue = &contentCellValue;
+					if (!pStartReleasedContentCellsType)
+					{
+						pStartReleasedContentCellsType = &contentCellType;
+						pStartReleasedContentCellsValue = &contentCellValue;
 
-					startReleasedContentCellsOffset = (page << 16) | cell;
-					countReleasedContentCells = 0;
-				}
-				else
-				{
-					countReleasedContentCells++;
-				}
+						startReleasedContentCellsOffset = (page << 16) | cell;
+						countReleasedContentCells = 0;
 
-				if (countReleasedContentCells == MAX_KEY_SEGMENTS - 1 ||
-					cell == MAX_SHORT - 1)
+						if (startReleasedContentCellsOffset == 922)
+						{
+							startReleasedContentCellsOffset = startReleasedContentCellsOffset;
+						}
+					}
+					else
+					{
+						countReleasedContentCells++;
+					}
+
+					if (countReleasedContentCells == MAX_KEY_SEGMENTS - 1 ||
+						cell == MAX_SHORT - 1)
+					{
+						releaseContentCells(pStartReleasedContentCellsValue,
+							startReleasedContentCellsOffset,
+							countReleasedContentCells);
+
+						pStartReleasedContentCellsType = 0;
+						pStartReleasedContentCellsValue = 0;
+					}
+				}
+				else if (pStartReleasedContentCellsType)
 				{
 					releaseContentCells(pStartReleasedContentCellsValue,
-										startReleasedContentCellsOffset,
-										countReleasedContentCells);
+						startReleasedContentCellsOffset,
+						countReleasedContentCells);
 
 					pStartReleasedContentCellsType = 0;
 					pStartReleasedContentCellsValue = 0;
 				}
 			}
-			else if (pStartReleasedContentCellsType)
+			else
 			{
-				releaseContentCells(pStartReleasedContentCellsValue,
-									startReleasedContentCellsOffset,
-									countReleasedContentCells);
+				skipContentCells--;
+			}
 
-				pStartReleasedContentCellsType = 0;
-				pStartReleasedContentCellsValue = 0;
+			//skip all empty cells for ONLY_CONTENT_TYPE segment
+			if (contentCellType >= ONLY_CONTENT_TYPE)
+			{
+				skipContentCells = contentCellType - ONLY_CONTENT_TYPE;
 			}
 		}
 	}
@@ -1225,6 +1265,8 @@ void HArray::shrinkVarPages()
 	uint32 countReleasedContentCells = 0;
 	uint32 startReleasedContentCellsOffset = 0;
 	
+	uint32 skipContentCells = 0;
+
 	int32 lastPage = ContentPagesCount - 1;
 
 	for (uint32 page = 0; page < ContentPagesCount; page++)
@@ -1291,40 +1333,58 @@ void HArray::shrinkVarPages()
 			}
 
 			//scan released content cells
-			if (contentCellType == EMPTY_TYPE)
+			if (skipContentCells == 0)
 			{
-				if (!pStartReleasedContentCellsType)
+				if (contentCellType == EMPTY_TYPE)
 				{
-					pStartReleasedContentCellsType = &contentCellType;
-					pStartReleasedContentCellsValue = &contentCellValue;
+					if (!pStartReleasedContentCellsType)
+					{
+						pStartReleasedContentCellsType = &contentCellType;
+						pStartReleasedContentCellsValue = &contentCellValue;
 
-					startReleasedContentCellsOffset = (page << 16) | cell;
-					countReleasedContentCells = 0;
-				}
-				else
-				{
-					countReleasedContentCells++;
-				}
+						startReleasedContentCellsOffset = (page << 16) | cell;
+						countReleasedContentCells = 0;
 
-				if (countReleasedContentCells == MAX_KEY_SEGMENTS - 1 ||
-					cell == MAX_SHORT - 1)
+						if (startReleasedContentCellsOffset == 922)
+						{
+							startReleasedContentCellsOffset = startReleasedContentCellsOffset;
+						}
+					}
+					else
+					{
+						countReleasedContentCells++;
+					}
+
+					if (countReleasedContentCells == MAX_KEY_SEGMENTS - 1 ||
+						cell == MAX_SHORT - 1)
+					{
+						releaseContentCells(pStartReleasedContentCellsValue,
+							startReleasedContentCellsOffset,
+							countReleasedContentCells);
+
+						pStartReleasedContentCellsType = 0;
+						pStartReleasedContentCellsValue = 0;
+					}
+				}
+				else if (pStartReleasedContentCellsType)
 				{
 					releaseContentCells(pStartReleasedContentCellsValue,
-										startReleasedContentCellsOffset,
-										countReleasedContentCells);
+						startReleasedContentCellsOffset,
+						countReleasedContentCells);
 
 					pStartReleasedContentCellsType = 0;
 					pStartReleasedContentCellsValue = 0;
 				}
 			}
-			else if (pStartReleasedContentCellsType)
+			else
 			{
-				releaseContentCells(pStartReleasedContentCellsValue,
-									startReleasedContentCellsOffset,
-									countReleasedContentCells);
+				skipContentCells--;
+			}
 
-				pStartReleasedContentCellsType = 0;
-				pStartReleasedContentCellsValue = 0;
+			//skip all empty cells for ONLY_CONTENT_TYPE segment
+			if (contentCellType >= ONLY_CONTENT_TYPE)
+			{
+				skipContentCells = contentCellType - ONLY_CONTENT_TYPE;
 			}
 		}
 	}

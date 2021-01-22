@@ -186,7 +186,7 @@ void HArray::shrinkContentPages()
 	//1. scan header ==============================================================================================
 	for (uint32 cell = 0; cell < HeaderSize; cell++)
 	{
-		uint32 contentOffset = pHeader[cell];
+		uint32& contentOffset = pHeader[cell];
 
 		if (contentOffset >= shrinkLastContentOffset)
 		{

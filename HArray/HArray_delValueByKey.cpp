@@ -743,7 +743,7 @@ bool HArray::delValueByKey(uint32* key,
 		headerOffset = (*normalizeFunc)(key);
 	}
 
-	uint32& contentOffset = pHeader[headerOffset];
+	uint32 contentOffset = pHeader[headerOffset];
 
 	if (contentOffset)
 	{
@@ -752,11 +752,6 @@ bool HArray::delValueByKey(uint32* key,
 		bool isVarContCell;
 
 	NEXT_KEY_PART:
-
-		if (pathLen == 28)
-		{
-			pathLen = 28;
-		}
 
 		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
 		ushort16 contentIndex = contentOffset & 0xFFFF;
@@ -1110,7 +1105,7 @@ DISMANTLING:
 
 	if (dismantling(path, pathLen))
 	{
-		contentOffset = 0;
+		pHeader[headerOffset] = 0;
 
 		amountFreeSlotsBeforeHeaderResize++;
 	}

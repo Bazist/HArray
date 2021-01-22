@@ -57,7 +57,7 @@ uint32 HArray::insert(uint32* key,
 			headerOffset = (*normalizeFunc)(key) >> HeaderBits;
 		}
 
-		uint32& contentOffset = pHeader[headerOffset];
+		uint32 contentOffset = pHeader[headerOffset];
 
 		ContentPage* pContentPage;
 		uint32 contentIndex;
@@ -94,7 +94,7 @@ uint32 HArray::insert(uint32* key,
 			{
 				uint32 startContentOffset = tailReleasedContentOffsets[keyLen];
 
-				contentOffset = startContentOffset;
+				pHeader[headerOffset] = startContentOffset;
 
 				ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
 				uint32 contentIndex = startContentOffset & 0xFFFF;
@@ -141,7 +141,7 @@ uint32 HArray::insert(uint32* key,
 					contentIndex = 0;						
 				}
 
-				contentOffset = lastContentOffset;
+				pHeader[headerOffset] = lastContentOffset;
 
 				pContentPage->pType[contentIndex] = (ONLY_CONTENT_TYPE + keyLen);
 

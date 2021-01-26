@@ -781,7 +781,7 @@ public:
 		return count;
 	}
 
-	uint32 getUsedMemory()
+	uint32 getTotalMemory()
 	{
 		return sizeof(HArrayInt) + HEADER_SIZE * sizeof(HeaderCellInt) + CountDoublePage * sizeof(DoublePageInt) + CountMultiplyPage * sizeof(MultiplyPageInt);
 	}

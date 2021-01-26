@@ -107,7 +107,11 @@ void testHArrayInt(uint32* keys, uint32 countKeys)
 
 	finish = msclock();
 
+	//uint32 memoryInMb = ha.getTotalMemory() / 1024 / 1024;
+
 	printf("Search: %d msec.\n", (finish - start));
+
+	//printf("Memory: %d mb.\n", memoryInMb);
 
 	totalHArrayTime += (finish - start);
 
@@ -464,6 +468,8 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 		return;
 	}
 
+	uint32 memoryInMb = (uint32)ha.getTotalMemory() / 1024 / 1024;
+
 	//DELETE ===========================================
 
 	start = msclock();
@@ -527,7 +533,9 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	finish = msclock();
 	
-	printf("Delete: %d msec.\n", (finish - start));
+	printf("Delete: %d msec., ", (finish - start));
+
+	printf("Memory: %d mb.\n", memoryInMb);
 
 	totalHArrayTime += (finish - start);
 	
@@ -887,6 +895,8 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 	totalHArrayTime += (finish - start);
 
+	uint32 memoryInMb = (uint32)ha.getTotalMemory() / 1024 / 1024;
+
 	//DELETE ===========================================
 
 	start = msclock();
@@ -951,7 +961,9 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 	finish = msclock();
 
-	printf("Delete: %d msec.\n", (finish - start));
+	printf("Delete: %d msec, ", (finish - start));
+
+	printf("Memory: %d mb.\n", memoryInMb);
 
 	totalHArrayTime += (finish - start);
 
@@ -963,6 +975,7 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 	ha.printStat();
 	#endif
 
+	
 	ha.destroy();
 
 	#endif
@@ -1015,6 +1028,8 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 	printf("Search: %d msec, ", (finish - start));
 
 	totalHArrayTime += (finish - start);
+
+	uint32 memoryInMb = (uint32)ha.getTotalMemory() / 1024 / 1024;
 
 //DELETE ===========================================
 
@@ -1131,7 +1146,9 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 
 	finish = msclock();
 
-	printf("Delete: %d msec.\n", (finish - start));
+	printf("Delete: %d msec., ", (finish - start));
+
+	printf("Memory: %d mb.\n", memoryInMb);
 
 	totalHArrayTime += (finish - start);
 

@@ -34,6 +34,7 @@
 ## Trie ? I heard about Trees and Hastables but don't know anything about Trie
 # [Explain me as for Beginners](https://github.com/Bazist/HArray/blob/master/Trie_for_beginners.md)
 
+![alt tag](https://raw.githubusercontent.com/Bazist/HArray/master/Images/How_HArray_works_animation.gif)
 
 ### Examples
 

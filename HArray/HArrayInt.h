@@ -848,9 +848,11 @@ public:
 		return count;
 	}
 
-	uint32 getTotalMemory()
+	ulong64 getTotalMemory()
 	{
-		return sizeof(HArrayInt) + HEADER_SIZE * sizeof(HeaderCellInt) + CountDoublePage * sizeof(DoublePageInt) + CountMultiplyPage * sizeof(MultiplyPageInt);
+		return (ulong64)sizeof(HArrayInt) + HEADER_SIZE * (ulong64)sizeof(HeaderCellInt) + 
+			(ulong64)CountDoublePage * sizeof(DoublePageInt) + 
+			(ulong64)CountMultiplyPage * sizeof(MultiplyPageInt);
 	}
 
 	void destroy()

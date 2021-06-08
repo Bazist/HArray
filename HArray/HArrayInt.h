@@ -114,6 +114,9 @@ public:
 	uint32 CountDoublePage;
 	uint32 CountMultiplyPage;
 
+	uint32 SizeDoublePage;
+	uint32 SizeMultiplyPage;
+
 	uint32 maxDoubleOffset;
 	uint32 maxMultiplyOffset;
 
@@ -146,8 +149,11 @@ public:
 
 			pHeader = new HeaderCellInt[HEADER_SIZE + 1];
 
-			pDoublePages = new DoublePageInt * [INIT_MAX_PAGES];
-			pMultiplyPages = new MultiplyPageInt * [INIT_MAX_PAGES];
+			SizeDoublePage = INIT_MAX_PAGES;
+			SizeMultiplyPage = INIT_MAX_PAGES;
+
+			pDoublePages = new DoublePageInt * [SizeDoublePage];
+			pMultiplyPages = new MultiplyPageInt * [SizeMultiplyPage];
 
 			for (uint32 i = 0; i <= HEADER_SIZE; i++)
 			{
@@ -172,6 +178,52 @@ public:
 
 			throw;
 		}
+	}
+
+	void resizeDoublePages()
+	{
+		DoublePageInt** pNewDoublePages = new DoublePageInt * [SizeDoublePage * 2];
+
+		uint32 i = 0;
+		
+		for (; i < SizeDoublePage; i++)
+		{
+			pNewDoublePages[i] = pDoublePages[i];
+		}
+
+		SizeDoublePage *= 2;
+
+		for (; i < SizeDoublePage; i++)
+		{
+			pNewDoublePages[i] = 0;
+		}
+
+		delete[] pDoublePages;
+
+		pDoublePages = pNewDoublePages;
+	}
+
+	void resizeMultiplyPages()
+	{
+		MultiplyPageInt** pNewMultiplyPages = new MultiplyPageInt* [SizeMultiplyPage * 2];
+
+		uint32 i = 0;
+
+		for (; i < SizeMultiplyPage; i++)
+		{
+			pNewMultiplyPages[i] = pMultiplyPages[i];
+		}
+
+		SizeMultiplyPage *= 2;
+
+		for (; i < SizeMultiplyPage; i++)
+		{
+			pNewMultiplyPages[i] = 0;
+		}
+
+		delete[] pMultiplyPages;
+
+		pMultiplyPages = pNewMultiplyPages;
 	}
 
 	bool insert(uint32 key, uint32 value)
@@ -222,6 +274,11 @@ public:
 						pPage = new DoublePageInt();
 						pDoublePages[currPage] = pPage;
 						CountDoublePage++;
+
+						if (CountDoublePage == SizeDoublePage)
+						{
+							resizeDoublePages();
+						}
 					}
 
 					DoubleValueCellInt& valueCell = pPage->pValues[maxDoubleOffset & 0xFFFF];
@@ -283,6 +340,11 @@ public:
 						pPage = new MultiplyPageInt();
 						pMultiplyPages[currPage] = pPage;
 						CountMultiplyPage++;
+
+						if (CountMultiplyPage == SizeMultiplyPage)
+						{
+							resizeMultiplyPages();
+						}
 
 						MultiplyValueCellInt& valueCell = pPage->pValues[offset & 0xFFFF];
 						valueCell.Value = value; //insert
@@ -367,6 +429,11 @@ public:
 							pPage = new MultiplyPageInt();
 							pMultiplyPages[currPage] = pPage;
 							CountMultiplyPage++;
+
+							if (CountMultiplyPage == SizeMultiplyPage)
+							{
+								resizeMultiplyPages();
+							}
 						}
 
 						MultiplyValueCellInt& valueCell = pPage->pValues[offset & 0xFFFF];

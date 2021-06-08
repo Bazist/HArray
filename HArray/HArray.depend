@@ -54,3 +54,29 @@
 	"stdafx.h"
 	"HArrayVarRAM.h"
 
+1612898027 source:/home/slavik/Documents/HArray/HArray/Main.cpp
+	"stdafx.h"
+	<stdio.h>
+	<math.h>
+	<stdlib.h>
+	<time.h>
+	<map>
+	<unordered_map>
+	"HArrayInt.h"
+	"HArray.h"
+	<google/dense_hash_map>
+
+1612898027 /home/slavik/Documents/HArray/HArray/stdafx.h
+	<stdio.h>
+	<string.h>
+	<inttypes.h>
+
+1612898027 /home/slavik/Documents/HArray/HArray/HArrayInt.h
+	"stdafx.h"
+
+1612898027 /home/slavik/Documents/HArray/HArray/HArray.h
+	"HArrayBase.h"
+
+1612898027 /home/slavik/Documents/HArray/HArray/HArrayBase.h
+	"stdafx.h"
+

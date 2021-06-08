@@ -32,22 +32,20 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="HArrayFixBase.h" />
-		<Unit filename="HArrayInt.h" />
-		<Unit filename="HArrayVarRAM.h" />
-		<Unit filename="HArrayVarRAM_compact.cpp" />
-		<Unit filename="HArrayVarRAM_delValueByKey.cpp" />
-		<Unit filename="HArrayVarRAM_getKeysAndValuesByRange.cpp" />
-		<Unit filename="HArrayVarRAM_getValueByKey.cpp" />
-		<Unit filename="HArrayVarRAM_getValuesByRange.cpp" />
-		<Unit filename="HArrayVarRAM_hasPartKey.cpp" />
-		<Unit filename="HArrayVarRAM_insert.cpp" />
-		<Unit filename="HArrayVarRAM_scanKeysAndValues.cpp" />
-		<Unit filename="Main.cpp" />
-		<Unit filename="stdafx.h" />
-		<Extensions>
-			<code_completion />
-			<debugger />
-		</Extensions>
+		<Unit filename="HArray/HArray.h" />
+		<Unit filename="HArray/HArrayBase.h" />
+		<Unit filename="HArray/HArrayInt.h" />
+		<Unit filename="HArray/HArray_delValueByKey.cpp" />
+		<Unit filename="HArray/HArray_getKeysAndValuesByRange.cpp" />
+		<Unit filename="HArray/HArray_getValueByKey.cpp" />
+		<Unit filename="HArray/HArray_hasPartKey.cpp" />
+		<Unit filename="HArray/HArray_insert.cpp" />
+		<Unit filename="HArray/HArray_rebuild.cpp" />
+		<Unit filename="HArray/HArray_resizeHeader.cpp" />
+		<Unit filename="HArray/HArray_scanKeysAndValues.cpp" />
+		<Unit filename="HArray/HArray_shrink.cpp" />
+		<Unit filename="HArray/HArray_test.cpp" />
+		<Unit filename="HArray/Main.cpp" />
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

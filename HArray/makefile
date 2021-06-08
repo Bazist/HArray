@@ -1,14 +1,2 @@
-OBJS= HArrayVarRAM_delValueByKey.o HArrayVarRAM_getKeysAndValuesByRange.o HArrayVarRAM_getValueByKey.o HArrayVarRAM_getValuesByRange.o HArrayVarRAM_hasPartKey.o HArrayVarRAM_insert.o HArrayVarRAM_scanKeysAndValues.o Main.o stdafx.o
-
-CXXFLAGS= -O -pipe -Wall -Wno-write-strings -std=c++11
-
-test: $(OBJS)
-        $(CXX) -o test $(OBJS)
-
-.cpp.o:
-        $(CXX) -c $< $(CXXFLAGS)
-
-clean:
-        rm -f test ./*.o
-
-.PHONY: clean
+all:
+	g++ HArray_delValueByKey.cpp HArray_getValueByKey.cpp HArray_getKeysAndValuesByRange.cpp HArray_hasPartKey.cpp HArray_insert.cpp HArray_scanKeysAndValues.cpp HArray_rebuild.cpp HArray_resizeHeader.cpp HArray_shrink.cpp HArray_test.cpp Main.cpp -o HArray

@@ -722,7 +722,7 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 	return true;
 }
 
-bool HArray::delValueByKey(void* key, uint32 keyLen)
+bool HArray::delValueByKey(char* key, uint32 keyLen)
 {
 	uint32 lastSegmentKeyLen = keyLen & 0x3;
 

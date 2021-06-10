@@ -20,7 +20,7 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-bool HArray::insert(void* key,
+bool HArray::insert(char* key,
 					uint32 keyLen,
 					uint32 value)
 {

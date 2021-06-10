@@ -19,10 +19,51 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-uint32* HArray::getValueByKey(uint32* key,
-							  uint32 keyLen2)
+bool HArray::getValueByKey(char* key,
+						   uint32 keyLen,
+						   uint32& value)
 {
-	uint32 keyLenInSegments = keyLen2 >> 2; //in 4 bytes
+	uint32 lastSegmentKeyLen = keyLen & 0x3;
+
+	if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
+	{
+		return getValueByKey((uint32*)key, keyLen, value);
+	}
+	else
+	{
+		uint32* keyInSegments = (uint32*)key;
+		uint32 keyLenInSegments = keyLen >> 2;
+
+		uint32 newKey[MAX_KEY_SEGMENTS];
+
+		uint32 i = 0;
+
+		for (; i < keyLenInSegments; i++)
+		{
+			newKey[i] = keyInSegments[i];
+		}
+
+		newKey[i] = 0;
+
+		char* lastSegmentNewKey = (char*)&newKey[i];
+		char* lastSegmentKey = (char*)&keyInSegments[i];
+
+		for (uint32 j = 0; j < lastSegmentKeyLen; j++)
+		{
+			lastSegmentNewKey[j] = lastSegmentKey[j];
+		}
+
+		return getValueByKey((uint32*)newKey, (keyLen | 0x3) + 1, value);
+	}
+}
+
+bool HArray::getValueByKey(uint32* key,
+	 					   uint32 keyLen,
+						   uint32& value)
+{
+	value = 0;
+
+	keyLen >>= 2; //in 4 bytes
 
 	uint32 headerOffset;
 
@@ -49,18 +90,22 @@ NEXT_KEY_PART:
 
 		if(contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
-			if((keyLenInSegments - keyOffset) != (contentCellType - ONLY_CONTENT_TYPE))
+			if((keyLen - keyOffset) != (contentCellType - ONLY_CONTENT_TYPE))
 			{
-				return 0;
+				return false;
 			}
 
-			for(; keyOffset < keyLenInSegments; contentIndex++, keyOffset++)
+			for(; keyOffset < keyLen; contentIndex++, keyOffset++)
 			{
-				if(pContentPage->pContent[contentIndex] != key[keyOffset])
-					return 0;
+				if (pContentPage->pContent[contentIndex] != key[keyOffset])
+				{
+					return false;
+				}
 			}
 
-			return &pContentPage->pContent[contentIndex]; //return value
+			value = pContentPage->pContent[contentIndex]; //return value
+			
+			return true;
 		}
 
 		uint32& keyValue = key[keyOffset];
@@ -71,7 +116,7 @@ NEXT_KEY_PART:
 			VarPage* pVarPage = pVarPages[(*pContentCellValueOrOffset) >> 16];
 			VarCell& varCell = pVarPage->pVar[(*pContentCellValueOrOffset) & 0xFFFF];
 
-			if(keyOffset < keyLenInSegments)
+			if(keyOffset < keyLen)
 			{
 				contentCellType = varCell.ContCellType; //read from var cell
 
@@ -90,15 +135,17 @@ NEXT_KEY_PART:
 			{
 				if(varCell.ValueContCellType)
                 {
-                	return &varCell.ValueContCellValue;
+                	value = varCell.ValueContCellValue;
+
+					return true;
                 }
                 else
                 {
-                	return 0;
+					return false;
                 }
 			}
 		}
-		else if(keyOffset == keyLenInSegments)
+		else if(keyOffset == keyLen)
 		{
 			if(contentCellType == VALUE_TYPE)
 			{
@@ -106,7 +153,7 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 
@@ -129,17 +176,17 @@ NEXT_KEY_PART:
 				}
 			}
 
-			return 0;
+			return false;
 		}
 		else if(contentCellType == VALUE_TYPE)
 		{
-			if(keyOffset == keyLenInSegments)
+			if(keyOffset == keyLen)
 			{
                 return pContentCellValueOrOffset;
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 		else if(contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
@@ -159,7 +206,7 @@ NEXT_KEY_PART:
 
 			if(blockCellType == EMPTY_TYPE)
 			{
-				return 0;
+				return false;
 			}
 			else if(blockCellType == CURRENT_VALUE_TYPE) //current value
 			{
@@ -172,7 +219,7 @@ NEXT_KEY_PART:
 				}
 				else
 				{
-					return 0;
+					return false;
 				}
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE1) //branch cell
@@ -191,7 +238,7 @@ NEXT_KEY_PART:
 					}
 				}
 
-				return 0;
+				return false;
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE2) //branch cell
 			{
@@ -225,7 +272,7 @@ NEXT_KEY_PART:
 					}
 				}
 
-				return 0;
+				return false;
 			}
 			else if(blockCell.Type <= MAX_BLOCK_TYPE)
 			{
@@ -237,7 +284,7 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 		else if(contentCellType == CURRENT_VALUE_TYPE) //PART OF KEY =========================================================================
@@ -251,10 +298,10 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 	}
 
-	return 0;
+	return false;
 }

@@ -776,13 +776,15 @@ public:
 	}
 	//INSERT =============================================================================================================
 
-	uint32 insert(uint32* key,
+	bool insert(uint32* key,
 				uint32 keyLen,
 				uint32 value);
 
-	//REBUILD =========================================================================================================
+	bool insert(char* key,
+		uint32 keyLen,
+		uint32 value);
 
-	void resizeHeader();
+	//REBUILD =========================================================================================================
 
 	static bool rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
 
@@ -790,11 +792,21 @@ public:
 	
 	//GET =============================================================================================================
 
-	uint32* getValueByKey(uint32* key,
-					      uint32 keyLen);
+	bool getValueByKey(uint32* key,
+					   uint32 keyLen,
+					   uint32& value);
+
+	bool getValueByKey(char* key,
+					   uint32 keyLen,
+					   uint32& value);
 
 	bool hasPartKey(uint32* key, uint32 keyLen);
+
+	bool hasPartKey(char* key, uint32 keyLen);
+
 	bool delValueByKey(uint32* key, uint32 keyLen);
+
+	bool delValueByKey(char* key, uint32 keyLen);
 
 	//RANGE keys and values =============================================================================================================
 	void sortLastItem(HArrayPair* pairs,

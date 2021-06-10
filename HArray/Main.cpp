@@ -1548,7 +1548,7 @@ int main()
 								2000000,   //step
 								10000000); //stop
 	
-	HArray_VS_StdMap_BinKey(10000000, //start
+	HArray_VS_StdMap_BinKey(1000000, //start
 							2000000, //step
 							10000000,//stop
 							false);  //shuffle

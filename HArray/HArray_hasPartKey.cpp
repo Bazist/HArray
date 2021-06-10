@@ -19,7 +19,7 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-bool HArray::hasPartKey(char* key, uint32 keyLen)
+bool HArray::hasPartKey(const char* key, uint32 keyLen)
 {
 	uint32 lastSegmentKeyLen = keyLen & 0x3;
 

@@ -19,7 +19,7 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-bool HArray::getValueByKey(char* key,
+bool HArray::getValueByKey(const char* key,
 						   uint32 keyLen,
 						   uint32& value)
 {

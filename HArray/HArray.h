@@ -778,27 +778,31 @@ public:
 
 	bool insert(uint32* key, uint32 keyLen, uint32 value);
 
-	bool insert(char* key, uint32 keyLen, uint32 value);
+	bool insert(const char* key, uint32 keyLen, uint32 value);
+
+	//GET =============================================================================================================
+
+	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value);
+
+	bool getValueByKey(const char* key, uint32 keyLen, uint32& value);
+
+	//HAS =============================================================================================================
+	
+	bool hasPartKey(uint32* key, uint32 keyLen);
+
+	bool hasPartKey(const char* key, uint32 keyLen);
+
+	//DELL =============================================================================================================
+	
+	bool delValueByKey(uint32* key, uint32 keyLen);
+
+	bool delValueByKey(const char* key, uint32 keyLen);
 
 	//REBUILD =========================================================================================================
 
 	static bool rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
 
 	uint32 rebuild(uint32 headerBase = 0, bool removeEmptyKeys = false);
-	
-	//GET =============================================================================================================
-
-	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value);
-
-	bool getValueByKey(char* key, uint32 keyLen, uint32& value);
-	
-	bool hasPartKey(uint32* key, uint32 keyLen);
-
-	bool hasPartKey(char* key, uint32 keyLen);
-	
-	bool delValueByKey(uint32* key, uint32 keyLen);
-
-	bool delValueByKey(char* key, uint32 keyLen);
 
 	//RANGE keys and values =============================================================================================================
 	void sortLastItem(HArrayPair* pairs,

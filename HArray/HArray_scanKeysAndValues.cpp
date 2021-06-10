@@ -274,6 +274,10 @@ NEXT_KEY_PART:
 						pContentPage->pType[contentIndex],
 						pData); //return value
 				}
+				else
+				{
+					printf("!!! FAIL STATE !!!");
+				}
 
 				return 0;
 			}

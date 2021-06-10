@@ -537,7 +537,7 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	printf("Memory: %d mb.\n", memoryInMb);
 
-	totalHArrayTime += (finish - start);
+	//totalHArrayTime += (finish - start);
 	
 	#ifdef PRINT_MEM
 	ha.printMemory();
@@ -965,7 +965,7 @@ void testHArrayStr(std::string* keys, uint32 countKeys)
 
 	printf("Memory: %d mb.\n", memoryInMb);
 
-	totalHArrayTime += (finish - start);
+	//totalHArrayTime += (finish - start);
 
 	#ifdef PRINT_MEM
 	ha.printMemory();
@@ -1007,7 +1007,7 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 
 	printf("Insert: %d msec, ", (finish - start));
 
-	totalHArrayTime += (finish - start);
+	//totalHArrayTime += (finish - start);
 
 	//SEARCH ===========================================
 	start = msclock();
@@ -1027,7 +1027,7 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 
 	printf("Search: %d msec, ", (finish - start));
 
-	totalHArrayTime += (finish - start);
+	//totalHArrayTime += (finish - start);
 
 	uint32 memoryInMb = (uint32)ha.getTotalMemory() / 1024 / 1024;
 
@@ -1150,7 +1150,7 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 
 	printf("Memory: %d mb.\n", memoryInMb);
 
-	totalHArrayTime += (finish - start);
+	//totalHArrayTime += (finish - start);
 
 #ifdef PRINT_MEM
 	ha.printMemory();
@@ -1561,9 +1561,9 @@ int main()
 								1000000,  //step
 								3000000); //stop
 
-	printf("COEF Map VS HArray: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
-	printf("COEF Unordered Map VS HArray: %.2f\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);
-	printf("COEF Dense VS HArray: %.2f\n", (double)totalDenseTime / (double)totalHArrayTime);
+	printf("COEF HArray VS Map: In average HArray faster in %.2f times.\n", (double)totalMapTime / (double)totalHArrayTime);
+	printf("COEF HArray VS Unordered Map: In average HArray faster in %.2f times.\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);
+	printf("COEF HArray VS Dense: In average HArray faster in %.2f times.\n", (double)totalDenseTime / (double)totalHArrayTime);
 
 	return 0;
 };

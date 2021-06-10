@@ -74,7 +74,7 @@ bool HArray::testContentConsistency()
 	//2. scan branches =============================================================================================
 	uint32 lastPage = 0;
 	
-	if (lastPage > 0)
+	if (BranchPagesCount > 0)
 	{
 		lastPage = BranchPagesCount - 1;
 

@@ -889,6 +889,12 @@ bool HArray::shrinkBlock(uint32 startBlockOffset,
 	{
 		endOffset = MAX_SHORT;
 	}
+	else
+	{
+		printf("!!! FAIL STATE !!!");
+
+		return false;
+	}
 
 	for (uint32 cell = startOffset; cell < endOffset; cell++)
 	{

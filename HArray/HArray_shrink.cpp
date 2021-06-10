@@ -891,7 +891,7 @@ bool HArray::shrinkBlock(uint32 startBlockOffset,
 	}
 	else
 	{
-		printf("!!! FAIL STATE !!!");
+		//printf("!!! FAIL STATE !!!");
 
 		return false;
 	}

@@ -43,10 +43,7 @@ class DoublePageInt
 public:
 	DoublePageInt()
 	{
-		for (uint32 i = 0; i < PAGE_SIZE; i++)
-		{
-			pValues[i].Code2 = 0;
-		}
+		memset(this, 0, sizeof(DoublePageInt));
 	}
 
 	DoubleValueCellInt pValues[PAGE_SIZE];
@@ -61,10 +58,7 @@ class MultiplyPageInt
 public:
 	MultiplyPageInt()
 	{
-		for (uint32 i = 0; i < PAGE_SIZE; i++)
-		{
-			pValues[i].Code = 0;
-		}
+		memset(this, 0, sizeof(MultiplyPageInt));
 	}
 
 	MultiplyValueCellInt pValues[PAGE_SIZE];
@@ -77,25 +71,11 @@ public:
 class HArrayInt
 {
 public:
-	HArrayInt()
+	HArrayInt(uint32 headerBase = 20)
 	{
-		HEADER_SIZE = 255 * 255 * 255;
-		BLOCK_SIZE = 255;
+		memset(this, 0, sizeof(HArrayInt));
 
-		BLOCK_BITS = 8;
-
-		pDoublePages = 0;
-		pMultiplyPages = 0;
-
-		CountDoublePage = 0;
-		CountMultiplyPage = 0;
-
-		maxDoubleOffset = 0;
-		maxMultiplyOffset = 0;
-
-		lastHeaderCode = 1;
-
-		currReleaseCell = 0;
+		init(headerBase);
 	}
 
 	uint32 HEADER_BASE;
@@ -130,6 +110,8 @@ public:
 
 	void init(uint32 headerBase)
 	{
+		destroy();
+
 		//clear pointers
 		pHeader = 0;
 		pDoublePages = 0;
@@ -141,13 +123,13 @@ public:
 			CONTENT_BASE = 32 - headerBase;
 
 			ulong64 maxKey = 1;
-			maxKey <<= (headerBase + CONTENT_BASE);
+			maxKey <<= ((ulong64)headerBase + CONTENT_BASE);
 
 			BLOCK_BITS = CONTENT_BASE;
-			HEADER_SIZE = (maxKey >> BLOCK_BITS);
-			BLOCK_SIZE = (maxKey >> headerBase) - 1;
+			HEADER_SIZE = (uint32)(maxKey >> BLOCK_BITS);
+			BLOCK_SIZE = (uint32)((maxKey >> headerBase) - 1);
 
-			pHeader = new HeaderCellInt[HEADER_SIZE + 1];
+			pHeader = new HeaderCellInt[(ulong64)HEADER_SIZE + 1];
 
 			SizeDoublePage = INIT_MAX_PAGES;
 			SizeMultiplyPage = INIT_MAX_PAGES;
@@ -169,8 +151,16 @@ public:
 			pDoublePages[0] = new DoublePageInt();
 			pMultiplyPages[0] = new MultiplyPageInt();
 
-			CountDoublePage++;
-			CountMultiplyPage++;
+			CountDoublePage = 1;
+			CountMultiplyPage = 1;
+
+			maxDoubleOffset = 0;
+			maxMultiplyOffset = 0;
+
+			lastHeaderCode = 1;
+
+			currReleaseCell = 0;
+
 		}
 		catch (...)
 		{
@@ -182,7 +172,7 @@ public:
 
 	void resizeDoublePages()
 	{
-		DoublePageInt** pNewDoublePages = new DoublePageInt * [SizeDoublePage * 2];
+		DoublePageInt** pNewDoublePages = new DoublePageInt* [(ulong64)SizeDoublePage * 2];
 
 		uint32 i = 0;
 		
@@ -205,7 +195,7 @@ public:
 
 	void resizeMultiplyPages()
 	{
-		MultiplyPageInt** pNewMultiplyPages = new MultiplyPageInt* [SizeMultiplyPage * 2];
+		MultiplyPageInt** pNewMultiplyPages = new MultiplyPageInt* [(ulong64)SizeMultiplyPage * 2];
 
 		uint32 i = 0;
 
@@ -238,7 +228,7 @@ public:
 			if (headerCell.Type)
 			{
 				//Existing block
-				uint32 countValues;
+				uint32 countValues = 0;
 
 				if (headerCell.Type == 1) //with one element in block
 				{

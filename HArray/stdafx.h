@@ -33,6 +33,7 @@
 
 #ifdef _WIN32
 typedef __int32 int32;
+typedef __int64 long64;
 typedef unsigned __int32 uint32;
 typedef unsigned __int64 ulong64;
 typedef unsigned __int16 ushort16;
@@ -42,6 +43,7 @@ typedef unsigned __int8 ucode8;
 
 #ifdef linux
 typedef int32_t int32;
+typedef int64_t long64;
 typedef uint32_t uint32;
 typedef uint64_t ulong64;
 typedef uint16_t ushort16;

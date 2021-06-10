@@ -72,95 +72,106 @@ bool HArray::testContentConsistency()
 	}
 
 	//2. scan branches =============================================================================================
-	uint32 lastPage = BranchPagesCount - 1;
-
-	for (uint32 page = 0; page < BranchPagesCount; page++)
+	uint32 lastPage = 0;
+	
+	if (lastPage > 0)
 	{
-		BranchPage* pBranchPage = pBranchPages[page];
+		lastPage = BranchPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < BranchPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastBranchOffset - 1) & 0xFFFF) + 1;
-		}
+			BranchPage* pBranchPage = pBranchPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			BranchCell& branchCell = pBranchPage->pBranch[cell];
+			uint32 countCells;
 
-			for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+			if (page < lastPage) //not last page
 			{
-				if (branchCell.Offsets[i]) //not empty
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastBranchOffset - 1) & 0xFFFF) + 1;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				BranchCell& branchCell = pBranchPage->pBranch[cell];
+
+				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
 				{
-					count += getFullContentLen(branchCell.Offsets[i]);
-				}
-				else
-				{
-					break;
+					if (branchCell.Offsets[i]) //not empty
+					{
+						count += getFullContentLen(branchCell.Offsets[i]);
+					}
+					else
+					{
+						break;
+					}
 				}
 			}
 		}
 	}
 
 	//3. scan blocks ===============================================================================================
-	lastPage = BlockPagesCount - 1;
-
-	for (uint32 page = 0; page < BlockPagesCount; page++)
+	if (BlockPagesCount > 0)
 	{
-		BlockPage* pBlockPage = pBlockPages[page];
+		lastPage = BlockPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < BlockPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
-		}
+			BlockPage* pBlockPage = pBlockPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			BlockCell& blockCell = pBlockPage->pBlock[cell];
+			uint32 countCells;
 
-			if (blockCell.Type == CURRENT_VALUE_TYPE)
+			if (page < lastPage) //not last page
 			{
-				count += getFullContentLen(blockCell.Offset);
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+				if (blockCell.Type == CURRENT_VALUE_TYPE)
+				{
+					count += getFullContentLen(blockCell.Offset);
+				}
 			}
 		}
 	}
 
 	//4. var cells =================================================================================================
-	lastPage = VarPagesCount - 1;
-
-	for (uint32 page = 0; page < VarPagesCount; page++)
+	if (VarPagesCount > 0)
 	{
-		VarPage* pVarPage = pVarPages[page];
+		lastPage = VarPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < VarPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastVarOffset - 1) & 0xFFFF) + 1;
-		}
+			VarPage* pVarPage = pVarPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			VarCell& varCell = pVarPage->pVar[cell];
+			uint32 countCells;
 
-			if (varCell.ContCellType == CONTINUE_VAR_TYPE)
+			if (page < lastPage) //not last page
 			{
-				count += getFullContentLen(varCell.ContCellValue);
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastVarOffset - 1) & 0xFFFF) + 1;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				VarCell& varCell = pVarPage->pVar[cell];
+
+				if (varCell.ContCellType == CONTINUE_VAR_TYPE)
+				{
+					count += getFullContentLen(varCell.ContCellValue);
+				}
 			}
 		}
 	}
@@ -173,75 +184,83 @@ bool HArray::testBranchConsistency()
 	uint32 count = 0;
 
 	//content ===================================================================================================================
-	int32 lastPage = ContentPagesCount - 1;
-
-	for (uint32 page = 0; page < ContentPagesCount; page++)
+	uint32 lastPage = 0;
+	
+	if (ContentPagesCount > 0)
 	{
-		ContentPage* pContentPage = pContentPages[page];
+		lastPage = ContentPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < ContentPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
-		}
+			ContentPage* pContentPage = pContentPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			uchar8& contentCellType = pContentPage->pType[cell];
-			uint32& contentCellValue = pContentPage->pContent[cell];
+			uint32 countCells;
 
-			if (MIN_BRANCH_TYPE1 <= contentCellType && contentCellType <= MAX_BRANCH_TYPE1) //in content
+			if (page < lastPage) //not last page
 			{
-				count++;
+				countCells = MAX_SHORT;
 			}
-			else if (contentCellType == VAR_TYPE) //shunted in var cell
+			else //last page
 			{
-				VarCell& varCell = pVarPages[contentCellValue >> 16]->pVar[contentCellValue & 0xFFFF];
+				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
+			}
 
-				if (MIN_BRANCH_TYPE1 <= varCell.ContCellType && varCell.ContCellType <= MAX_BRANCH_TYPE1) //in content
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				uchar8& contentCellType = pContentPage->pType[cell];
+				uint32& contentCellValue = pContentPage->pContent[cell];
+
+				if (MIN_BRANCH_TYPE1 <= contentCellType && contentCellType <= MAX_BRANCH_TYPE1) //in content
 				{
 					count++;
+				}
+				else if (contentCellType == VAR_TYPE) //shunted in var cell
+				{
+					VarCell& varCell = pVarPages[contentCellValue >> 16]->pVar[contentCellValue & 0xFFFF];
+
+					if (MIN_BRANCH_TYPE1 <= varCell.ContCellType && varCell.ContCellType <= MAX_BRANCH_TYPE1) //in content
+					{
+						count++;
+					}
 				}
 			}
 		}
 	}
 
 	//blocks ===================================================================================================================
-	lastPage = BlockPagesCount - 1;
-
-	for (uint32 page = 0; page < BlockPagesCount; page++)
+	if (BlockPagesCount > 0)
 	{
-		BlockPage* pBlockPage = pBlockPages[page];
+		lastPage = BlockPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < BlockPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
-		}
+			BlockPage* pBlockPage = pBlockPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			BlockCell& blockCell = pBlockPage->pBlock[cell];
+			uint32 countCells;
 
-			if (blockCell.Type >= MIN_BRANCH_TYPE1)
+			if (page < lastPage) //not last page
 			{
-				if (blockCell.Type <= MAX_BRANCH_TYPE1) //one branch found
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+				if (blockCell.Type >= MIN_BRANCH_TYPE1)
 				{
-					count++;
-				}
-				else if (blockCell.Type <= MAX_BRANCH_TYPE2) //one branch found
-				{
-					count+=2;
+					if (blockCell.Type <= MAX_BRANCH_TYPE1) //one branch found
+					{
+						count++;
+					}
+					else if (blockCell.Type <= MAX_BRANCH_TYPE2) //one branch found
+					{
+						count += 2;
+					}
 				}
 			}
 		}
@@ -255,57 +274,65 @@ bool HArray::testBlockConsistency()
 	uint32 count = 0;
 
 	//content ===================================================================================================================
-	int32 lastPage = ContentPagesCount - 1;
+	uint32 lastPage = 0;
 
-	for (uint32 page = 0; page < ContentPagesCount; page++)
+	if (ContentPagesCount > 0)
 	{
-		ContentPage* pContentPage = pContentPages[page];
+		lastPage = ContentPagesCount - 1;
 
-		uint32 countCells;
+		for (uint32 page = 0; page < ContentPagesCount; page++)
+		{
+			ContentPage* pContentPage = pContentPages[page];
 
-		if (page < lastPage) //not last page
-		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
-		}
+			uint32 countCells;
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			if (MIN_BLOCK_TYPE <= pContentPage->pType[cell] && pContentPage->pType[cell] <= MAX_BLOCK_TYPE) //in content
+			if (page < lastPage) //not last page
 			{
-				count++;
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				if (MIN_BLOCK_TYPE <= pContentPage->pType[cell] && pContentPage->pType[cell] <= MAX_BLOCK_TYPE) //in content
+				{
+					count++;
+				}
 			}
 		}
 	}
 
 	//sub blocks ===================================================================================================================
-	lastPage = BlockPagesCount - 1;
-
-	for (uint32 page = 0; page < BlockPagesCount; page++)
+	if (BlockPagesCount > 0)
 	{
-		BlockPage* pBlockPage = pBlockPages[page];
+		lastPage = BlockPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < BlockPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
-		}
+			BlockPage* pBlockPage = pBlockPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			BlockCell& blockCell = pBlockPage->pBlock[cell];
+			uint32 countCells;
 
-			if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
+			if (page < lastPage) //not last page
 			{
-				count++;
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+				if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
+				{
+					count++;
+				}
 			}
 		}
 	}
@@ -317,28 +344,31 @@ bool HArray::testVarConsistency()
 {
 	uint32 count = 0;
 
-	int32 lastPage = ContentPagesCount - 1;
-
-	for (uint32 page = 0; page < ContentPagesCount; page++)
+	if (ContentPagesCount > 0)
 	{
-		ContentPage* pContentPage = pContentPages[page];
+		uint32 lastPage = ContentPagesCount - 1;
 
-		uint32 countCells;
+		for (uint32 page = 0; page < ContentPagesCount; page++)
+		{
+			ContentPage* pContentPage = pContentPages[page];
 
-		if (page < lastPage) //not last page
-		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
-		}
+			uint32 countCells;
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			if (pContentPage->pType[cell] == VAR_TYPE)
+			if (page < lastPage) //not last page
 			{
-				count++;
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				if (pContentPage->pType[cell] == VAR_TYPE)
+				{
+					count++;
+				}
 			}
 		}
 	}
@@ -368,109 +398,120 @@ bool HArray::testFillContentPages()
 	}
 
 	//2. scan branches =============================================================================================
-	uint32 lastPage = BranchPagesCount - 1;
+	uint32 lastPage = 0;
 
-	for (uint32 page = 0; page < BranchPagesCount; page++)
+	if (BranchPagesCount > 0)
 	{
-		BranchPage* pBranchPage = pBranchPages[page];
+		lastPage = BranchPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < BranchPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastBranchOffset - 1) & 0xFFFF) + 1;
-		}
+			BranchPage* pBranchPage = pBranchPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			BranchCell& branchCell = pBranchPage->pBranch[cell];
+			uint32 countCells;
 
-			for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+			if (page < lastPage) //not last page
 			{
-				if (branchCell.Offsets[i]) //not empty
-				{
-					uint32 len = getFullContentLen(branchCell.Offsets[i]);
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastBranchOffset - 1) & 0xFFFF) + 1;
+			}
 
-					for (uint32 j = branchCell.Offsets[i]; j < branchCell.Offsets[i] + len; j++)
-					{
-						control[j]++;
-					}
-				}
-				else
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				BranchCell& branchCell = pBranchPage->pBranch[cell];
+
+				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
 				{
-					break;
+					if (branchCell.Offsets[i]) //not empty
+					{
+						uint32 len = getFullContentLen(branchCell.Offsets[i]);
+
+						for (uint32 j = branchCell.Offsets[i]; j < branchCell.Offsets[i] + len; j++)
+						{
+							control[j]++;
+						}
+					}
+					else
+					{
+						break;
+					}
 				}
 			}
 		}
 	}
 
 	//3. scan blocks ===============================================================================================
-	lastPage = BlockPagesCount - 1;
-
-	for (uint32 page = 0; page < BlockPagesCount; page++)
+	if (BlockPagesCount > 0)
 	{
-		BlockPage* pBlockPage = pBlockPages[page];
+		lastPage = BlockPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < BlockPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
-		}
+			BlockPage* pBlockPage = pBlockPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			BlockCell& blockCell = pBlockPage->pBlock[cell];
+			uint32 countCells;
 
-			if (blockCell.Type == CURRENT_VALUE_TYPE)
+			if (page < lastPage) //not last page
 			{
-				uint32 len = getFullContentLen(blockCell.Offset);
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
+			}
 
-				for (uint32 j = blockCell.Offset; j < blockCell.Offset + len; j++)
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+				if (blockCell.Type == CURRENT_VALUE_TYPE)
 				{
-					control[j]++;
+					uint32 len = getFullContentLen(blockCell.Offset);
+
+					for (uint32 j = blockCell.Offset; j < blockCell.Offset + len; j++)
+					{
+						control[j]++;
+					}
 				}
 			}
 		}
 	}
 
 	//4. var cells =================================================================================================
-	lastPage = VarPagesCount - 1;
-
-	for (uint32 page = 0; page < VarPagesCount; page++)
+	if (VarPagesCount > 0)
 	{
-		VarPage* pVarPage = pVarPages[page];
+		lastPage = VarPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < VarPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastVarOffset - 1) & 0xFFFF) + 1;
-		}
+			VarPage* pVarPage = pVarPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			VarCell& varCell = pVarPage->pVar[cell];
+			uint32 countCells;
 
-			if (varCell.ContCellType == CONTINUE_VAR_TYPE)
+			if (page < lastPage) //not last page
 			{
-				uint32 len = getFullContentLen(varCell.ContCellValue);
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastVarOffset - 1) & 0xFFFF) + 1;
+			}
 
-				for (uint32 j = varCell.ContCellValue; j < varCell.ContCellValue + len; j++)
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				VarCell& varCell = pVarPage->pVar[cell];
+
+				if (varCell.ContCellType == CONTINUE_VAR_TYPE)
 				{
-					control[j]++;
+					uint32 len = getFullContentLen(varCell.ContCellValue);
+
+					for (uint32 j = varCell.ContCellValue; j < varCell.ContCellValue + len; j++)
+					{
+						control[j]++;
+					}
 				}
 			}
 		}
@@ -526,76 +567,84 @@ bool HArray::testFillBranchPages()
 	uint32 currCountReleasedBranchCells = countReleasedBranchCells;
 
 	//content ===================================================================================================================
-	int32 lastPage = ContentPagesCount - 1;
+	uint32 lastPage = 0;
 
-	for (uint32 page = 0; page < ContentPagesCount; page++)
+	if (ContentPagesCount > 0)
 	{
-		ContentPage* pContentPage = pContentPages[page];
+		lastPage = ContentPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < ContentPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
-		}
+			ContentPage* pContentPage = pContentPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			uchar8 contentCellType = pContentPage->pType[cell];
-			uint32 contentCellValue = pContentPage->pContent[cell];
+			uint32 countCells;
 
-			if (MIN_BRANCH_TYPE1 <= contentCellType && contentCellType <= MAX_BRANCH_TYPE1) //in content
+			if (page < lastPage) //not last page
 			{
-				control[contentCellValue]++;
+				countCells = MAX_SHORT;
 			}
-			else if (contentCellType == VAR_TYPE) //shunted in var cell
+			else //last page
 			{
-				VarCell& varCell = pVarPages[contentCellValue >> 16]->pVar[contentCellValue & 0xFFFF];
+				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
+			}
 
-				if (MIN_BRANCH_TYPE1 <= varCell.ContCellType && varCell.ContCellType <= MAX_BRANCH_TYPE1) //in content
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				uchar8 contentCellType = pContentPage->pType[cell];
+				uint32 contentCellValue = pContentPage->pContent[cell];
+
+				if (MIN_BRANCH_TYPE1 <= contentCellType && contentCellType <= MAX_BRANCH_TYPE1) //in content
 				{
-					control[varCell.ContCellValue]++;
+					control[contentCellValue]++;
+				}
+				else if (contentCellType == VAR_TYPE) //shunted in var cell
+				{
+					VarCell& varCell = pVarPages[contentCellValue >> 16]->pVar[contentCellValue & 0xFFFF];
+
+					if (MIN_BRANCH_TYPE1 <= varCell.ContCellType && varCell.ContCellType <= MAX_BRANCH_TYPE1) //in content
+					{
+						control[varCell.ContCellValue]++;
+					}
 				}
 			}
 		}
 	}
 
 	//blocks ===================================================================================================================
-	lastPage = BlockPagesCount - 1;
-
-	for (uint32 page = 0; page < BlockPagesCount; page++)
+	if (BlockPagesCount > 0)
 	{
-		BlockPage* pBlockPage = pBlockPages[page];
+		lastPage = BlockPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < BlockPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
-		}
+			BlockPage* pBlockPage = pBlockPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			BlockCell& blockCell = pBlockPage->pBlock[cell];
+			uint32 countCells;
 
-			if (blockCell.Type >= MIN_BRANCH_TYPE1)
+			if (page < lastPage) //not last page
 			{
-				if (blockCell.Type <= MAX_BRANCH_TYPE1) //one branch found
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+				if (blockCell.Type >= MIN_BRANCH_TYPE1)
 				{
-					control[blockCell.Offset]++;
-				}
-				else if (blockCell.Type <= MAX_BRANCH_TYPE2) //one branch found
-				{
-					control[blockCell.Offset]++;
-					control[blockCell.ValueOrOffset]++;
+					if (blockCell.Type <= MAX_BRANCH_TYPE1) //one branch found
+					{
+						control[blockCell.Offset]++;
+					}
+					else if (blockCell.Type <= MAX_BRANCH_TYPE2) //one branch found
+					{
+						control[blockCell.Offset]++;
+						control[blockCell.ValueOrOffset]++;
+					}
 				}
 			}
 		}
@@ -640,57 +689,65 @@ bool HArray::testFillBlockPages()
 	uint32 currCountReleasedBlockCells = countReleasedBlockCells;
 
 	//content ===================================================================================================================
-	uint32 lastPage = ContentPagesCount - 1;
-
-	for (uint32 page = 0; page < ContentPagesCount; page++)
+	uint32 lastPage = 0;
+	
+	if (ContentPagesCount > 0)
 	{
-		ContentPage* pContentPage = pContentPages[page];
+		lastPage = ContentPagesCount - 1;
 
-		uint32 countCells;
+		for (uint32 page = 0; page < ContentPagesCount; page++)
+		{
+			ContentPage* pContentPage = pContentPages[page];
 
-		if (page < lastPage) //not last page
-		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
-		}
+			uint32 countCells;
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			if (MIN_BLOCK_TYPE <= pContentPage->pType[cell] && pContentPage->pType[cell] <= MAX_BLOCK_TYPE) //in content
+			if (page < lastPage) //not last page
 			{
-				control[pContentPage->pContent[cell] / BLOCK_ENGINE_SIZE]++;
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				if (MIN_BLOCK_TYPE <= pContentPage->pType[cell] && pContentPage->pType[cell] <= MAX_BLOCK_TYPE) //in content
+				{
+					control[pContentPage->pContent[cell] / BLOCK_ENGINE_SIZE]++;
+				}
 			}
 		}
 	}
 
 	//sub blocks ===================================================================================================================
-	lastPage = BlockPagesCount - 1;
-
-	for (uint32 page = 0; page < BlockPagesCount; page++)
+	if (BlockPagesCount > 0)
 	{
-		BlockPage* pBlockPage = pBlockPages[page];
+		lastPage = BlockPagesCount - 1;
 
-		uint32 countCells;
-
-		if (page < lastPage) //not last page
+		for (uint32 page = 0; page < BlockPagesCount; page++)
 		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
-		}
+			BlockPage* pBlockPage = pBlockPages[page];
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			BlockCell& blockCell = pBlockPage->pBlock[cell];
+			uint32 countCells;
 
-			if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
+			if (page < lastPage) //not last page
 			{
-				control[blockCell.Offset / BLOCK_ENGINE_SIZE]++;
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				BlockCell& blockCell = pBlockPage->pBlock[cell];
+
+				if (MIN_BLOCK_TYPE <= blockCell.Type && blockCell.Type <= MAX_BLOCK_TYPE) //in block
+				{
+					control[blockCell.Offset / BLOCK_ENGINE_SIZE]++;
+				}
 			}
 		}
 	}
@@ -732,28 +789,31 @@ bool HArray::testFillVarPages()
 	uint32 currCountReleasedVarCells = countReleasedVarCells;
 
 	//content ===================================================================================================================
-	int32 lastPage = ContentPagesCount - 1;
-
-	for (uint32 page = 0; page < ContentPagesCount; page++)
+	if (ContentPagesCount > 0)
 	{
-		ContentPage* pContentPage = pContentPages[page];
+		uint32 lastPage = ContentPagesCount - 1;
 
-		uint32 countCells;
+		for (uint32 page = 0; page < ContentPagesCount; page++)
+		{
+			ContentPage* pContentPage = pContentPages[page];
 
-		if (page < lastPage) //not last page
-		{
-			countCells = MAX_SHORT;
-		}
-		else //last page
-		{
-			countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
-		}
+			uint32 countCells;
 
-		for (uint32 cell = 0; cell < countCells; cell++)
-		{
-			if (pContentPage->pType[cell] == VAR_TYPE) //in content
+			if (page < lastPage) //not last page
 			{
-				control[pContentPage->pContent[cell]]++;
+				countCells = MAX_SHORT;
+			}
+			else //last page
+			{
+				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
+			}
+
+			for (uint32 cell = 0; cell < countCells; cell++)
+			{
+				if (pContentPage->pType[cell] == VAR_TYPE) //in content
+				{
+					control[pContentPage->pContent[cell]]++;
+				}
 			}
 		}
 	}

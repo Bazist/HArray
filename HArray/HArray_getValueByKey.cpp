@@ -20,9 +20,9 @@
 #include "HArray.h"
 
 uint32* HArray::getValueByKey(uint32* key,
-								  uint32 keyLen)
+							  uint32 keyLen2)
 {
-	keyLen >>= 2; //in 4 bytes
+	uint32 keyLenInSegments = keyLen2 >> 2; //in 4 bytes
 
 	uint32 headerOffset;
 
@@ -43,18 +43,18 @@ uint32* HArray::getValueByKey(uint32* key,
 
 NEXT_KEY_PART:
 		ContentPage* pContentPage = pContentPages[contentOffset>>16];
-		ushort16 contentIndex = contentOffset&0xFFFF;
+		ushort16 contentIndex = contentOffset & 0xFFFF;
 
 		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
 
 		if(contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
-			if((keyLen - keyOffset) != (contentCellType - ONLY_CONTENT_TYPE))
+			if((keyLenInSegments - keyOffset) != (contentCellType - ONLY_CONTENT_TYPE))
 			{
 				return 0;
 			}
 
-			for(; keyOffset < keyLen; contentIndex++, keyOffset++)
+			for(; keyOffset < keyLenInSegments; contentIndex++, keyOffset++)
 			{
 				if(pContentPage->pContent[contentIndex] != key[keyOffset])
 					return 0;
@@ -71,7 +71,7 @@ NEXT_KEY_PART:
 			VarPage* pVarPage = pVarPages[(*pContentCellValueOrOffset) >> 16];
 			VarCell& varCell = pVarPage->pVar[(*pContentCellValueOrOffset) & 0xFFFF];
 
-			if(keyOffset < keyLen)
+			if(keyOffset < keyLenInSegments)
 			{
 				contentCellType = varCell.ContCellType; //read from var cell
 
@@ -98,7 +98,7 @@ NEXT_KEY_PART:
                 }
 			}
 		}
-		else if(keyOffset == keyLen)
+		else if(keyOffset == keyLenInSegments)
 		{
 			if(contentCellType == VALUE_TYPE)
 			{
@@ -133,7 +133,7 @@ NEXT_KEY_PART:
 		}
 		else if(contentCellType == VALUE_TYPE)
 		{
-			if(keyOffset == keyLen)
+			if(keyOffset == keyLenInSegments)
 			{
                 return pContentCellValueOrOffset;
 			}

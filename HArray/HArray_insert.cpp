@@ -26,12 +26,12 @@ uint32 HArray::insert(uint32* key,
 {
 	try
 	{
-		keyLen >>= 2; //in 4 bytes
+		uint32 keyLenInSegments = keyLen >> 2; //in 4 bytes
 
-		uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
+		uint32 maxSafeShort = MAX_SAFE_SHORT - keyLenInSegments;
 
 		//create new page =======================================================================================
-		if (!pContentPages[(lastContentOffset + keyLen + ValueLen) >> 16])
+		if (!pContentPages[(lastContentOffset + keyLenInSegments + ValueLen) >> 16])
 		{
 			pContentPages[ContentPagesCount++] = new ContentPage();
 
@@ -65,47 +65,30 @@ uint32 HArray::insert(uint32* key,
 		uchar8 contentCellType;
 		//uint32 contentCellValue;
 
-		uint32* pSetLastContentOffset;
+		uint32* pSetLastContentOffset = 0;
 
 		if (!contentOffset)
 		{
 #ifndef _RELEASE
 			tempValues[SHORT_WAY_STAT]++;
 #endif
-			////resize header if fill factor exceeded min value
-			//if (!(--amountFreeSlotsBeforeHeaderResize))
-			//{
-			//	resizeHeader();
-
-			//	if (!normalizeFunc)
-			//	{
-			//		headerOffset = key[0] >> HeaderBits;
-			//	}
-			//	else
-			//	{
-			//		headerOffset = (*normalizeFunc)(key) >> HeaderBits;
-			//	}
-
-			//	pHeaderCell = &pHeader[headerOffset];
-			//}
-
 			//insert key in free slot
-			if (tailReleasedContentOffsets[keyLen])
+			if (tailReleasedContentOffsets[keyLenInSegments])
 			{
-				uint32 startContentOffset = tailReleasedContentOffsets[keyLen];
+				uint32 startContentOffset = tailReleasedContentOffsets[keyLenInSegments];
 
 				pHeader[headerOffset] = startContentOffset;
 
 				ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
 				uint32 contentIndex = startContentOffset & 0xFFFF;
 
-				pContentPage->pType[contentIndex] = (ONLY_CONTENT_TYPE + keyLen);
-				tailReleasedContentOffsets[keyLen] = pContentPage->pContent[contentIndex];
+				pContentPage->pType[contentIndex] = (ONLY_CONTENT_TYPE + keyLenInSegments);
+				tailReleasedContentOffsets[keyLenInSegments] = pContentPage->pContent[contentIndex];
 
-				countReleasedContentCells -= (keyLen + ValueLen);
+				countReleasedContentCells -= (keyLenInSegments + ValueLen);
 
 				//fill key
-				for (; keyOffset < keyLen; contentIndex++, keyOffset++)
+				for (; keyOffset < keyLenInSegments; contentIndex++, keyOffset++)
 				{
 					pContentPage->pContent[contentIndex] = key[keyOffset];
 				}
@@ -143,10 +126,10 @@ uint32 HArray::insert(uint32* key,
 
 				pHeader[headerOffset] = lastContentOffset;
 
-				pContentPage->pType[contentIndex] = (ONLY_CONTENT_TYPE + keyLen);
+				pContentPage->pType[contentIndex] = (ONLY_CONTENT_TYPE + keyLenInSegments);
 
 				//fill key
-				for (; keyOffset < keyLen; contentIndex++, keyOffset++, lastContentOffset++)
+				for (; keyOffset < keyLenInSegments; contentIndex++, keyOffset++, lastContentOffset++)
 				{
 					pContentPage->pContent[contentIndex] = key[keyOffset];
 				}
@@ -184,8 +167,8 @@ uint32 HArray::insert(uint32* key,
 					uchar8& contentCellType = pContentPage->pType[contentIndex];
 					uint32& contentCellValue = pContentPage->pContent[contentIndex];
 
-					//key less than original, insert
-					if (keyOffset == keyLen)
+					//key shorter than already inserted, insert
+					if (keyOffset == keyLenInSegments)
 					{
 						VarCell* pVarCell;
 
@@ -297,7 +280,7 @@ uint32 HArray::insert(uint32* key,
 					}
 				}
 
-				if (keyLen > originKeyLen) //key more than original
+				if (keyLenInSegments > originKeyLen) //key longer than already inserted
 				{
 					VarCell* pVarCell;
 
@@ -354,7 +337,7 @@ uint32 HArray::insert(uint32* key,
 					contentIndex = contentOffset & 0xFFFF;
 
 					//key less than original, insert
-					if (keyOffset == keyLen)
+					if (keyOffset == keyLenInSegments)
 					{
 						VarCell* pVarCell;
 
@@ -475,7 +458,7 @@ uint32 HArray::insert(uint32* key,
 				pContentPage = pContentPages[contentOffset >> 16];
 				contentIndex = contentOffset & 0xFFFF;
 
-				if (keyLen > originKeyLen) //key more than original
+				if (keyLenInSegments > originKeyLen) //key more than original
 				{
 					VarCell* pVarCell;
 
@@ -528,9 +511,7 @@ uint32 HArray::insert(uint32* key,
 			return 0;
 		}
 
-		uint32 keyValue;
-
-		keyValue = key[keyOffset];
+		uint32 keyValue = key[keyOffset];
 
 		pContentCellType = &pContentPage->pType[contentIndex];
 		pContentCellValue = &pContentPage->pContent[contentIndex];
@@ -544,7 +525,7 @@ uint32 HArray::insert(uint32* key,
 			VarPage* pVarPage = pVarPages[contentCellValueOrOffset >> 16];
 			VarCell& varCell = pVarPage->pVar[contentCellValueOrOffset & 0xFFFF];
 
-			if (keyOffset < keyLen)
+			if (keyOffset < keyLenInSegments)
 			{
 				contentCellType = varCell.ContCellType; //read from var cell
 				contentCellValueOrOffset = varCell.ContCellValue;
@@ -570,7 +551,7 @@ uint32 HArray::insert(uint32* key,
 		}
 		else if (contentCellType == VALUE_TYPE) //update existing value
 		{
-			if (keyOffset < keyLen)
+			if (keyOffset < keyLenInSegments)
 			{
 				VarCell* pVarCell;
 
@@ -619,7 +600,7 @@ uint32 HArray::insert(uint32* key,
 				return 0;
 			}
 		}
-		else if (keyOffset == keyLen) //STOP =====================================================================
+		else if (keyOffset == keyLenInSegments) //STOP =====================================================================
 		{
 			VarCell* pVarCell;
 
@@ -1473,7 +1454,7 @@ uint32 HArray::insert(uint32* key,
 
 	FILL_KEY2:
 
-		uint32 restKeyLen = keyLen - keyOffset;
+		uint32 restKeyLen = keyLenInSegments - keyOffset;
 
 		if (tailReleasedContentOffsets[restKeyLen])
 		{
@@ -1488,7 +1469,7 @@ uint32 HArray::insert(uint32* key,
 
 			countReleasedContentCells -= (restKeyLen + ValueLen);
 
-			for (; keyOffset < keyLen; contentIndex++, keyOffset++)
+			for (; keyOffset < keyLenInSegments; contentIndex++, keyOffset++)
 			{
 				pContentPage->pContent[contentIndex] = key[keyOffset];
 			}
@@ -1525,12 +1506,15 @@ uint32 HArray::insert(uint32* key,
 			}
 
 			//set last content offset in cell
-			*pSetLastContentOffset = lastContentOffset;
+			if (pSetLastContentOffset)
+			{
+				*pSetLastContentOffset = lastContentOffset;
+			}
 
 			//fill key
 			pContentPage->pType[contentIndex] = ONLY_CONTENT_TYPE + restKeyLen;
 
-			for (; keyOffset < keyLen; contentIndex++, keyOffset++, lastContentOffset++)
+			for (; keyOffset < keyLenInSegments; contentIndex++, keyOffset++, lastContentOffset++)
 			{
 				pContentPage->pContent[contentIndex] = key[keyOffset];
 			}

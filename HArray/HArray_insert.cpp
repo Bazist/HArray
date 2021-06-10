@@ -20,9 +20,9 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-bool HArray::insert(char* key,
-	uint32 keyLen,
-	uint32 value)
+bool HArray::insert(void* key,
+					uint32 keyLen,
+					uint32 value)
 {
 	uint32 lastSegmentKeyLen = keyLen & 0x3;
 

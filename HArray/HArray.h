@@ -776,13 +776,9 @@ public:
 	}
 	//INSERT =============================================================================================================
 
-	bool insert(uint32* key,
-				uint32 keyLen,
-				uint32 value);
+	bool insert(uint32* key, uint32 keyLen, uint32 value);
 
-	bool insert(char* key,
-		uint32 keyLen,
-		uint32 value);
+	bool insert(void* key, uint32 keyLen, uint32 value);
 
 	//REBUILD =========================================================================================================
 
@@ -792,21 +788,17 @@ public:
 	
 	//GET =============================================================================================================
 
-	bool getValueByKey(uint32* key,
-					   uint32 keyLen,
-					   uint32& value);
+	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value);
 
-	bool getValueByKey(char* key,
-					   uint32 keyLen,
-					   uint32& value);
-
+	bool getValueByKey(void* key, uint32 keyLen, uint32& value);
+	
 	bool hasPartKey(uint32* key, uint32 keyLen);
 
-	bool hasPartKey(char* key, uint32 keyLen);
-
+	bool hasPartKey(void* key, uint32 keyLen);
+	
 	bool delValueByKey(uint32* key, uint32 keyLen);
 
-	bool delValueByKey(char* key, uint32 keyLen);
+	bool delValueByKey(void* key, uint32 keyLen);
 
 	//RANGE keys and values =============================================================================================================
 	void sortLastItem(HArrayPair* pairs,

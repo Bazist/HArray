@@ -27,8 +27,8 @@
 #define _WIN32_WINNT 0x0501	// Change this to the appropriate value to target other versions of Windows.
 #endif
 
+#include <string>
 #include <stdio.h>
-#include <string.h>
 #include <inttypes.h>
 
 #ifdef _WIN32

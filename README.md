@@ -149,9 +149,11 @@ ha.delValueByKey(key, keyLen);
 
 ### How to run
 
+```c++
 git clone github.com/Bazist/HArray.git
 cd HArray/HArray
 make
+```
 
 ### License
 

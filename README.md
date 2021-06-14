@@ -13,7 +13,7 @@
 
 - **High optimized** Trie structure implemented in more than **8K lines**
 - Tested on **1 Billion keys** succesfully
-- Insert **Keys with variable length** inside one instance of the container
+- **Keys with variable length** inside one instance of the container
 - **Without any Stop World** events such as Rebuild/Rehashing on Insert key.
 - **Without any Hash Functions**, the container has adpative algorithm for different nature of keys
 - **Scan by Prefix/Scan by Range** functionality as bonus

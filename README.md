@@ -58,7 +58,15 @@ ha.insert(key, keyLen, value);
 Get value by key. Will return 0 if key is not found
 
 ```c++
-uint32* pValue = ha.getValueByKey(key, keyLen);
+uint32 value;
+if(ha.getValueByKey(key, keyLen, value))
+{
+   printf("%d", value)
+}
+else
+{
+   //key is not found
+}
 ```
 
 Get all keys by range from min key to max key. 

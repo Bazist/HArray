@@ -2,7 +2,7 @@
 
 **HArrayInt** - Key\Value In Memory structure for 32bit keys
 
-**HArrayVarRAM** - Key\Value In Memory structure for keys with variety size
+**HArray** - Key\Value In Memory structure for keys with variety size
 
 ------------------
 

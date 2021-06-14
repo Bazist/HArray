@@ -372,8 +372,6 @@ void HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 		if(count == size && pairs)
 			return;
 
-NEXT_KEY_PART:
-
 		ContentPage* pContentPage = pContentPages[contentOffset>>16];
 		ushort16 contentIndex = contentOffset&0xFFFF;
 

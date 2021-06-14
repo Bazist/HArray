@@ -19,9 +19,50 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-uint32* HArray::getValueByKey(uint32* key,
-								  uint32 keyLen)
+bool HArray::getValueByKey(const char* key,
+						   uint32 keyLen,
+						   uint32& value)
 {
+	uint32 lastSegmentKeyLen = keyLen & 0x3;
+
+	if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
+	{
+		return getValueByKey((uint32*)key, keyLen, value);
+	}
+	else
+	{
+		uint32* keyInSegments = (uint32*)key;
+		uint32 keyLenInSegments = keyLen >> 2;
+
+		uint32 newKey[MAX_KEY_SEGMENTS];
+
+		uint32 i = 0;
+
+		for (; i < keyLenInSegments; i++)
+		{
+			newKey[i] = keyInSegments[i];
+		}
+
+		newKey[i] = 0;
+
+		char* lastSegmentNewKey = (char*)&newKey[i];
+		char* lastSegmentKey = (char*)&keyInSegments[i];
+
+		for (uint32 j = 0; j < lastSegmentKeyLen; j++)
+		{
+			lastSegmentNewKey[j] = lastSegmentKey[j];
+		}
+
+		return getValueByKey((uint32*)newKey, (keyLen | 0x3) + 1, value);
+	}
+}
+
+bool HArray::getValueByKey(uint32* key,
+	 					   uint32 keyLen,
+						   uint32& value)
+{
+	value = 0;
+
 	keyLen >>= 2; //in 4 bytes
 
 	uint32 headerOffset;
@@ -43,7 +84,7 @@ uint32* HArray::getValueByKey(uint32* key,
 
 NEXT_KEY_PART:
 		ContentPage* pContentPage = pContentPages[contentOffset>>16];
-		ushort16 contentIndex = contentOffset&0xFFFF;
+		ushort16 contentIndex = contentOffset & 0xFFFF;
 
 		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
 
@@ -51,16 +92,20 @@ NEXT_KEY_PART:
 		{
 			if((keyLen - keyOffset) != (contentCellType - ONLY_CONTENT_TYPE))
 			{
-				return 0;
+				return false;
 			}
 
 			for(; keyOffset < keyLen; contentIndex++, keyOffset++)
 			{
-				if(pContentPage->pContent[contentIndex] != key[keyOffset])
-					return 0;
+				if (pContentPage->pContent[contentIndex] != key[keyOffset])
+				{
+					return false;
+				}
 			}
 
-			return &pContentPage->pContent[contentIndex]; //return value
+			value = pContentPage->pContent[contentIndex]; //return value
+			
+			return true;
 		}
 
 		uint32& keyValue = key[keyOffset];
@@ -90,11 +135,13 @@ NEXT_KEY_PART:
 			{
 				if(varCell.ValueContCellType)
                 {
-                	return &varCell.ValueContCellValue;
+                	value = varCell.ValueContCellValue;
+
+					return true;
                 }
                 else
                 {
-                	return 0;
+					return false;
                 }
 			}
 		}
@@ -106,7 +153,7 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 
@@ -129,7 +176,7 @@ NEXT_KEY_PART:
 				}
 			}
 
-			return 0;
+			return false;
 		}
 		else if(contentCellType == VALUE_TYPE)
 		{
@@ -139,7 +186,7 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 		else if(contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
@@ -159,7 +206,7 @@ NEXT_KEY_PART:
 
 			if(blockCellType == EMPTY_TYPE)
 			{
-				return 0;
+				return false;
 			}
 			else if(blockCellType == CURRENT_VALUE_TYPE) //current value
 			{
@@ -172,7 +219,7 @@ NEXT_KEY_PART:
 				}
 				else
 				{
-					return 0;
+					return false;
 				}
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE1) //branch cell
@@ -191,7 +238,7 @@ NEXT_KEY_PART:
 					}
 				}
 
-				return 0;
+				return false;
 			}
 			else if(blockCellType <= MAX_BRANCH_TYPE2) //branch cell
 			{
@@ -225,7 +272,7 @@ NEXT_KEY_PART:
 					}
 				}
 
-				return 0;
+				return false;
 			}
 			else if(blockCell.Type <= MAX_BLOCK_TYPE)
 			{
@@ -237,7 +284,7 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 		else if(contentCellType == CURRENT_VALUE_TYPE) //PART OF KEY =========================================================================
@@ -251,10 +298,10 @@ NEXT_KEY_PART:
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 	}
 
-	return 0;
+	return false;
 }

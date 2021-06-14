@@ -117,9 +117,6 @@ void HArray::scanKeysAndValues(uint32* key,
 
 	for(;; keyOffset++, contentOffset++)
 	{
-
-NEXT_KEY_PART:
-
 		ContentPage* pContentPage = pContentPages[contentOffset>>16];
 		ushort16 contentIndex = contentOffset&0xFFFF;
 
@@ -222,9 +219,9 @@ NEXT_KEY_PART:
 }
 
 uint32 HArray::scanKeysAndValues(uint32* key,
-									   uint32 keyLen,
-									   HARRAY_ITEM_VISIT_FUNC visitor,
-									   void* pData)
+								uint32 keyLen,
+								HARRAY_ITEM_VISIT_FUNC visitor,
+								void* pData)
 {
 	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
@@ -269,10 +266,18 @@ NEXT_KEY_PART:
 					key[keyOffset] = pContentPage->pContent[contentIndex];
 				}
 
-				(*visitor)(key,
-						   keyOffset,
-						   pContentPage->pContent[contentIndex],
-						   pContentPage->pType[contentIndex], pData); //return value
+				if (contentIndex < MAX_SHORT) //remove warning of compilator
+				{
+					(*visitor)(key,
+						keyOffset,
+						pContentPage->pContent[contentIndex],
+						pContentPage->pType[contentIndex],
+						pData); //return value
+				}
+				else
+				{
+					printf("!!! FAIL STATE !!!");
+				}
 
 				return 0;
 			}

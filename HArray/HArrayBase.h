@@ -133,7 +133,7 @@ public:
 
 	void print()
 	{
-		for(int i=0; i<KeyLen; i++)
+		for(uint32 i = 0; i < KeyLen; i++)
 		{
 			printf("%u ", Key[i]);
 		}
@@ -190,10 +190,7 @@ struct BlockPage
 {
 	BlockPage()
 	{
-		for (uint32 i = 0; i < MAX_SHORT; i++)
-		{
-			pBlock[i].Type = 0;
-		}
+		memset(this, 0, sizeof(BlockPage));
 	}
 
 	BlockCell pBlock[MAX_SHORT];
@@ -203,13 +200,7 @@ struct CompactPage
 {
 	CompactPage()
 	{
-		for (uint32 i = 0; i < MAX_CHAR; i++)
-		{
-			Values[i] = 0;
-			Offsets[i] = 0;
-		}
-
-		Count = 0;
+		memset(this, 0, sizeof(CompactPage));
 	}
 
 	uint32 Values[MAX_CHAR];

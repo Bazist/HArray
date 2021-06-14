@@ -30,18 +30,10 @@ class HArray
 public:
 	HArray()
 	{
-		pContentPages = 0;
-		pVarPages = 0;
-		pBranchPages = 0;
-		pBlockPages = 0;
+		memset(this, 0, sizeof(HArray));
 
-		ContentPagesCount = 0;
-		VarPagesCount = 0;
-		BranchPagesCount = 0;
-		BlockPagesCount = 0;
+		init();
 	}
-
-	char Name[256];
 
 	uint32 ContentPagesCount;
 	uint32 VarPagesCount;
@@ -54,11 +46,6 @@ public:
 	uint32 BlockPagesSize;
 
 	uint32* pHeader;
-
-	/*uint32* pActiveContent;
-	ContentTypeCell* pActiveContentType;
-	BranchCell* pActiveBranch;
-	BlockCell* pActiveBlock;*/
 
 	ContentPage** pContentPages;
 	VarPage** pVarPages;
@@ -112,6 +99,8 @@ public:
 			  uint32 branchPagesSize,
 			  uint32 blockPagesSize)
 	{
+		destroy();
+
         //clear pointers
 		pHeader = 0;
 		
@@ -219,8 +208,11 @@ public:
 
 	bool saveToFile(const char* path)
 	{
-		FILE * pFile = fopen (path, "wb");
-  		if (pFile!=NULL)
+		FILE* pFile = 0;
+
+		errno_t errorCode = fopen_s(&pFile, path, "wb");
+
+  		if (!errorCode)
   		{
 			if (fwrite(this, sizeof(HArray), 1, pFile) != 1)
 			{
@@ -291,6 +283,10 @@ public:
 
 			return true;
   		}
+		else
+		{
+			printf("File is not opened. Error code: %d", errorCode);
+		}
 		
 	ERROR:
 
@@ -299,8 +295,11 @@ public:
 
 	bool loadFromFile(const char* path)
 	{
-		FILE * pFile = fopen (path, "rb");
-  		if (pFile!=NULL)
+		FILE* pFile = 0;
+		
+		errno_t errorCode = fopen_s(&pFile, path, "rb");
+
+  		if (!errorCode)
   		{
 			if (fread(this, sizeof(HArray), 1, pFile) != 1)
 			{
@@ -381,20 +380,14 @@ public:
 				}
 			}
 
-			//releaseBranchCells = 0;
-
-			/*
-	        if(releaseBranchCells)
-			{
-	            delete[] releaseBranchCells;
-	            releaseBranchCells = 0;
-			}
-			*/
-
-    		fclose (pFile);
+			fclose (pFile);
 
 			return true;
   		}
+		else
+		{
+			printf("File is not opened. Error code: %d.", errorCode);
+		}
 
 	ERROR:
 		destroy();
@@ -413,27 +406,27 @@ public:
 
 	ulong64 getHeaderSize()
 	{
-		return HeaderSize * sizeof(uint32);
+		return (ulong64)HeaderSize * sizeof(uint32);
 	}
 
 	ulong64 getContentSize()
 	{
-		return ContentPagesCount * sizeof(ContentPage);
+		return (ulong64)ContentPagesCount * sizeof(ContentPage);
 	}
 
 	ulong64 getVarSize()
 	{
-		return VarPagesCount * sizeof(VarPage);
+		return (ulong64)VarPagesCount * sizeof(VarPage);
 	}
 
 	ulong64 getBranchSize()
 	{
-		return BranchPagesCount * sizeof(BranchPage);
+		return (ulong64)BranchPagesCount * sizeof(BranchPage);
 	}
 
 	ulong64 getBlockSize()
 	{
-		return BlockPagesCount * sizeof(BlockPage);
+		return (ulong64)BlockPagesCount * sizeof(BlockPage);
 	}
 
 	ulong64 getUsedMemory()
@@ -653,12 +646,12 @@ public:
 	void printMemory()
 	{
 		printf("=================== HArray =========================\n");
-		printf("Header size: %d\n", getHeaderSize());
-		printf("Content size: %d\n", getContentSize());
-		printf("Var size: %d\n", getVarSize());
-		printf("Branch size: %d\n", getBranchSize());
-		printf("Block size: %d\n", getBlockSize());
-		printf("Total size: %d\n", getTotalMemory());
+		printf("Header size: %llu\n", getHeaderSize());
+		printf("Content size: %llu\n", getContentSize());
+		printf("Var size: %llu\n", getVarSize());
+		printf("Branch size: %llu\n", getBranchSize());
+		printf("Block size: %llu\n", getBlockSize());
+		printf("Total size: %llu\n", getTotalMemory());
 	}
 
 	void printStat()
@@ -783,25 +776,33 @@ public:
 	}
 	//INSERT =============================================================================================================
 
-	uint32 insert(uint32* key,
-				uint32 keyLen,
-				uint32 value);
+	bool insert(uint32* key, uint32 keyLen, uint32 value);
+
+	bool insert(const char* key, uint32 keyLen, uint32 value);
+
+	//GET =============================================================================================================
+
+	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value);
+
+	bool getValueByKey(const char* key, uint32 keyLen, uint32& value);
+
+	//HAS =============================================================================================================
+	
+	bool hasPartKey(uint32* key, uint32 keyLen);
+
+	bool hasPartKey(const char* key, uint32 keyLen);
+
+	//DELL =============================================================================================================
+	
+	bool delValueByKey(uint32* key, uint32 keyLen);
+
+	bool delValueByKey(const char* key, uint32 keyLen);
 
 	//REBUILD =========================================================================================================
-
-	void resizeHeader();
 
 	static bool rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
 
 	uint32 rebuild(uint32 headerBase = 0, bool removeEmptyKeys = false);
-	
-	//GET =============================================================================================================
-
-	uint32* getValueByKey(uint32* key,
-					      uint32 keyLen);
-
-	bool hasPartKey(uint32* key, uint32 keyLen);
-	bool delValueByKey(uint32* key, uint32 keyLen);
 
 	//RANGE keys and values =============================================================================================================
 	void sortLastItem(HArrayPair* pairs,
@@ -969,7 +970,5 @@ public:
             delete[] tailReleasedContentOffsets;
             tailReleasedContentOffsets = 0;
 		}
-
-		//valueListPool.destroy();
 	}
 };

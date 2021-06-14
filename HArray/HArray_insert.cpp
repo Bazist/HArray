@@ -20,7 +20,45 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-uint32 HArray::insert(uint32* key,
+bool HArray::insert(const char* key,
+					uint32 keyLen,
+					uint32 value)
+{
+	uint32 lastSegmentKeyLen = keyLen & 0x3;
+
+	if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
+	{
+		return insert((uint32*)key, keyLen, value);
+	}
+	else
+	{
+		uint32* keyInSegments = (uint32*)key;
+		uint32 keyLenInSegments = keyLen >> 2;
+		
+		uint32 newKey[MAX_KEY_SEGMENTS];
+
+		uint32 i = 0;
+
+		for (; i < keyLenInSegments; i++)
+		{
+			newKey[i] = keyInSegments[i];
+		}
+
+		newKey[i] = 0;
+
+		char* lastSegmentNewKey = (char*)&newKey[i];
+		char* lastSegmentKey = (char*)&keyInSegments[i];
+
+		for (uint32 j = 0; j < lastSegmentKeyLen; j++)
+		{
+			lastSegmentNewKey[j] = lastSegmentKey[j];
+		}
+
+		return insert((uint32*)newKey, (keyLen | 0x3) + 1, value);
+	}
+}
+
+bool HArray::insert(uint32* key,
 					uint32 keyLen,
 					uint32 value)
 {
@@ -65,30 +103,13 @@ uint32 HArray::insert(uint32* key,
 		uchar8 contentCellType;
 		//uint32 contentCellValue;
 
-		uint32* pSetLastContentOffset;
+		uint32* pSetLastContentOffset = 0;
 
 		if (!contentOffset)
 		{
 #ifndef _RELEASE
 			tempValues[SHORT_WAY_STAT]++;
 #endif
-			////resize header if fill factor exceeded min value
-			//if (!(--amountFreeSlotsBeforeHeaderResize))
-			//{
-			//	resizeHeader();
-
-			//	if (!normalizeFunc)
-			//	{
-			//		headerOffset = key[0] >> HeaderBits;
-			//	}
-			//	else
-			//	{
-			//		headerOffset = (*normalizeFunc)(key) >> HeaderBits;
-			//	}
-
-			//	pHeaderCell = &pHeader[headerOffset];
-			//}
-
 			//insert key in free slot
 			if (tailReleasedContentOffsets[keyLen])
 			{
@@ -113,7 +134,7 @@ uint32 HArray::insert(uint32* key,
 				pContentPage->pType[contentIndex] = VALUE_TYPE;
 				pContentPage->pContent[contentIndex] = value;
 
-				return 0;
+				return true;
 			}
 			else
 			{
@@ -156,7 +177,7 @@ uint32 HArray::insert(uint32* key,
 
 				lastContentOffset++;
 
-				return 0;
+				return true;
 			}
 		}
 		
@@ -184,7 +205,7 @@ uint32 HArray::insert(uint32* key,
 					uchar8& contentCellType = pContentPage->pType[contentIndex];
 					uint32& contentCellValue = pContentPage->pContent[contentIndex];
 
-					//key less than original, insert
+					//key shorter than already inserted, insert
 					if (keyOffset == keyLen)
 					{
 						VarCell* pVarCell;
@@ -233,7 +254,7 @@ uint32 HArray::insert(uint32* key,
 
 						pContentPage->pType[contentIndex] = VALUE_TYPE;
 
-						return 0;
+						return true;
 					}
 					else if (contentCellValue != key[keyOffset])
 					{
@@ -297,7 +318,7 @@ uint32 HArray::insert(uint32* key,
 					}
 				}
 
-				if (keyLen > originKeyLen) //key more than original
+				if (keyLen > originKeyLen) //key longer than already inserted
 				{
 					VarCell* pVarCell;
 
@@ -343,7 +364,7 @@ uint32 HArray::insert(uint32* key,
 				{
 					pContentPage->pContent[contentIndex] = value;
 
-					return 0;
+					return false;
 				}
 			}
 			else  //content in two pages
@@ -402,7 +423,7 @@ uint32 HArray::insert(uint32* key,
 
 						pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF] = VALUE_TYPE;
 
-						return 0;
+						return true;
 					}
 					else if (pContentPage->pContent[contentIndex] != key[keyOffset])
 					{
@@ -521,16 +542,14 @@ uint32 HArray::insert(uint32* key,
 				{
 					pContentPage->pContent[contentIndex] = value;
 
-					return 0;
+					return false;
 				}
 			}
 
-			return 0;
+			return true;
 		}
 
-		uint32 keyValue;
-
-		keyValue = key[keyOffset];
+		uint32 keyValue = key[keyOffset];
 
 		pContentCellType = &pContentPage->pType[contentIndex];
 		pContentCellValue = &pContentPage->pContent[contentIndex];
@@ -565,7 +584,7 @@ uint32 HArray::insert(uint32* key,
 				varCell.ValueContCellType = VALUE_TYPE;
 				varCell.ValueContCellValue = value;
 
-				return 0;
+				return false;
 			}
 		}
 		else if (contentCellType == VALUE_TYPE) //update existing value
@@ -616,7 +635,7 @@ uint32 HArray::insert(uint32* key,
 			{
 				*pContentCellValue = value;
 
-				return 0;
+				return false;
 			}
 		}
 		else if (keyOffset == keyLen) //STOP =====================================================================
@@ -659,7 +678,7 @@ uint32 HArray::insert(uint32* key,
 			pContentPage->pType[contentIndex] = VAR_TYPE;
 			pContentPage->pContent[contentIndex] = lastVarOffset++;
 
-			return 0;
+			return true;
 		}
 
 		if (contentCellType <= MAX_BRANCH_TYPE1) //BRANCH =====================================================================
@@ -1496,7 +1515,7 @@ uint32 HArray::insert(uint32* key,
 			pContentPage->pType[contentIndex] = VALUE_TYPE;
 			pContentPage->pContent[contentIndex] = value;
 
-			return 0;
+			return true;
 		}
 		else
 		{
@@ -1525,7 +1544,10 @@ uint32 HArray::insert(uint32* key,
 			}
 
 			//set last content offset in cell
-			*pSetLastContentOffset = lastContentOffset;
+			if (pSetLastContentOffset)
+			{
+				*pSetLastContentOffset = lastContentOffset;
+			}
 
 			//fill key
 			pContentPage->pType[contentIndex] = ONLY_CONTENT_TYPE + restKeyLen;
@@ -1540,7 +1562,7 @@ uint32 HArray::insert(uint32* key,
 
 			lastContentOffset++;
 
-			return 0;
+			return true;
 		}
 	}
 	catch (...)

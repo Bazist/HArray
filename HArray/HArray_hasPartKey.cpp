@@ -19,8 +19,43 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-bool HArray::hasPartKey(uint32* key,
-							  uint32 keyLen)
+bool HArray::hasPartKey(const char* key, uint32 keyLen)
+{
+	uint32 lastSegmentKeyLen = keyLen & 0x3;
+
+	if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
+	{
+		return hasPartKey((uint32*)key, keyLen);
+	}
+	else
+	{
+		uint32* keyInSegments = (uint32*)key;
+		uint32 keyLenInSegments = keyLen >> 2;
+
+		uint32 newKey[MAX_KEY_SEGMENTS];
+
+		uint32 i = 0;
+
+		for (; i < keyLenInSegments; i++)
+		{
+			newKey[i] = keyInSegments[i];
+		}
+
+		newKey[i] = 0;
+
+		char* lastSegmentNewKey = (char*)&newKey[i];
+		char* lastSegmentKey = (char*)&keyInSegments[i];
+
+		for (uint32 j = 0; j < lastSegmentKeyLen; j++)
+		{
+			lastSegmentNewKey[j] = lastSegmentKey[j];
+		}
+
+		return hasPartKey((uint32*)newKey, (keyLen | 0x3) + 1);
+	}
+}
+
+bool HArray::hasPartKey(uint32* key, uint32 keyLen)
 {
 	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;

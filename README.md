@@ -161,6 +161,7 @@ ha.delValueByKey(key, keyLen);
 git clone github.com/Bazist/HArray.git
 cd HArray/HArray
 make
+./HArray
 ```
 
 ### License

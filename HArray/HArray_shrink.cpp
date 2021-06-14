@@ -88,7 +88,7 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 			startContentOffset = tailReleasedContentOffsets[keyLen];
 
 			ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
-			
+
 			uchar8& contentCellType = pContentPage->pType[startContentOffset & 0xFFFF];
 			uint32& contentCellValue = pContentPage->pContent[startContentOffset & 0xFFFF];
 
@@ -157,7 +157,7 @@ MOVE_KEY:
 	//copy data
 	memcpy(pDestStartContentCellType, pSourceStartContentCellType, dataLen);
 	memcpy(pDestStartContentCellValue, pSourceStartContentCellValue, dataLen * sizeof(uint32));
-	
+
 	memset(pSourceStartContentCellType, 0, dataLen);
 	memset(pSourceStartContentCellValue, 0, dataLen * sizeof(uint32));
 
@@ -471,7 +471,7 @@ void HArray::shrinkBranchPages()
 
 			uint32 countCells;
 
-			if ((int32)page < lastPage) //not last page
+			if (page < lastPage) //not last page
 			{
 				countCells = MAX_SHORT;
 			}
@@ -891,7 +891,7 @@ bool HArray::shrinkBlock(uint32 startBlockOffset,
 
 		return false;
 	}
-	
+
 	for (uint32 cell = startOffset; cell < endOffset; cell++)
 	{
 		BlockCell& blockCell = pBlockPage->pBlock[cell];
@@ -996,7 +996,7 @@ void HArray::shrinkBlockPages()
 	uint32 skipContentCells = 0;
 
 	uint32 lastPage = 0;
-	
+
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;
@@ -1298,11 +1298,11 @@ void HArray::shrinkVarPages()
 
 	uint32 countReleasedContentCells = 0;
 	uint32 startReleasedContentCellsOffset = 0;
-	
+
 	uint32 skipContentCells = 0;
 
 	uint32 lastPage = 0;
-	
+
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;

@@ -90,7 +90,7 @@ NEXT_KEY_PART:
 
 		if(contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
-			if((keyLen - keyOffset) != (contentCellType - ONLY_CONTENT_TYPE))
+			if((keyLen - keyOffset) != (uint32)(contentCellType - ONLY_CONTENT_TYPE))
 			{
 				return false;
 			}
@@ -104,7 +104,7 @@ NEXT_KEY_PART:
 			}
 
 			value = pContentPage->pContent[contentIndex]; //return value
-			
+
 			return true;
 		}
 

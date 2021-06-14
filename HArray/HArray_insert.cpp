@@ -34,7 +34,7 @@ bool HArray::insert(const char* key,
 	{
 		uint32* keyInSegments = (uint32*)key;
 		uint32 keyLenInSegments = keyLen >> 2;
-		
+
 		uint32 newKey[MAX_KEY_SEGMENTS];
 
 		uint32 i = 0;
@@ -82,6 +82,7 @@ bool HArray::insert(uint32* key,
 		//insert value ==========================================================================================
 		uint32 keyOffset = 0;
 		uint32 headerOffset;
+		uint32 keyValue;
 
 		uchar8* pContentCellType;
 		uint32* pContentCellValue;
@@ -99,7 +100,7 @@ bool HArray::insert(uint32* key,
 
 		ContentPage* pContentPage;
 		uint32 contentIndex;
-		
+
 		uchar8 contentCellType;
 		//uint32 contentCellValue;
 
@@ -159,7 +160,7 @@ bool HArray::insert(uint32* key,
 
 					lastContentOffset = (page << 16);
 
-					contentIndex = 0;						
+					contentIndex = 0;
 				}
 
 				pHeader[headerOffset] = lastContentOffset;
@@ -180,7 +181,7 @@ bool HArray::insert(uint32* key,
 				return true;
 			}
 		}
-		
+
 #ifndef _RELEASE
 		tempValues[LONG_WAY_STAT]++;
 #endif
@@ -242,7 +243,7 @@ bool HArray::insert(uint32* key,
 
 						pVarCell->ValueContCellType = VALUE_TYPE;
 						pVarCell->ValueContCellValue = value;
-						
+
 						contentCellType = VAR_TYPE;
 						contentCellValue = lastVarOffset++;
 
@@ -549,7 +550,7 @@ bool HArray::insert(uint32* key,
 			return true;
 		}
 
-		uint32 keyValue = key[keyOffset];
+		keyValue = key[keyOffset];
 
 		pContentCellType = &pContentPage->pType[contentIndex];
 		pContentCellValue = &pContentPage->pContent[contentIndex];
@@ -778,7 +779,7 @@ bool HArray::insert(uint32* key,
 
 				//get free block
 				uint32 startBlockOffset;
-				
+
 				if (countReleasedBlockCells)
 				{
 					startBlockOffset = tailReleasedBlockOffset;
@@ -873,7 +874,7 @@ bool HArray::insert(uint32* key,
 							}
 							else
 							{
-								pSetLastContentOffset = &pCurrBranchCell->Offsets[0];								
+								pSetLastContentOffset = &pCurrBranchCell->Offsets[0];
 							}
 						}
 						else //types 1..4
@@ -889,7 +890,7 @@ bool HArray::insert(uint32* key,
 							}
 							else
 							{
-								pSetLastContentOffset = &currBranchCell.Offsets[currBlockCell.Type];								
+								pSetLastContentOffset = &currBranchCell.Offsets[currBlockCell.Type];
 							}
 
 							currBlockCell.Type++;
@@ -1028,7 +1029,7 @@ bool HArray::insert(uint32* key,
 						tailReleasedBranchOffset = pBranchCell->Values[0];
 
 						countReleasedBranchCells--;
-												
+
 						blockCell.ValueOrOffset = branchOffset;
 					}
 					else
@@ -1485,7 +1486,7 @@ bool HArray::insert(uint32* key,
 				goto FILL_KEY;
 			}
 		}
-		
+
 	FILL_KEY:
 
 		keyOffset++;
@@ -1540,7 +1541,7 @@ bool HArray::insert(uint32* key,
 
 				lastContentOffset = (page << 16);
 
-				contentIndex = 0;						
+				contentIndex = 0;
 			}
 
 			//set last content offset in cell

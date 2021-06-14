@@ -177,7 +177,7 @@ bool HArray::tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathL
 	}
 
 	//if less than 8 values ===================================================================================
-	if (currPathLen <= 0 || 
+	if (currPathLen <= 0 ||
 		path[currPathLen - 1].Type != BLOCK_OFFSET_SEGMENT_TYPE) //top block
 	{
 		if (count == 0)
@@ -799,7 +799,7 @@ bool HArray::delValueByKey(uint32* key,
 		{
 			uint32 restKeyLen = keyLen - keyOffset;
 
-			if (restKeyLen != (contentCellType - ONLY_CONTENT_TYPE))
+			if (restKeyLen != (uint32)(contentCellType - ONLY_CONTENT_TYPE))
 			{
 				return false;
 			}
@@ -1102,7 +1102,7 @@ bool HArray::delValueByKey(uint32* key,
 				//go to block
 				idxKeyValue = (blockCell.Type - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 				startOffset = blockCell.Offset;
-								
+
 				goto NEXT_BLOCK;
 			}
 			else
@@ -1145,7 +1145,7 @@ DISMANTLING:
 
 		amountFreeSlotsBeforeHeaderResize++;
 	}
-	
+
 	//SHRINK =============================================================================================
 	if (autoShrinkOnPercents)
 	{

@@ -24,7 +24,6 @@
 #endif
 
 #include "stdafx.h"
-
 #define _RELEASE 0x1234567
 
 const uint32 REPOSITORY_VERSION = 1;
@@ -165,7 +164,7 @@ struct VarCell
 {
 	uchar8 ValueContCellType;
 	uint32 ValueContCellValue;
-	
+
 	uchar8 ContCellType;
 	uint32 ContCellValue;
 };
@@ -238,7 +237,7 @@ struct SegmentPath
 	{
 		/*
 		printf("Type: %u, ", Type);
-		
+
 		if(pContentCell)
 			printf("ContentCell: Type=%u, Value=%u, ", pContentCell->Type, pContentCell->Value);
 

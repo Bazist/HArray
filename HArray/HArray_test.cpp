@@ -73,7 +73,7 @@ bool HArray::testContentConsistency()
 
 	//2. scan branches =============================================================================================
 	uint32 lastPage = 0;
-	
+
 	if (BranchPagesCount > 0)
 	{
 		lastPage = BranchPagesCount - 1;
@@ -185,7 +185,7 @@ bool HArray::testBranchConsistency()
 
 	//content ===================================================================================================================
 	uint32 lastPage = 0;
-	
+
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;
@@ -561,8 +561,6 @@ bool HArray::testFillBranchPages()
 	char* control = new char[lastBranchOffset];
 	memset(control, 0, lastBranchOffset);
 
-	uint32 shrinkLastBranchOffset = lastBranchOffset - countReleasedBranchCells;
-
 	uint32 currTailReleasedBranchOffset = tailReleasedBranchOffset;
 	uint32 currCountReleasedBranchCells = countReleasedBranchCells;
 
@@ -683,14 +681,12 @@ bool HArray::testFillBlockPages()
 	char* control = new char[lastBlockOffset / BLOCK_ENGINE_SIZE];
 	memset(control, 0, lastBlockOffset / BLOCK_ENGINE_SIZE);
 
-	uint32 shrinkLastBlockOffset = lastBlockOffset - countReleasedBlockCells;
-
 	uint32 currTailReleasedBlockOffset = tailReleasedBlockOffset;
 	uint32 currCountReleasedBlockCells = countReleasedBlockCells;
 
 	//content ===================================================================================================================
 	uint32 lastPage = 0;
-	
+
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;

@@ -154,7 +154,7 @@ public:
 			pIndexes = new uint32[MAX_SHORT];
 			pValues = new uint32[MAX_SHORT];
 			pReleaseCells = new uint32[MAX_SHORT];
-			
+
 			CountDoublePage = 1;
 			CountMultiplyPage = 1;
 
@@ -179,7 +179,7 @@ public:
 		DoublePageInt** pNewDoublePages = new DoublePageInt* [(ulong64)SizeDoublePage * 2];
 
 		uint32 i = 0;
-		
+
 		for (; i < SizeDoublePage; i++)
 		{
 			pNewDoublePages[i] = pDoublePages[i];
@@ -636,8 +636,6 @@ public:
 		pNewArray->init(HEADER_BASE);
 
 		//copy
-		uint32 count = 0;
-
 		uint32 startKey = 0;
 		uint32 endKey = 0xFFFFFFFF;
 
@@ -844,8 +842,8 @@ public:
 
 	ulong64 getTotalMemory()
 	{
-		return (ulong64)sizeof(HArrayInt) + HEADER_SIZE * (ulong64)sizeof(HeaderCellInt) + 
-			(ulong64)CountDoublePage * sizeof(DoublePageInt) + 
+		return (ulong64)sizeof(HArrayInt) + HEADER_SIZE * (ulong64)sizeof(HeaderCellInt) +
+			(ulong64)CountDoublePage * sizeof(DoublePageInt) +
 			(ulong64)CountMultiplyPage * sizeof(MultiplyPageInt);
 	}
 

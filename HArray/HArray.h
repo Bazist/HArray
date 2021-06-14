@@ -103,7 +103,7 @@ public:
 
         //clear pointers
 		pHeader = 0;
-		
+
 		setUInt32Comparator();
 
 		pContentPages = 0;
@@ -136,7 +136,7 @@ public:
             countReleasedBranchCells = 0;
 			countReleasedBlockCells = 0;
 			countReleasedVarCells = 0;
-			
+
             MAX_SAFE_SHORT = MAX_SHORT - ValueLen;
 
             pHeader = new uint32[HeaderSize];
@@ -210,9 +210,15 @@ public:
 	{
 		FILE* pFile = 0;
 
-		errno_t errorCode = fopen_s(&pFile, path, "wb");
+		#ifdef _WIN32
+        errno_t errorCode = fopen_s(&pFile, path, "wb");
+        if (!errorCode)
+  		#endif // _WIN32
 
-  		if (!errorCode)
+		#ifdef linux
+		pFile = fopen(path, "wb");
+		if(pFile != NULL)
+        #endif // linux
   		{
 			if (fwrite(this, sizeof(HArray), 1, pFile) != 1)
 			{
@@ -285,9 +291,9 @@ public:
   		}
 		else
 		{
-			printf("File is not opened. Error code: %d", errorCode);
+			printf("File '%s' is not opened.", path);
 		}
-		
+
 	ERROR:
 
 		return false;
@@ -296,10 +302,16 @@ public:
 	bool loadFromFile(const char* path)
 	{
 		FILE* pFile = 0;
-		
-		errno_t errorCode = fopen_s(&pFile, path, "rb");
 
-  		if (!errorCode)
+		#ifdef _WIN32
+        errno_t errorCode = fopen_s(&pFile, path, "rb");
+        if (!errorCode)
+  		#endif // _WIN32
+
+		#ifdef linux
+		pFile = fopen(path, "rb");
+		if(pFile != NULL)
+        #endif // linux
   		{
 			if (fread(this, sizeof(HArray), 1, pFile) != 1)
 			{
@@ -386,7 +398,7 @@ public:
   		}
 		else
 		{
-			printf("File is not opened. Error code: %d.", errorCode);
+			printf("File '%s' is not opened.", path);
 		}
 
 	ERROR:
@@ -646,12 +658,12 @@ public:
 	void printMemory()
 	{
 		printf("=================== HArray =========================\n");
-		printf("Header size: %llu\n", getHeaderSize());
-		printf("Content size: %llu\n", getContentSize());
-		printf("Var size: %llu\n", getVarSize());
-		printf("Branch size: %llu\n", getBranchSize());
-		printf("Block size: %llu\n", getBlockSize());
-		printf("Total size: %llu\n", getTotalMemory());
+		printf("Header size: %llu\n", (long long unsigned int)getHeaderSize());
+		printf("Content size: %llu\n", (long long unsigned int)getContentSize());
+		printf("Var size: %llu\n", (long long unsigned int)getVarSize());
+		printf("Branch size: %llu\n", (long long unsigned int)getBranchSize());
+		printf("Block size: %llu\n", (long long unsigned int)getBlockSize());
+		printf("Total size: %llu\n", (long long unsigned int)getTotalMemory());
 	}
 
 	void printStat()
@@ -787,13 +799,13 @@ public:
 	bool getValueByKey(const char* key, uint32 keyLen, uint32& value);
 
 	//HAS =============================================================================================================
-	
+
 	bool hasPartKey(uint32* key, uint32 keyLen);
 
 	bool hasPartKey(const char* key, uint32 keyLen);
 
 	//DELL =============================================================================================================
-	
+
 	bool delValueByKey(uint32* key, uint32 keyLen);
 
 	bool delValueByKey(const char* key, uint32 keyLen);
@@ -901,7 +913,7 @@ public:
 	bool testBlockConsistency();
 	bool testBranchConsistency();
 	bool testVarConsistency();
-	
+
 	bool testFillContentPages();
 	bool testFillBlockPages();
 	bool testFillBranchPages();
@@ -910,7 +922,7 @@ public:
 	uint32 getFullContentLen(uint32 contentOffset);
 	bool shrinkBlock(uint32 startBlockOffset,
 					 uint32 shrinkLastBlockOffset);
-	
+
 	//=============================================================================================================
 
 	void destroy()

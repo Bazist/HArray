@@ -55,5 +55,7 @@ ___
 
 ## Of course the real life a little bit complex than illustrated simple cases above. And real implementations could be much more effective than mentioned here, but it was only for understand main idea of Trie.
 
+![alt tag](https://raw.githubusercontent.com/Bazist/HArray/master/Images/How_HArray_works_animation.gif)
+
 ___
 ## ENJOY

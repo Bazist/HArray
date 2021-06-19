@@ -548,8 +548,7 @@ void HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 
 			return;
 		}
-		else if(contentCellType == VALUE_TYPE_1 ||
-			    contentCellType == VALUE_TYPE_2)
+		else if(VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
 		{
 			if(pairs)
 			{

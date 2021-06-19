@@ -30,8 +30,7 @@ uint32 HArray::getFullContentLen(uint32 contentOffset)
 
 	while (true)
 	{
-		if (*pEndContentCellType == VALUE_TYPE_1 ||
-			*pEndContentCellType == VALUE_TYPE_2 ||
+		if ((VALUE_TYPE_1 <= *pEndContentCellType && *pEndContentCellType <= VALUE_TYPE_5) ||
 			(MIN_BRANCH_TYPE1 <= *pEndContentCellType && *pEndContentCellType <= MAX_BRANCH_TYPE1) ||
 			(MIN_BLOCK_TYPE <= *pEndContentCellType && *pEndContentCellType <= MAX_BLOCK_TYPE))
 		{
@@ -42,8 +41,7 @@ uint32 HArray::getFullContentLen(uint32 contentOffset)
 			VarCell& varCell = pVarPages[*pEndContentCellValue >> 16]->pVar[*pEndContentCellValue & 0xFFFF];
 
 			if (varCell.ContCellType == CONTINUE_VAR_TYPE ||
-				varCell.ContCellType == VALUE_TYPE_1 ||
-				varCell.ContCellType == VALUE_TYPE_2 ||
+				(VALUE_TYPE_1 <= varCell.ContCellType && varCell.ContCellType <= VALUE_TYPE_5) ||
 				(MIN_BRANCH_TYPE1 <= varCell.ContCellType && varCell.ContCellType <= MAX_BRANCH_TYPE1) ||
 				(MIN_BLOCK_TYPE <= varCell.ContCellType && varCell.ContCellType <= MAX_BLOCK_TYPE))
 			{

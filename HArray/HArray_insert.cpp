@@ -61,7 +61,7 @@ bool HArray::insert(const char* key,
 bool HArray::insert(uint32* key,
 					uint32 keyLen,
 					uint32 value,
-					uchar8 valueType) //Type of value parameter: VALUE_TYPE_1 (by default) or VALUE_TYPE_2
+					uchar8 valueType) //Type of value parameter: VALUE_TYPE_1 (by default), VALUE_TYPE_2 ... VALUE_TYPE_5
 {
 	try
 	{
@@ -588,8 +588,7 @@ bool HArray::insert(uint32* key,
 				return false;
 			}
 		}
-		else if (contentCellType == VALUE_TYPE_1 ||
-				 contentCellType == VALUE_TYPE_2) //update existing value
+		else if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5) //update existing value
 		{
 			if (keyOffset < keyLen)
 			{

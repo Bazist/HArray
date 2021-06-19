@@ -155,8 +155,7 @@ NEXT_KEY_PART:
 		}
 		else if(keyOffset == keyLen)
 		{
-			if(contentCellType == VALUE_TYPE_1 ||
-			   contentCellType == VALUE_TYPE_2)
+			if(VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
 			{
                 return pContentCellValueOrOffset;
 			}
@@ -187,8 +186,7 @@ NEXT_KEY_PART:
 
 			return false;
 		}
-		else if(contentCellType == VALUE_TYPE_1 ||
-				contentCellType == VALUE_TYPE_2)
+		else if(VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
 		{
 			if(keyOffset == keyLen)
 			{

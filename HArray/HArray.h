@@ -222,14 +222,14 @@ public:
   		{
 			if (fwrite(this, sizeof(HArray), 1, pFile) != 1)
 			{
-				goto ERROR;
+				goto ERROR_LABEL;
 			}
 
     		if(pHeader)
 			{
 				if (fwrite(pHeader, sizeof(uint32), HeaderSize, pFile) != HeaderSize)
 				{
-					goto ERROR;
+					goto ERROR_LABEL;
 				}
 			}
 
@@ -239,7 +239,7 @@ public:
 				{
 					if (fwrite(pContentPages[i], sizeof(ContentPage), 1, pFile) != 1)
 					{
-						goto ERROR;
+						goto ERROR_LABEL;
 					}
 				}
 			}
@@ -250,7 +250,7 @@ public:
 				{
 					if (fwrite(pVarPages[i], sizeof(VarPage), 1, pFile) != 1)
 					{
-						goto ERROR;
+						goto ERROR_LABEL;
 					}
 				}
 			}
@@ -261,7 +261,7 @@ public:
 				{
 					if (fwrite(pBranchPages[i], sizeof(BranchPage), 1, pFile) != 1)
 					{
-						goto ERROR;
+						goto ERROR_LABEL;
 					}
 				}
 			}
@@ -272,7 +272,7 @@ public:
 				{
 					if (fwrite(pBlockPages[i], sizeof(BlockPage), 1, pFile) != 1)
 					{
-						goto ERROR;
+						goto ERROR_LABEL;
 					}
 				}
 			}
@@ -294,7 +294,7 @@ public:
 			printf("File '%s' is not opened.", path);
 		}
 
-	ERROR:
+	ERROR_LABEL:
 
 		return false;
 	}
@@ -315,7 +315,7 @@ public:
   		{
 			if (fread(this, sizeof(HArray), 1, pFile) != 1)
 			{
-				goto ERROR;
+				goto ERROR_LABEL;
 			}
 
     		if(pHeader)
@@ -324,7 +324,7 @@ public:
 
 				if(fread (pHeader, sizeof(uint32), HeaderSize, pFile) != HeaderSize)
 				{
-					goto ERROR;
+					goto ERROR_LABEL;
 				}
 			}
 
@@ -339,7 +339,7 @@ public:
 
 					if (fread(pContentPages[i], sizeof(ContentPage), 1, pFile) != 1)
 					{
-						goto ERROR;
+						goto ERROR_LABEL;
 					}
 				}
 			}
@@ -355,7 +355,7 @@ public:
 
 					if (fread(pVarPages[i], sizeof(VarPage), 1, pFile) != 1)
 					{
-						goto ERROR;
+						goto ERROR_LABEL;
 					}
 				}
 			}
@@ -371,7 +371,7 @@ public:
 
 					if (fread(pBranchPages[i], sizeof(BranchPage), 1, pFile) != 1)
 					{
-						goto ERROR;
+						goto ERROR_LABEL;
 					}
 				}
 			}
@@ -387,7 +387,7 @@ public:
 
 					if (fread(pBlockPages[i], sizeof(BlockPage), 1, pFile) != 1)
 					{
-						goto ERROR;
+						goto ERROR_LABEL;
 					}
 				}
 			}
@@ -401,7 +401,7 @@ public:
 			printf("File '%s' is not opened.", path);
 		}
 
-	ERROR:
+	ERROR_LABEL:
 		destroy();
 
 		return false;

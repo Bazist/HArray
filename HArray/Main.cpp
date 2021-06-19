@@ -429,7 +429,7 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		ha.insert((uint32*)keys[i].Data, sizeof(BinKey), keys[i].Data[0]);
+		ha.insert((uint32*)keys[i].Data, BIN_KEY_LEN, keys[i].Data[0]);
 	}
 
 	finish = msclock();
@@ -450,7 +450,7 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 	{
 		uint32 value;
 
-		ha.getValueByKey((uint32*)keys[i].Data, sizeof(BinKey), value);
+		ha.getValueByKey((uint32*)keys[i].Data, BIN_KEY_LEN, value);
 
 		if (value != keys[i].Data[0])
 		{
@@ -480,7 +480,7 @@ void testHArrayBin(BinKey* keys, uint32 countKeys, bool shuffle)
 
 	for (uint32 i = 0; i < countKeys; i++)
 	{
-		ha.delValueByKey((uint32*)keys[i].Data, sizeof(BinKey));
+		ha.delValueByKey((uint32*)keys[i].Data, BIN_KEY_LEN);
 
 		#ifdef CONSISTENCY_TESTS
 
@@ -832,7 +832,7 @@ void HArray_VS_StdMap_BinKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 s
 
 //==== HArray - String Keys ===========================================================================================
 
-const char STR_KEY_LEN = 64;
+const char STR_KEY_LEN = 64 / 4;
 
 static const char alphanum[] =
 "0123456789"
@@ -1008,7 +1008,7 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 	{
 		const char* str = keys[i / 15].c_str();
 
-		ha.insert((uint32*)str, (i % 15) * 4 + 4, str[0]);
+		ha.insert((uint32*)str, (i % 15) + 1, str[0]);
 	}
 
 	finish = msclock();
@@ -1026,7 +1026,7 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 
 		uint32 value;
 
-		ha.getValueByKey((uint32*)str, (i % 15) * 4 + 4, value);
+		ha.getValueByKey((uint32*)str, (i % 15) + 1, value);
 
 		if (value != (uint32)str[0])
 		{
@@ -1051,7 +1051,7 @@ void testHArrayStrVar(std::string* keys, uint32 countKeys)
 	{
 		const char* str = keys[i / 15].c_str();
 
-		ha.delValueByKey((uint32*)str, (i % 15) * 4 + 4);
+		ha.delValueByKey((uint32*)str, (i % 15) + 1);
 
 		/*
 		if (i >= 2849)

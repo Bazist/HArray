@@ -728,7 +728,7 @@ bool HArray::delValueByKey(const char* key, uint32 keyLen)
 
 	if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
 	{
-		return delValueByKey((uint32*)key, keyLen);
+		return delValueByKey((uint32*)key, keyLen / 4);
 	}
 	else
 	{
@@ -754,7 +754,7 @@ bool HArray::delValueByKey(const char* key, uint32 keyLen)
 			lastSegmentNewKey[j] = lastSegmentKey[j];
 		}
 
-		return delValueByKey((uint32*)newKey, (keyLen | 0x3) + 1);
+		return delValueByKey((uint32*)newKey, keyLen / 4 + 1);
 	}
 }
 
@@ -765,8 +765,6 @@ bool HArray::delValueByKey(uint32* key,
 
 	SegmentPath path[MAX_KEY_SEGMENTS];
 	int32 pathLen = 0;
-
-	keyLen >>= 2; //in 4 bytes
 
 	uint32 headerOffset;
 
@@ -885,7 +883,8 @@ bool HArray::delValueByKey(uint32* key,
 		}
 		else if (keyOffset == keyLen)
 		{
-			if (contentCellType == VALUE_TYPE)
+			if (contentCellType == VALUE_TYPE_1 ||
+				contentCellType == VALUE_TYPE_2)
 			{
 				//save path
 				SegmentPath& sp = path[pathLen++];
@@ -933,7 +932,8 @@ bool HArray::delValueByKey(uint32* key,
 
 			return 0;
 		}
-		else if (contentCellType == VALUE_TYPE)
+		else if (contentCellType == VALUE_TYPE_1 ||
+				 contentCellType == VALUE_TYPE_2)
 		{
 			if (keyOffset == keyLen)
 			{

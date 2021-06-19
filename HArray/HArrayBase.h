@@ -52,8 +52,9 @@ const uchar8 MAX_BLOCK_TYPE = MIN_BLOCK_TYPE + (32 / BLOCK_ENGINE_STEP) - 1;
 const uchar8 VAR_TYPE = MAX_BLOCK_TYPE + 1; //for var value
 const uchar8 CONTINUE_VAR_TYPE = VAR_TYPE + 1; //for continue var value
 const uchar8 CURRENT_VALUE_TYPE = CONTINUE_VAR_TYPE + 1;
-const uchar8 VALUE_TYPE = CURRENT_VALUE_TYPE + 1;
-const uchar8 ONLY_CONTENT_TYPE = VALUE_TYPE + 1;
+const uchar8 VALUE_TYPE_1 = CURRENT_VALUE_TYPE + 1;
+const uchar8 VALUE_TYPE_2 = VALUE_TYPE_1 + 1;
+const uchar8 ONLY_CONTENT_TYPE = VALUE_TYPE_2 + 1;
 
 const uchar8 MOVES_LEVEL1_STAT = 0;
 const uchar8 MOVES_LEVEL2_STAT = 1;

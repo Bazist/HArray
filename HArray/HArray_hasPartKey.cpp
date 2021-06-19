@@ -25,7 +25,7 @@ bool HArray::hasPartKey(const char* key, uint32 keyLen)
 
 	if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
 	{
-		return hasPartKey((uint32*)key, keyLen);
+		return hasPartKey((uint32*)key, keyLen / 4);
 	}
 	else
 	{
@@ -51,13 +51,12 @@ bool HArray::hasPartKey(const char* key, uint32 keyLen)
 			lastSegmentNewKey[j] = lastSegmentKey[j];
 		}
 
-		return hasPartKey((uint32*)newKey, (keyLen | 0x3) + 1);
+		return hasPartKey((uint32*)newKey, keyLen / 4 + 1);
 	}
 }
 
 bool HArray::hasPartKey(uint32* key, uint32 keyLen)
 {
-	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
 	uint32 headerOffset;
@@ -158,7 +157,8 @@ NEXT_KEY_PART:
 
 			return false;
 		}
-		else if(contentCellType == VALUE_TYPE)
+		else if(contentCellType == VALUE_TYPE_1 ||
+				contentCellType == VALUE_TYPE_2)
 		{
 			return true;
 		}

@@ -188,7 +188,8 @@ void HArray::scanKeysAndValues(uint32* key,
 
 			return;
 		}
-		else if(contentCellType == VALUE_TYPE)
+		else if(contentCellType == VALUE_TYPE_1 ||
+				contentCellType == VALUE_TYPE_2)
 		{
 			(*visitor)(key,
 					   keyOffset,
@@ -223,7 +224,6 @@ uint32 HArray::scanKeysAndValues(uint32* key,
 								HARRAY_ITEM_VISIT_FUNC visitor,
 								void* pData)
 {
-	keyLen >>= 2; //in 4 bytes
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
 	uint32 headerOffset;
@@ -335,7 +335,8 @@ NEXT_KEY_PART:
 		}
 		else if(keyOffset == keyLen)
 		{
-			if(contentCellType == VALUE_TYPE)
+			if(contentCellType == VALUE_TYPE_1 ||
+			   contentCellType == VALUE_TYPE_2)
 			{
 				(*visitor)(key,
 						   keyOffset,
@@ -375,7 +376,8 @@ NEXT_KEY_PART:
 
 			return 0;
 		}
-		else if(contentCellType == VALUE_TYPE)
+		else if(contentCellType == VALUE_TYPE_1 ||
+				contentCellType == VALUE_TYPE_2)
 		{
 			(*visitor)(key,
 					   keyOffset,

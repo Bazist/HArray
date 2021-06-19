@@ -27,7 +27,7 @@ bool HArray::getValueByKey(const char* key,
 
 	if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
 	{
-		return getValueByKey((uint32*)key, keyLen, value);
+		return getValueByKey((uint32*)key, keyLen / 4, value);
 	}
 	else
 	{
@@ -53,17 +53,25 @@ bool HArray::getValueByKey(const char* key,
 			lastSegmentNewKey[j] = lastSegmentKey[j];
 		}
 
-		return getValueByKey((uint32*)newKey, (keyLen | 0x3) + 1, value);
+		return getValueByKey((uint32*)newKey, keyLen / 4 + 1, value);
 	}
 }
 
 bool HArray::getValueByKey(uint32* key,
+	uint32 keyLen,
+	uint32& value)
+{
+	uchar8 valueType;
+
+	return getValueByKey(key, keyLen, value, valueType);
+}
+
+bool HArray::getValueByKey(uint32* key,
 	 					   uint32 keyLen,
-						   uint32& value)
+						   uint32& value,
+						   uchar8& valueType)
 {
 	value = 0;
-
-	keyLen >>= 2; //in 4 bytes
 
 	uint32 headerOffset;
 
@@ -147,7 +155,8 @@ NEXT_KEY_PART:
 		}
 		else if(keyOffset == keyLen)
 		{
-			if(contentCellType == VALUE_TYPE)
+			if(contentCellType == VALUE_TYPE_1 ||
+			   contentCellType == VALUE_TYPE_2)
 			{
                 return pContentCellValueOrOffset;
 			}
@@ -178,7 +187,8 @@ NEXT_KEY_PART:
 
 			return false;
 		}
-		else if(contentCellType == VALUE_TYPE)
+		else if(contentCellType == VALUE_TYPE_1 ||
+				contentCellType == VALUE_TYPE_2)
 		{
 			if(keyOffset == keyLen)
 			{

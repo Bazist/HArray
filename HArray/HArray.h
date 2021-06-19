@@ -788,11 +788,13 @@ public:
 	}
 	//INSERT =============================================================================================================
 
-	bool insert(uint32* key, uint32 keyLen, uint32 value);
+	bool insert(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType = VALUE_TYPE_1);
 
 	bool insert(const char* key, uint32 keyLen, uint32 value);
 
 	//GET =============================================================================================================
+
+	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value, uchar8& valueType);
 
 	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value);
 

@@ -13,6 +13,7 @@
 
 - **High optimized** Trie structure implemented in more than **8K lines**
 - Tested on **1 Billion keys** succesfully
+- **Keys with variable length** inside one instance of the container
 - **Without any Stop World** events such as Rebuild/Rehashing on Insert key.
 - **Without any Hash Functions**, the container has adpative algorithm for different nature of keys
 - **Scan by Prefix/Scan by Range** functionality as bonus
@@ -33,8 +34,6 @@
 
 ## Trie ? I heard about Trees and Hastables but don't know anything about Trie
 # [Explain me as for Beginners](https://github.com/Bazist/HArray/blob/master/Trie_for_beginners.md)
-
-![alt tag](https://raw.githubusercontent.com/Bazist/HArray/master/Images/How_HArray_works_animation.gif)
 
 ### Examples
 
@@ -59,7 +58,15 @@ ha.insert(key, keyLen, value);
 Get value by key. Will return 0 if key is not found
 
 ```c++
-uint32* pValue = ha.getValueByKey(key, keyLen);
+uint32 value;
+if(ha.getValueByKey(key, keyLen, value))
+{
+   printf("%d", value)
+}
+else
+{
+   //key is not found
+}
 ```
 
 Get all keys by range from min key to max key. 
@@ -146,6 +153,15 @@ Delete Key and Value from container
 
 ```c++
 ha.delValueByKey(key, keyLen);
+```
+
+### How to Run
+
+```c++
+git clone github.com/Bazist/HArray.git
+cd HArray/HArray
+make
+./HArray
 ```
 
 ### License

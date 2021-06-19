@@ -589,18 +589,18 @@ void HArrayVarRAM_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, ui
 
 int main()
 {
-	HArrayInt_VS_StdMap_IntKey(1000000,   //start
-							   2000000,   //step
-							   10000000); //stop
+	//HArrayInt_VS_StdMap_IntKey(1000000,   //start
+	//						   2000000,   //step
+	//						   10000000); //stop
 
-	HArrayVarRAM_VS_StdMap_BinKey(1000000,   //start
+	HArrayVarRAM_VS_StdMap_BinKey(10000000,   //start
 								  2000000,   //step
 								  10000000,  //stop
 								  true); 	 //shuffle
 
-	HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
-							  	  1000000,   //step
-							  	  3000000);  //stop
+	//HArrayVarRAM_VS_StdMap_StrKey(1000000,   //start
+	//						  	  1000000,   //step
+	//						  	  3000000);  //stop
 
 	printf("COEF: %.2f\n", (double)totalMapTime / (double)totalHArrayTime);
 

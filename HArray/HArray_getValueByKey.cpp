@@ -71,7 +71,7 @@ bool HArray::getValueByKey(uint32* key,
 	uint32& value,
 	uchar8& valueType)
 {
-	value = 0;
+	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
 	uint32 headerOffset;
 
@@ -111,8 +111,28 @@ bool HArray::getValueByKey(uint32* key,
 				}
 			}
 
-			valueType = pContentPage->pType[contentIndex];
-			value = pContentPage->pContent[contentIndex]; //return value
+			if (contentIndex < maxSafeShort) //content in one page
+			{
+				for (; keyOffset < keyLen; contentIndex++, keyOffset++)
+				{
+					if (pContentPage->pContent[contentIndex] != key[keyOffset])
+						return false;
+				}
+
+				valueType = pContentPage->pType[contentIndex];
+				value = pContentPage->pContent[contentIndex]; //return value
+			}
+			else //content in two pages
+			{
+				for (; keyOffset < keyLen; contentOffset++, keyOffset++)
+				{
+					if (pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF] != key[keyOffset])
+						return false;
+				}
+
+				valueType = pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF];
+				value = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF]; //return value
+			}
 
 			return true;
 		}

@@ -1375,7 +1375,7 @@ void HArray_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 s
 
 	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
-		printf("Insert/Search/Delete %u SIMILAR keys (%u bytes each) ...\n", countKeys, STR_KEY_LEN);
+		printf("Insert/Search/Delete %u SIMILAR keys (%u bytes each) ...\n", countKeys, STR_KEY_LEN * 4);
 		testHArrayStr(strKeys, countKeys);
 		testDenseHashMapStr(strKeys, countKeys);
 		testStdMapStr(strKeys, countKeys);
@@ -1391,7 +1391,7 @@ void HArray_VS_StdMap_StrKey(uint32 startOnAmount, uint32 stepOfAmount, uint32 s
 
 	for (uint32 countKeys = startOnAmount; countKeys <= stopOnAmount; countKeys += stepOfAmount)
 	{
-		printf("Insert/Search/Delete %u RANDOM keys (%u bytes each) ...\n", countKeys, STR_KEY_LEN);
+		printf("Insert/Search/Delete %u RANDOM keys (%u bytes each) ...\n", countKeys, STR_KEY_LEN * 4);
 		testHArrayStr(strKeys, countKeys);
 		testDenseHashMapStr(strKeys, countKeys);
 		testStdMapStr(strKeys, countKeys);

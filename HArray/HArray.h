@@ -407,15 +407,6 @@ public:
 		return false;
 	}
 
-	uint32 getHash()
-	{
-		return lastHeaderBranchOffset +
-			   lastContentOffset +
-			   lastVarOffset +
-			   lastBranchOffset +
-			   lastBlockOffset;
-	}
-
 	ulong64 getHeaderSize()
 	{
 		return (ulong64)HeaderSize * sizeof(uint32);
@@ -790,7 +781,12 @@ public:
 
 	bool insert(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType = VALUE_TYPE_1);
 
-	bool insert(const char* key, uint32 keyLen, uint32 value);
+	bool insert(uint32* key1,
+		uint32 keyLen1,
+		uint32* key2,
+		uint32 keyLen2,
+		uint32 value,
+		uchar8 valueType);
 
 	//GET =============================================================================================================
 
@@ -798,19 +794,13 @@ public:
 
 	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value);
 
-	bool getValueByKey(const char* key, uint32 keyLen, uint32& value);
-
 	//HAS =============================================================================================================
 
 	bool hasPartKey(uint32* key, uint32 keyLen);
 
-	bool hasPartKey(const char* key, uint32 keyLen);
-
 	//DELL =============================================================================================================
 
 	bool delValueByKey(uint32* key, uint32 keyLen);
-
-	bool delValueByKey(const char* key, uint32 keyLen);
 
 	//REBUILD =========================================================================================================
 
@@ -851,6 +841,7 @@ public:
 								uint32 maxKeyLen);
 
 	//TEMPLATE ====================================================================================================
+	//SCAN BY VISITOR
 	void scanKeysAndValuesFromBlock(uint32* key,
 									uint32 contentOffset,
 									uint32 keyOffset,
@@ -864,13 +855,32 @@ public:
 						   HARRAY_ITEM_VISIT_FUNC visitor,
 						   void* pData);
 
-	uint32 scanKeysAndValues(uint32* key,
+	void scanKeysAndValues(uint32* key,
 						 uint32 keyLen,
 						 HARRAY_ITEM_VISIT_FUNC visitor,
 						 void* pData);
 
-	uint32 scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
+	void scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 							 void* pData);
+
+	//RETURN ARRAY
+	void HArray::scanKeysAndValuesFromBlock(uint32* key,
+		uint32 contentOffset,
+		uint32 keyOffset,
+		uint32 blockOffset,
+		HArrayPair* pairs,
+		uint32& countPairs);
+
+	void HArray::scanKeysAndValues(uint32* key,
+		uint32 keyOffset,
+		uint32 contentOffset,
+		HArrayPair* pairs,
+		uint32& countPairs);
+
+	void scanKeysAndValues(uint32* key,
+		uint32 keyLen,
+		HArrayPair* pairs,
+		uint32& countPairs);
 
 	//DISMANTLING ====================================================================================================
 

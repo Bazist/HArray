@@ -130,9 +130,22 @@ struct HACursor
 struct HArrayPair
 {
 public:
-	uint32 Key[16];
-	uint32 Value;
+	uint32 Key[MAX_CHAR - ONLY_CONTENT_TYPE];
 	uint32 KeyLen;
+	uint32 Value;
+	uchar8 ValueType;
+
+	inline void setPair(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType)
+	{
+		for (uint32 i = 0; i < keyLen; i++)
+		{
+			Key[i] = key[i];
+		}
+
+		KeyLen = keyLen;
+		Value = value;
+		ValueType = valueType;
+	}
 
 	void print()
 	{

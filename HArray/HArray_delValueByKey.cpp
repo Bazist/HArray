@@ -722,42 +722,6 @@ bool HArray::dismantling(SegmentPath* path, uint32 pathLen)
 	return true;
 }
 
-bool HArray::delValueByKey(const char* key, uint32 keyLen)
-{
-	uint32 lastSegmentKeyLen = keyLen & 0x3;
-
-	if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
-	{
-		return delValueByKey((uint32*)key, keyLen / 4);
-	}
-	else
-	{
-		uint32* keyInSegments = (uint32*)key;
-		uint32 keyLenInSegments = keyLen >> 2;
-
-		uint32 newKey[MAX_KEY_SEGMENTS];
-
-		uint32 i = 0;
-
-		for (; i < keyLenInSegments; i++)
-		{
-			newKey[i] = keyInSegments[i];
-		}
-
-		newKey[i] = 0;
-
-		char* lastSegmentNewKey = (char*)&newKey[i];
-		char* lastSegmentKey = (char*)&keyInSegments[i];
-
-		for (uint32 j = 0; j < lastSegmentKeyLen; j++)
-		{
-			lastSegmentNewKey[j] = lastSegmentKey[j];
-		}
-
-		return delValueByKey((uint32*)newKey, keyLen / 4 + 1);
-	}
-}
-
 bool HArray::delValueByKey(uint32* key,
 						   uint32 keyLen)
 {

@@ -55,14 +55,6 @@ bool HArray::getValueByKey(uint32* key,
 				return false;
 			}
 
-			for (; keyOffset < keyLen; contentIndex++, keyOffset++)
-			{
-				if (pContentPage->pContent[contentIndex] != key[keyOffset])
-				{
-					return false;
-				}
-			}
-
 			if (contentIndex < maxSafeShort) //content in one page
 			{
 				for (; keyOffset < keyLen; contentIndex++, keyOffset++)

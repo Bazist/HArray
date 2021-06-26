@@ -121,7 +121,7 @@ NEXT_KEY_PART:
 
 			return false;
 		}
-		else if(VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+		else if(contentCellType == VALUE_TYPE)
 		{
 			return true;
 		}

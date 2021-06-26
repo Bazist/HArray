@@ -847,7 +847,7 @@ bool HArray::delValueByKey(uint32* key,
 		}
 		else if (keyOffset == keyLen)
 		{
-			if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+			if (contentCellType == VALUE_TYPE)
 			{
 				//save path
 				SegmentPath& sp = path[pathLen++];
@@ -895,7 +895,7 @@ bool HArray::delValueByKey(uint32* key,
 
 			return 0;
 		}
-		else if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+		else if (contentCellType == VALUE_TYPE)
 		{
 			if (keyOffset == keyLen)
 			{

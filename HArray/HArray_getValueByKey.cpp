@@ -23,16 +23,6 @@ bool HArray::getValueByKey(uint32* key,
 	uint32 keyLen,
 	uint32& value)
 {
-	uchar8 valueType;
-
-	return getValueByKey(key, keyLen, value, valueType);
-}
-
-bool HArray::getValueByKey(uint32* key,
-	uint32 keyLen,
-	uint32& value,
-	uchar8& valueType)
-{
 	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
 	uint32 headerOffset;
@@ -81,7 +71,6 @@ bool HArray::getValueByKey(uint32* key,
 						return false;
 				}
 
-				valueType = pContentPage->pType[contentIndex];
 				value = pContentPage->pContent[contentIndex]; //return value
 			}
 			else //content in two pages
@@ -92,7 +81,6 @@ bool HArray::getValueByKey(uint32* key,
 						return false;
 				}
 
-				valueType = pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF];
 				value = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF]; //return value
 			}
 
@@ -126,7 +114,6 @@ bool HArray::getValueByKey(uint32* key,
 			{
 				if (varCell.ValueContCellType)
 				{
-					valueType = varCell.ValueContCellType;
 					value = varCell.ValueContCellValue;
 
 					return true;
@@ -139,9 +126,8 @@ bool HArray::getValueByKey(uint32* key,
 		}
 		else if (keyOffset == keyLen)
 		{
-			if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+			if (contentCellType == VALUE_TYPE)
 			{
-				valueType = contentCellType;
 				value = contentCellValueOrOffset;
 			}
 			else
@@ -171,11 +157,10 @@ bool HArray::getValueByKey(uint32* key,
 
 			return false;
 		}
-		else if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+		else if (contentCellType == VALUE_TYPE)
 		{
 			if (keyOffset == keyLen)
 			{
-				valueType = contentCellType;
 				value = contentCellValueOrOffset;
 			}
 			else

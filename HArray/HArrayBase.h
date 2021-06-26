@@ -52,12 +52,8 @@ const uchar8 MAX_BLOCK_TYPE = MIN_BLOCK_TYPE + (32 / BLOCK_ENGINE_STEP) - 1;
 const uchar8 VAR_TYPE = MAX_BLOCK_TYPE + 1; //for var value
 const uchar8 CONTINUE_VAR_TYPE = VAR_TYPE + 1; //for continue var value
 const uchar8 CURRENT_VALUE_TYPE = CONTINUE_VAR_TYPE + 1;
-const uchar8 VALUE_TYPE_1 = CURRENT_VALUE_TYPE + 1;
-const uchar8 VALUE_TYPE_2 = VALUE_TYPE_1 + 1;
-const uchar8 VALUE_TYPE_3 = VALUE_TYPE_2 + 1;
-const uchar8 VALUE_TYPE_4 = VALUE_TYPE_3 + 1;
-const uchar8 VALUE_TYPE_5 = VALUE_TYPE_4 + 1;
-const uchar8 ONLY_CONTENT_TYPE = VALUE_TYPE_5 + 1;
+const uchar8 VALUE_TYPE = CURRENT_VALUE_TYPE + 1;
+const uchar8 ONLY_CONTENT_TYPE = VALUE_TYPE + 1;
 
 const uchar8 MOVES_LEVEL1_STAT = 0;
 const uchar8 MOVES_LEVEL2_STAT = 1;
@@ -89,7 +85,7 @@ const uchar8 MAX_KEY_SEGMENTS = MAX_CHAR - ONLY_CONTENT_TYPE;
 const uchar8 MIN_HEADER_BASE_BITS = 14;		  //16384 slots
 const uchar8 MAX_HEADER_FILL_FACTOR_BITS = 4; //fill factor 1/16 of header size
 
-typedef bool HARRAY_ITEM_VISIT_FUNC(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
+typedef bool HARRAY_ITEM_VISIT_FUNC(uint32* key, uint32 keyLen, uint32 value, void* pData);
 
 struct HArrayFixBaseInfo
 {

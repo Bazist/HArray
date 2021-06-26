@@ -20,33 +20,9 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-bool HArray::insert(uint32* key1,
-	uint32 keyLen1,
-	uint32* key2,
-	uint32 keyLen2,
-	uint32 value,
-	uchar8 valueType) //Type of value parameter: VALUE_TYPE_1 (by default), VALUE_TYPE_2 ... VALUE_TYPE_5
-{
-	uint32 key[MAX_CHAR - ONLY_CONTENT_TYPE]; //max possible key len
-	uint32 keyLen = 0;
-
-	for (uint32 i = 0; i < keyLen1; i++, keyLen++)
-	{
-		key[keyLen] = key1[i];
-	}
-
-	for (uint32 i = 0; i < keyLen2; i++, keyLen++)
-	{
-		key[keyLen] = key2[i];
-	}
-
-	return insert(key, keyLen, value, valueType);
-}
-
 bool HArray::insert(uint32* key,
 	uint32 keyLen,
-	uint32 value,
-	uchar8 valueType) //Type of value parameter: VALUE_TYPE_1 (by default), VALUE_TYPE_2 ... VALUE_TYPE_5
+	uint32 value) //Type of value parameter: VALUE_TYPE_1 (by default), VALUE_TYPE_2 ... VALUE_TYPE_5
 {
 	try
 	{
@@ -116,7 +92,7 @@ bool HArray::insert(uint32* key,
 					pContentPage->pContent[contentIndex] = key[keyOffset];
 				}
 
-				pContentPage->pType[contentIndex] = valueType;
+				pContentPage->pType[contentIndex] = VALUE_TYPE;
 				pContentPage->pContent[contentIndex] = value;
 
 				return true;
@@ -157,7 +133,7 @@ bool HArray::insert(uint32* key,
 					pContentPage->pContent[contentIndex] = key[keyOffset];
 				}
 
-				pContentPage->pType[contentIndex] = valueType;
+				pContentPage->pType[contentIndex] = VALUE_TYPE;
 				pContentPage->pContent[contentIndex] = value;
 
 				lastContentOffset++;
@@ -225,7 +201,7 @@ bool HArray::insert(uint32* key,
 						pVarCell->ContCellType = CURRENT_VALUE_TYPE;
 						pVarCell->ContCellValue = contentCellValue;
 
-						pVarCell->ValueContCellType = valueType;
+						pVarCell->ValueContCellType = VALUE_TYPE;
 						pVarCell->ValueContCellValue = value;
 
 						contentCellType = VAR_TYPE;
@@ -334,7 +310,7 @@ bool HArray::insert(uint32* key,
 						pVarCell = &pVarPage->pVar[lastVarOffset & 0xFFFF];
 					}
 
-					pVarCell->ValueContCellType = valueType;
+					pVarCell->ValueContCellType = VALUE_TYPE;
 					pVarCell->ValueContCellValue = pContentPage->pContent[contentIndex];
 
 					pVarCell->ContCellType = CONTINUE_VAR_TYPE;
@@ -347,7 +323,7 @@ bool HArray::insert(uint32* key,
 				}
 				else //key is exists, update
 				{
-					pContentPage->pType[contentIndex] = valueType;
+					pContentPage->pType[contentIndex] = VALUE_TYPE;
 					pContentPage->pContent[contentIndex] = value;
 
 					return false;
@@ -395,7 +371,7 @@ bool HArray::insert(uint32* key,
 						pVarCell->ContCellType = CURRENT_VALUE_TYPE;
 						pVarCell->ContCellValue = pContentPage->pContent[contentIndex];
 
-						pVarCell->ValueContCellType = valueType;
+						pVarCell->ValueContCellType = VALUE_TYPE;
 						pVarCell->ValueContCellValue = value;
 
 						pContentPage->pType[contentIndex] = VAR_TYPE;
@@ -513,7 +489,7 @@ bool HArray::insert(uint32* key,
 						pVarCell = &pVarPage->pVar[lastVarOffset & 0xFFFF];
 					}
 
-					pVarCell->ValueContCellType = valueType;
+					pVarCell->ValueContCellType = VALUE_TYPE;
 					pVarCell->ValueContCellValue = pContentPage->pContent[contentIndex];
 
 					pVarCell->ContCellType = CONTINUE_VAR_TYPE;
@@ -567,13 +543,13 @@ bool HArray::insert(uint32* key,
 			else
 			{
 				//update existing value
-				varCell.ValueContCellType = valueType;
+				varCell.ValueContCellType = VALUE_TYPE;
 				varCell.ValueContCellValue = value;
 
 				return false;
 			}
 		}
-		else if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5) //update existing value
+		else if (contentCellType == VALUE_TYPE) //update existing value
 		{
 			if (keyOffset < keyLen)
 			{
@@ -606,7 +582,7 @@ bool HArray::insert(uint32* key,
 					pVarCell = &pVarPage->pVar[lastVarOffset & 0xFFFF];
 				}
 
-				pVarCell->ValueContCellType = valueType;
+				pVarCell->ValueContCellType = VALUE_TYPE;
 				pVarCell->ValueContCellValue = pContentPage->pContent[contentIndex];
 
 				pVarCell->ContCellType = CONTINUE_VAR_TYPE;
@@ -658,7 +634,7 @@ bool HArray::insert(uint32* key,
 			pVarCell->ContCellType = pContentPage->pType[contentIndex];
 			pVarCell->ContCellValue = pContentPage->pContent[contentIndex];
 
-			pVarCell->ValueContCellType = valueType;
+			pVarCell->ValueContCellType = VALUE_TYPE;
 			pVarCell->ValueContCellValue = value;
 
 			pContentPage->pType[contentIndex] = VAR_TYPE;
@@ -1498,7 +1474,7 @@ bool HArray::insert(uint32* key,
 				pContentPage->pContent[contentIndex] = key[keyOffset];
 			}
 
-			pContentPage->pType[contentIndex] = valueType;
+			pContentPage->pType[contentIndex] = VALUE_TYPE;
 			pContentPage->pContent[contentIndex] = value;
 
 			return true;
@@ -1543,7 +1519,7 @@ bool HArray::insert(uint32* key,
 				pContentPage->pContent[contentIndex] = key[keyOffset];
 			}
 
-			pContentPage->pType[contentIndex] = valueType;
+			pContentPage->pType[contentIndex] = VALUE_TYPE;
 			pContentPage->pContent[contentIndex] = value;
 
 			lastContentOffset++;

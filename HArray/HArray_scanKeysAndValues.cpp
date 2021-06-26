@@ -140,7 +140,6 @@ void HArray::scanKeysAndValues(uint32* key,
 			(*visitor)(key,
 					   keyOffset,
 					   pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF],
-					   pContentPages[contentOffset>>16]->pType[contentOffset&0xFFFF],
 					   pData);
 
 			return;
@@ -158,7 +157,6 @@ void HArray::scanKeysAndValues(uint32* key,
 			(*visitor)(key,
 					   keyOffset,
 					   varCell.ValueContCellValue,
-					   varCell.ValueContCellType,
 					   pData);
 
 			if(contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
@@ -189,12 +187,11 @@ void HArray::scanKeysAndValues(uint32* key,
 
 			return;
 		}
-		else if(VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+		else if(contentCellType == VALUE_TYPE)
 		{
 			(*visitor)(key,
 					   keyOffset,
 					   contentCellValueOrOffset,
-					   contentCellType,
 					   pData);
 
 			return;
@@ -271,7 +268,6 @@ NEXT_KEY_PART:
 					(*visitor)(key,
 						keyOffset,
 						pContentPage->pContent[contentIndex],
-						pContentPage->pType[contentIndex],
 						pData); //return value
 				}
 				else
@@ -297,7 +293,6 @@ NEXT_KEY_PART:
 				(*visitor)(key,
 						   keyOffset,
 						   pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF],
-						   pContentPages[contentOffset>>16]->pType[contentOffset&0xFFFF],
 						   pData);
 
 				return;
@@ -335,12 +330,11 @@ NEXT_KEY_PART:
 		}
 		else if(keyOffset == keyLen)
 		{
-			if(VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+			if(contentCellType == VALUE_TYPE)
 			{
 				(*visitor)(key,
 						   keyOffset,
 					       contentCellValueOrOffset,
-						   contentCellType,
 						   pData);
 
 				return;
@@ -375,12 +369,11 @@ NEXT_KEY_PART:
 
 			return;
 		}
-		else if(VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+		else if(contentCellType == VALUE_TYPE)
 		{
 			(*visitor)(key,
 					   keyOffset,
 					   contentCellValueOrOffset,
-					   contentCellType,
 					   pData);
 
 			return;

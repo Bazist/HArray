@@ -29,7 +29,7 @@ public:
 	uint32 Count;
 };
 
-bool HArray::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
+bool HArray::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, void* pData)
 {
 	RebuildData* pRD = (RebuildData*)pData;
 

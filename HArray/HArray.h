@@ -779,18 +779,9 @@ public:
 	}
 	//INSERT =============================================================================================================
 
-	bool insert(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType = VALUE_TYPE_1);
-
-	bool insert(uint32* key1,
-		uint32 keyLen1,
-		uint32* key2,
-		uint32 keyLen2,
-		uint32 value,
-		uchar8 valueType);
+	bool insert(uint32* key, uint32 keyLen, uint32 value);
 
 	//GET =============================================================================================================
-
-	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value, uchar8& valueType);
 
 	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value);
 
@@ -804,7 +795,7 @@ public:
 
 	//REBUILD =========================================================================================================
 
-	static bool rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData);
+	static bool rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, void* pData);
 
 	uint32 rebuild(uint32 headerBase = 0, bool removeEmptyKeys = false);
 
@@ -862,27 +853,6 @@ public:
 
 	void scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 							 void* pData);
-
-	////RETURN ARRAY
-	//void HArray::scanKeysAndValuesFromBlock(uint32* key,
-	//	uint32 keyLen,
-	//	uint32 contentOffset,
-	//	uint32 keyOffset,
-	//	uint32 blockOffset,
-	//	HArrayPair* pairs,
-	//	uint32& countPairs);
-
-	//void HArray::scanKeysAndValues(uint32* key,
-	//	uint32 keyLen,
-	//	uint32 keyOffset,
-	//	uint32 contentOffset,
-	//	HArrayPair* pairs,
-	//	uint32& countPairs);
-
-	//void scanKeysAndValues(uint32* key,
-	//	uint32 keyLen,
-	//	HArrayPair* pairs,
-	//	uint32& countPairs);
 
 	//DISMANTLING ====================================================================================================
 

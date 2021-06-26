@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "HArray.h"
+#include "HArrayLongValue.h"
 
-class HArrayChar : public HArray
+class HArrayChar : public HArrayLongValue
 {
 public:
 

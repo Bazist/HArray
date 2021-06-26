@@ -22,6 +22,37 @@
 
 class HArrayLongValue : public HArray
 {
+private:
+
+	struct ScanLongValuesData
+	{
+		uint32 KeyLen;
+		uint32* Value;
+		uint32 ValueLen;
+		void* pData;
+	};
+
+	static bool scanValues(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
+	{
+		ScanLongValuesData* pScanData = (ScanLongValuesData*)pData;
+
+		pScanData->ValueLen = value; //valueLen was saved in value
+
+		if (pScanData->KeyLen + pScanData->ValueLen == keyLen) //our key is composite key: key + value
+		{
+			for (uint32 i = 0; i < pScanData->ValueLen; i++)
+			{
+				pScanData->Value[i] = key[pScanData->KeyLen++];
+			}
+
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 public:
 
 	bool insert(uint32* key,
@@ -29,62 +60,53 @@ public:
 				uint32* value,
 				uint32 valueLen)
 	{
-		//uint32 existingValue;
+		if (HArray::hasPartKey(key, keyLen)) //it is update
+		{
+			HArray::delValueByKey(key, keyLen);
+		}
 
-		//if (HArray::getValueByKey(key, keyLen, existingValue)) //list with one value
-		//{
-		//	if (existingValue == value) //it is update
-		//	{
-		//		HArray::insert(key, keyLen, value);
-		//	}
-		//	else
-		//	{
-		//		//delete existing value
-		//		HArray::delValueByKey(key, keyLen);
+		for (uint32 i = 0; i < valueLen; i++, keyLen++)
+		{
+			key[keyLen] = value[i];
+		}
 
-		//		//insert existing value as part of key
-		//		key[keyLen++] = existingValue;
-
-		//		HArray::insert(key, keyLen, 0);
-
-		//		//insert new value as part of key
-		//		key[keyLen - 1] = value;
-
-		//		HArray::insert(key, keyLen, 0);
-		//	}
-		//}
-		//else //insert new value
-		//{
-		//	HArray::insert(key, keyLen, value);
-		//}
+		return HArray::insert(key, keyLen, valueLen);
 	}
 
-	bool getIntValuesByKey(uint32* key,
+	bool getValueByKey(uint32* key,
 		uint32 keyLen,
-		uint32* values,
-		uint32& countValues)
+		uint32* value,
+		uint32& valueLen)
 	{
-		//if (HArray::getValueByKey(key, keyLen, values[0])) //list with one value
-		//{
-		//	countValues = 1;
+		ScanLongValuesData scanData;
+		scanData.KeyLen = keyLen;
+		scanData.Value = value;
+		scanData.ValueLen = 0;
 
-		//	return true;
-		//}
+		HArray::scanKeysAndValues(key, keyLen, scanValues, &scanData);
+
+		valueLen = scanData.ValueLen;
+
+		return (valueLen > 0);
 	}
 
-	bool delValueByKey(uint32* key, uint32 keyLen, uint32 value)
+	bool delValueByKey(uint32* key, uint32 keyLen)
 	{
-		////uint32 existingValue;
+		uint32 value[MAX_CHAR - ONLY_CONTENT_TYPE];
+		uint32 valueLen = 0;
 
-		////if (HArray::getValueByKey(key, keyLen, existingValue)) //list with one value
-		////{
-		////	HArray::delValueByKey(key, keyLen);
-		////}
-		////else //list with many values
-		////{
-		////	key[keyLen++] = value;
+		if (getValueByKey(key, keyLen, value, valueLen))
+		{
+			for (uint32 i = 0; i < valueLen; i++, keyLen++)
+			{
+				key[keyLen] = value[i];
+			}
 
-		////	HArray::delValueByKey(key, keyLen);
-		////}
+			return HArray::delValueByKey(key, keyLen);
+		}
+		else
+		{
+			return false;
+		}
 	}
 };

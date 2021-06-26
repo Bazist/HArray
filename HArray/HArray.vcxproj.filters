@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Wrappers">
+      <UniqueIdentifier>{8c7b7c42-67ba-4d35-88ec-b9a3ba21a1e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -28,7 +31,13 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HArrayChar.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="HArrayLongValue.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="HArrayUniqueIntValueList.h">
+      <Filter>Header Files\Wrappers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

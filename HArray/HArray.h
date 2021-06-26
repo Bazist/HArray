@@ -863,24 +863,26 @@ public:
 	void scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 							 void* pData);
 
-	//RETURN ARRAY
-	void HArray::scanKeysAndValuesFromBlock(uint32* key,
-		uint32 contentOffset,
-		uint32 keyOffset,
-		uint32 blockOffset,
-		HArrayPair* pairs,
-		uint32& countPairs);
+	////RETURN ARRAY
+	//void HArray::scanKeysAndValuesFromBlock(uint32* key,
+	//	uint32 keyLen,
+	//	uint32 contentOffset,
+	//	uint32 keyOffset,
+	//	uint32 blockOffset,
+	//	HArrayPair* pairs,
+	//	uint32& countPairs);
 
-	void HArray::scanKeysAndValues(uint32* key,
-		uint32 keyOffset,
-		uint32 contentOffset,
-		HArrayPair* pairs,
-		uint32& countPairs);
+	//void HArray::scanKeysAndValues(uint32* key,
+	//	uint32 keyLen,
+	//	uint32 keyOffset,
+	//	uint32 contentOffset,
+	//	HArrayPair* pairs,
+	//	uint32& countPairs);
 
-	void scanKeysAndValues(uint32* key,
-		uint32 keyLen,
-		HArrayPair* pairs,
-		uint32& countPairs);
+	//void scanKeysAndValues(uint32* key,
+	//	uint32 keyLen,
+	//	HArrayPair* pairs,
+	//	uint32& countPairs);
 
 	//DISMANTLING ====================================================================================================
 

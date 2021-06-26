@@ -507,7 +507,7 @@ NEXT_KEY_PART:
 
 //scan all
 void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
-									   void* pData)
+								void* pData)
 {
 	uint32 key[1024];
 
@@ -526,479 +526,491 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 	return;
 }
 
-//RETURN ARRAY ======================================================================================================================
-void HArray::scanKeysAndValuesFromBlock(uint32* key,
-	uint32 contentOffset,
-	uint32 keyOffset,
-	uint32 blockOffset,
-	HArrayPair* pairs,
-	uint32& countPairs)
-{
-	//printf("getValuesByRangeFromBlock count=%d size=%d contentOffset=%d keyOffset=%d blockOffset=%d\n", count, size, contentOffset, keyOffset, blockOffset);
-
-	uint32 maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
-
-	for (uint32 offset = blockOffset; offset < maxOffset; offset++)
-	{
-		BlockPage* pBlockPage = pBlockPages[offset >> 16];
-		BlockCell& blockCell = pBlockPage->pBlock[offset & 0xFFFF];
-
-		uchar8& blockCellType = blockCell.Type;
-
-		if (blockCellType == EMPTY_TYPE)
-		{
-			continue;
-		}
-		else if (blockCellType == CURRENT_VALUE_TYPE) //current value
-		{
-			uint32& keyValue = blockCell.ValueOrOffset;
-
-			key[keyOffset] = keyValue;
-
-			scanKeysAndValues(key, keyOffset + 1, blockCell.Offset, pairs, countPairs);
-		}
-		else if (blockCellType <= MAX_BRANCH_TYPE1) //branch cell
-		{
-			BranchPage* pBranchPage = pBranchPages[blockCell.Offset >> 16];
-			BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
-
-			//try find value in the list
-			for (uint32 i = 0; i < blockCellType; i++)
-			{
-				uint32& keyValue = branchCell1.Values[i];
-
-				key[keyOffset] = keyValue;
-
-				scanKeysAndValues(key, keyOffset + 1, branchCell1.Offsets[i], pairs, countPairs);
-			}
-		}
-		else if (blockCellType <= MAX_BRANCH_TYPE2) //branch cell
-		{
-			BranchPage* pBranchPage1 = pBranchPages[blockCell.Offset >> 16];
-			BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
-
-			//try find value in the list
-			for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
-			{
-				uint32& keyValue = branchCell1.Values[i];
-
-				key[keyOffset] = keyValue;
-
-				scanKeysAndValues(key, keyOffset + 1, branchCell1.Offsets[i], pairs, countPairs);
-			}
-
-			BranchPage* pBranchPage2 = pBranchPages[blockCell.ValueOrOffset >> 16];
-			BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
-
-			//try find value in the list
-			uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
-
-			for (uint32 i = 0; i < countValues; i++)
-			{
-				uint32& keyValue = branchCell2.Values[i];
-
-				key[keyOffset] = keyValue;
-
-				scanKeysAndValues(key, keyOffset + 1, branchCell2.Offsets[i], pairs, countPairs);
-			}
-		}
-		else if (blockCell.Type <= MAX_BLOCK_TYPE)
-		{
-			//go to block
-			scanKeysAndValuesFromBlock(key,
-				contentOffset,
-				keyOffset,
-				blockCell.Offset,
-				pairs,
-				countPairs);
-		}
-	}
-}
-
-void HArray::scanKeysAndValues(uint32* key,
-	uint32 keyOffset,
-	uint32 contentOffset,
-	HArrayPair* pairs,
-	uint32& countPairs)
-{
-	//printf("getValuesByRange count=%d size=%d contentOffset=%d keyOffset=%d\n", count, size, contentOffset, keyOffset);
-
-	for (;; keyOffset++, contentOffset++)
-	{
-		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
-		ushort16 contentIndex = contentOffset & 0xFFFF;
-
-		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
-		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
-
-		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
-		{
-			uint32 keyLen = contentCellType - ONLY_CONTENT_TYPE;
-
-			for (uint32 i = 0; i < keyLen; i++, keyOffset++, contentOffset++)
-			{
-				uint32& keyValue = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF];
-
-				key[keyOffset] = keyValue;
-			}
-
-			pairs[countPairs++].setPair(key,
-				keyOffset,
-				pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF],
-				pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF]);
-
-			return;
-		}
-
-		if (contentCellType == VAR_TYPE) //VAR =====================================================================
-		{
-			VarPage* pVarPage = pVarPages[contentCellValueOrOffset >> 16];
-			VarCell& varCell = pVarPage->pVar[contentCellValueOrOffset & 0xFFFF];
-
-			//save value
-			contentCellType = varCell.ContCellType; //read from var cell
-			contentCellValueOrOffset = varCell.ContCellValue;
-
-			pairs[countPairs++].setPair(key,
-				keyOffset,
-				varCell.ValueContCellValue,
-				varCell.ValueContCellType);
-
-			if (contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
-			{
-				contentOffset = contentCellValueOrOffset;
-
-				//goto
-				scanKeysAndValues(key, keyOffset, contentOffset, pairs, countPairs);
-
-				return;
-			}
-		}
-
-		if (contentCellType <= MAX_BRANCH_TYPE1) //BRANCH =====================================================================
-		{
-			BranchPage* pBranchPage = pBranchPages[contentCellValueOrOffset >> 16];
-			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
-
-			//check other
-			for (uint32 i = 0; i < contentCellType; i++) //from 1
-			{
-				uint32& keyValue = branchCell.Values[i];
-
-				key[keyOffset] = keyValue;
-
-				scanKeysAndValues(key, keyOffset + 1, branchCell.Offsets[i], pairs, countPairs);
-			}
-
-			return;
-		}
-		else if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
-		{
-			pairs[countPairs++].setPair(key,
-				keyOffset,
-				contentCellValueOrOffset,
-				contentCellType);
-
-			return;
-		}
-		else if (contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
-		{
-			scanKeysAndValuesFromBlock(key,
-				contentOffset,
-				keyOffset,
-				contentCellValueOrOffset,
-				pairs,
-				countPairs);
-
-			return;
-		}
-		else if (contentCellType == CURRENT_VALUE_TYPE)
-		{
-			uint32& keyValue = contentCellValueOrOffset;
-
-			key[keyOffset] = keyValue;
-		}
-	}
-}
-
-void HArray::scanKeysAndValues(uint32* key,
-	uint32 keyLen,
-	HArrayPair* pairs,
-	uint32& countPairs)
-{
-	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
-
-	uint32 headerOffset;
-
-	if (!normalizeFunc)
-	{
-		headerOffset = key[0] >> HeaderBits;
-	}
-	else
-	{
-		headerOffset = (*normalizeFunc)(key);
-	}
-
-	uint32 contentOffset = pHeader[headerOffset];
-
-	if (contentOffset)
-	{
-		uint32 keyOffset = 0;
-
-	NEXT_KEY_PART:
-		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
-		ushort16 contentIndex = contentOffset & 0xFFFF;
-
-		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
-
-		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
-		{
-			uint32 fullKeyLen = keyOffset + contentCellType - ONLY_CONTENT_TYPE;
-
-			if (contentIndex < maxSafeShort) //content in one page
-			{
-				for (; keyOffset < keyLen; contentIndex++, keyOffset++)
-				{
-					if (pContentPage->pContent[contentIndex] != key[keyOffset])
-						return;
-				}
-
-				for (; keyOffset < fullKeyLen; contentIndex++, keyOffset++)
-				{
-					key[keyOffset] = pContentPage->pContent[contentIndex];
-				}
-
-				if (contentIndex < MAX_SHORT) //remove warning of compilator
-				{
-					pairs[countPairs++].setPair(key,
-						keyOffset,
-						pContentPage->pContent[contentIndex],
-						pContentPage->pType[contentIndex]);
-				}
-				else
-				{
-					printf("!!! FAIL STATE !!!");
-				}
-
-				return;
-			}
-			else //content in two pages
-			{
-				for (; keyOffset < keyLen; contentOffset++, keyOffset++)
-				{
-					if (pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF] != key[keyOffset])
-						return;
-				}
-
-				for (; keyOffset < fullKeyLen; contentIndex++, keyOffset++)
-				{
-					key[keyOffset] = pContentPage->pContent[contentIndex];
-				}
-
-				pairs[countPairs++].setPair(key,
-					keyOffset,
-					pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF],
-					pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF]);
-
-				return;
-			}
-		}
-
-		uint32& keyValue = key[keyOffset];
-		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
-
-		if (contentCellType == VAR_TYPE) //VAR =====================================================================
-		{
-			VarPage* pVarPage = pVarPages[contentCellValueOrOffset >> 16];
-			VarCell& varCell = pVarPage->pVar[contentCellValueOrOffset & 0xFFFF];
-
-			if (keyOffset < keyLen)
-			{
-				contentCellType = varCell.ContCellType; //read from var cell
-				contentCellValueOrOffset = varCell.ContCellValue;
-
-				if (contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
-				{
-					contentOffset = contentCellValueOrOffset;
-
-					goto NEXT_KEY_PART;
-				}
-			}
-			else
-			{
-				scanKeysAndValues(key, keyOffset, contentOffset, pairs, countPairs);
-
-				//return varCell.Value;
-
-				return;
-			}
-		}
-		else if (keyOffset == keyLen)
-		{
-			if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
-			{
-				pairs[countPairs++].setPair(key,
-					keyOffset,
-					contentCellValueOrOffset,
-					contentCellType);
-
-				return;
-
-			}
-			else
-			{
-				scanKeysAndValues(key, keyOffset, contentOffset, pairs, countPairs);
-
-				return;
-			}
-		}
-
-		if (contentCellType <= MAX_BRANCH_TYPE1) //BRANCH =====================================================================
-		{
-			BranchPage* pBranchPage = pBranchPages[contentCellValueOrOffset >> 16];
-			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
-
-			//try find value in the list
-			uint32* values = branchCell.Values;
-
-			for (uint32 i = 0; i < contentCellType; i++)
-			{
-				if (values[i] == keyValue)
-				{
-					contentOffset = branchCell.Offsets[i];
-					keyOffset++;
-
-					goto NEXT_KEY_PART;
-				}
-			}
-
-			return;
-		}
-		else if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
-		{
-			pairs[countPairs++].setPair(key,
-				keyOffset,
-				contentCellValueOrOffset,
-				contentCellType);
-
-			return;
-		}
-		else if (contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
-		{
-			uchar8 idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
-
-			uint32 startOffset = contentCellValueOrOffset;
-
-		NEXT_BLOCK:
-			uint32 subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
-			uint32 blockOffset = startOffset + subOffset;
-
-			BlockPage* pBlockPage = pBlockPages[blockOffset >> 16];
-			BlockCell& blockCell = pBlockPage->pBlock[blockOffset & 0xFFFF];
-
-			uchar8& blockCellType = blockCell.Type;
-
-			if (blockCellType == EMPTY_TYPE)
-			{
-				return;
-			}
-			else if (blockCellType == CURRENT_VALUE_TYPE) //current value
-			{
-				if (blockCell.ValueOrOffset == keyValue) //value is exists
-				{
-					contentOffset = blockCell.Offset;
-					keyOffset++;
-
-					goto NEXT_KEY_PART;
-				}
-				else
-				{
-					return;
-				}
-			}
-			else if (blockCellType <= MAX_BRANCH_TYPE1) //branch cell
-			{
-				BranchPage* pBranchPage = pBranchPages[blockCell.Offset >> 16];
-				BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
-
-				//try find value in the list
-				for (uint32 i = 0; i < blockCellType; i++)
-				{
-					if (branchCell1.Values[i] == keyValue)
-					{
-						contentOffset = branchCell1.Offsets[i];
-						keyOffset++;
-
-						goto NEXT_KEY_PART;
-					}
-				}
-
-				return;
-			}
-			else if (blockCellType <= MAX_BRANCH_TYPE2) //branch cell
-			{
-				BranchPage* pBranchPage1 = pBranchPages[blockCell.Offset >> 16];
-				BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
-
-				//try find value in the list
-				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
-				{
-					if (branchCell1.Values[i] == keyValue)
-					{
-						contentOffset = branchCell1.Offsets[i];
-						keyOffset++;
-
-						goto NEXT_KEY_PART;
-					}
-				}
-
-				BranchPage* pBranchPage2 = pBranchPages[blockCell.ValueOrOffset >> 16];
-				BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
-
-				//try find value in the list
-				uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
-
-				for (uint32 i = 0; i < countValues; i++)
-				{
-					if (branchCell2.Values[i] == keyValue)
-					{
-						contentOffset = branchCell2.Offsets[i];
-						keyOffset++;
-
-						goto NEXT_KEY_PART;
-					}
-				}
-
-				return;
-			}
-			else if (blockCell.Type <= MAX_BLOCK_TYPE)
-			{
-				//go to block
-				idxKeyValue = (blockCell.Type - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
-				startOffset = blockCell.Offset;
-
-				goto NEXT_BLOCK;
-			}
-			else
-			{
-				return;
-			}
-		}
-		else if (contentCellType == CURRENT_VALUE_TYPE) //PART OF KEY =========================================================================
-		{
-			if (contentCellValueOrOffset == keyValue)
-			{
-				contentOffset++;
-				keyOffset++;
-
-				goto NEXT_KEY_PART;
-			}
-			else
-			{
-				return;
-			}
-		}
-	}
-
-	return;
-}
+////RETURN ARRAY ======================================================================================================================
+//void HArray::scanKeysAndValuesFromBlock(uint32* key,
+//	uint32 keyLen,
+//	uint32 contentOffset,
+//	uint32 keyOffset,
+//	uint32 blockOffset,
+//	HArrayPair* pairs,
+//	uint32& countPairs)
+//{
+//	//printf("getValuesByRangeFromBlock count=%d size=%d contentOffset=%d keyOffset=%d blockOffset=%d\n", count, size, contentOffset, keyOffset, blockOffset);
+//
+//	uint32 maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
+//
+//	for (uint32 offset = blockOffset; offset < maxOffset; offset++)
+//	{
+//		BlockPage* pBlockPage = pBlockPages[offset >> 16];
+//		BlockCell& blockCell = pBlockPage->pBlock[offset & 0xFFFF];
+//
+//		uchar8& blockCellType = blockCell.Type;
+//
+//		if (blockCellType == EMPTY_TYPE)
+//		{
+//			continue;
+//		}
+//		else if (blockCellType == CURRENT_VALUE_TYPE) //current value
+//		{
+//			uint32& keyValue = blockCell.ValueOrOffset;
+//
+//			key[keyOffset] = keyValue;
+//
+//			scanKeysAndValues(key, keyLen, keyOffset + 1, blockCell.Offset, pairs, countPairs);
+//		}
+//		else if (blockCellType <= MAX_BRANCH_TYPE1) //branch cell
+//		{
+//			BranchPage* pBranchPage = pBranchPages[blockCell.Offset >> 16];
+//			BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
+//
+//			//try find value in the list
+//			for (uint32 i = 0; i < blockCellType; i++)
+//			{
+//				uint32& keyValue = branchCell1.Values[i];
+//
+//				key[keyOffset] = keyValue;
+//
+//				scanKeysAndValues(key, keyLen, keyOffset + 1, branchCell1.Offsets[i], pairs, countPairs);
+//			}
+//		}
+//		else if (blockCellType <= MAX_BRANCH_TYPE2) //branch cell
+//		{
+//			BranchPage* pBranchPage1 = pBranchPages[blockCell.Offset >> 16];
+//			BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
+//
+//			//try find value in the list
+//			for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+//			{
+//				uint32& keyValue = branchCell1.Values[i];
+//
+//				key[keyOffset] = keyValue;
+//
+//				scanKeysAndValues(key, keyLen, keyOffset + 1, branchCell1.Offsets[i], pairs, countPairs);
+//			}
+//
+//			BranchPage* pBranchPage2 = pBranchPages[blockCell.ValueOrOffset >> 16];
+//			BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
+//
+//			//try find value in the list
+//			uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
+//
+//			for (uint32 i = 0; i < countValues; i++)
+//			{
+//				uint32& keyValue = branchCell2.Values[i];
+//
+//				key[keyOffset] = keyValue;
+//
+//				scanKeysAndValues(key, keyLen, keyOffset + 1, branchCell2.Offsets[i], pairs, countPairs);
+//			}
+//		}
+//		else if (blockCell.Type <= MAX_BLOCK_TYPE)
+//		{
+//			//go to block
+//			scanKeysAndValuesFromBlock(key,
+//				keyLen,
+//				contentOffset,
+//				keyOffset,
+//				blockCell.Offset,
+//				pairs,
+//				countPairs);
+//		}
+//	}
+//}
+//
+//void HArray::scanKeysAndValues(uint32* key,
+//	uint32 keyLen,
+//	uint32 keyOffset,
+//	uint32 contentOffset,
+//	uint32* values,
+//	uint32& countValues)
+//{
+//	//printf("getValuesByRange count=%d size=%d contentOffset=%d keyOffset=%d\n", count, size, contentOffset, keyOffset);
+//
+//	for (;; keyOffset++, contentOffset++)
+//	{
+//		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
+//		ushort16 contentIndex = contentOffset & 0xFFFF;
+//
+//		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
+//		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
+//
+//		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
+//		{
+//			uint32 keyLen = contentCellType - ONLY_CONTENT_TYPE;
+//
+//			for (uint32 i = 0; i < keyLen; i++, keyOffset++, contentOffset++)
+//			{
+//				uint32& keyValue = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF];
+//
+//				key[keyOffset] = keyValue;
+//			}
+//
+//			pairs[countPairs++].setPair(keyLen,
+//				key,
+//				keyOffset,
+//				pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF],
+//				pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF]);
+//
+//			return;
+//		}
+//
+//		if (contentCellType == VAR_TYPE) //VAR =====================================================================
+//		{
+//			VarPage* pVarPage = pVarPages[contentCellValueOrOffset >> 16];
+//			VarCell& varCell = pVarPage->pVar[contentCellValueOrOffset & 0xFFFF];
+//
+//			//save value
+//			contentCellType = varCell.ContCellType; //read from var cell
+//			contentCellValueOrOffset = varCell.ContCellValue;
+//
+//			pairs[countPairs++].setPair(keyLen,
+//				key,
+//				keyOffset,
+//				varCell.ValueContCellValue,
+//				varCell.ValueContCellType);
+//
+//			if (contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
+//			{
+//				contentOffset = contentCellValueOrOffset;
+//
+//				//goto
+//				scanKeysAndValues(key, keyLen, keyOffset, contentOffset, pairs, countPairs);
+//
+//				return;
+//			}
+//		}
+//
+//		if (contentCellType <= MAX_BRANCH_TYPE1) //BRANCH =====================================================================
+//		{
+//			BranchPage* pBranchPage = pBranchPages[contentCellValueOrOffset >> 16];
+//			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
+//
+//			//check other
+//			for (uint32 i = 0; i < contentCellType; i++) //from 1
+//			{
+//				uint32& keyValue = branchCell.Values[i];
+//
+//				key[keyOffset] = keyValue;
+//
+//				scanKeysAndValues(key, keyLen, keyOffset + 1, branchCell.Offsets[i], pairs, countPairs);
+//			}
+//
+//			return;
+//		}
+//		else if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+//		{
+//			pairs[countPairs++].setPair(keyLen,
+//				key,
+//				keyOffset,
+//				contentCellValueOrOffset,
+//				contentCellType);
+//
+//			return;
+//		}
+//		else if (contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
+//		{
+//			scanKeysAndValuesFromBlock(key,
+//				keyLen,
+//				contentOffset,
+//				keyOffset,
+//				contentCellValueOrOffset,
+//				pairs,
+//				countPairs);
+//
+//			return;
+//		}
+//		else if (contentCellType == CURRENT_VALUE_TYPE)
+//		{
+//			uint32& keyValue = contentCellValueOrOffset;
+//
+//			key[keyOffset] = keyValue;
+//		}
+//	}
+//}
+//
+//void HArray::scanKeysAndValues(uint32* key,
+//	uint32 keyLen,
+//	uint32 filterKeyLen, //set 
+//	uint32* values,
+//	uint32& countValues)
+//{
+//	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
+//
+//	uint32 headerOffset;
+//
+//	if (!normalizeFunc)
+//	{
+//		headerOffset = key[0] >> HeaderBits;
+//	}
+//	else
+//	{
+//		headerOffset = (*normalizeFunc)(key);
+//	}
+//
+//	uint32 contentOffset = pHeader[headerOffset];
+//
+//	if (contentOffset)
+//	{
+//		uint32 keyOffset = 0;
+//
+//	NEXT_KEY_PART:
+//		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
+//		ushort16 contentIndex = contentOffset & 0xFFFF;
+//
+//		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
+//
+//		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
+//		{
+//			uint32 fullKeyLen = keyOffset + contentCellType - ONLY_CONTENT_TYPE;
+//
+//			if (contentIndex < maxSafeShort) //content in one page
+//			{
+//				for (; keyOffset < keyLen; contentIndex++, keyOffset++)
+//				{
+//					if (pContentPage->pContent[contentIndex] != key[keyOffset])
+//						return;
+//				}
+//
+//				for (; keyOffset < fullKeyLen; contentIndex++, keyOffset++)
+//				{
+//					key[keyOffset] = pContentPage->pContent[contentIndex];
+//				}
+//
+//				if (contentIndex < MAX_SHORT) //remove warning of compilator
+//				{
+//					pairs[countPairs++].setPair(keyLen, 
+//						key,
+//						keyOffset,
+//						pContentPage->pContent[contentIndex],
+//						pContentPage->pType[contentIndex]);
+//				}
+//				else
+//				{
+//					printf("!!! FAIL STATE !!!");
+//				}
+//
+//				return;
+//			}
+//			else //content in two pages
+//			{
+//				for (; keyOffset < keyLen; contentOffset++, keyOffset++)
+//				{
+//					if (pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF] != key[keyOffset])
+//						return;
+//				}
+//
+//				for (; keyOffset < fullKeyLen; contentIndex++, keyOffset++)
+//				{
+//					key[keyOffset] = pContentPage->pContent[contentIndex];
+//				}
+//
+//				pairs[countPairs++].setPair(keyLen,
+//					key,
+//					keyOffset,
+//					pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF],
+//					pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF]);
+//
+//				return;
+//			}
+//		}
+//
+//		uint32& keyValue = key[keyOffset];
+//		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
+//
+//		if (contentCellType == VAR_TYPE) //VAR =====================================================================
+//		{
+//			VarPage* pVarPage = pVarPages[contentCellValueOrOffset >> 16];
+//			VarCell& varCell = pVarPage->pVar[contentCellValueOrOffset & 0xFFFF];
+//
+//			if (keyOffset < keyLen)
+//			{
+//				contentCellType = varCell.ContCellType; //read from var cell
+//				contentCellValueOrOffset = varCell.ContCellValue;
+//
+//				if (contentCellType == CONTINUE_VAR_TYPE) //CONTINUE VAR =====================================================================
+//				{
+//					contentOffset = contentCellValueOrOffset;
+//
+//					goto NEXT_KEY_PART;
+//				}
+//			}
+//			else
+//			{
+//				scanKeysAndValues(key, keyLen, keyOffset, contentOffset, pairs, countPairs);
+//
+//				//return varCell.Value;
+//
+//				return;
+//			}
+//		}
+//		else if (keyOffset == keyLen)
+//		{
+//			if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+//			{
+//				pairs[countPairs++].setPair(keyLen,
+//					key,
+//					keyOffset,
+//					contentCellValueOrOffset,
+//					contentCellType);
+//
+//				return;
+//
+//			}
+//			else
+//			{
+//				scanKeysAndValues(key, keyLen, keyOffset, contentOffset, pairs, countPairs);
+//
+//				return;
+//			}
+//		}
+//
+//		if (contentCellType <= MAX_BRANCH_TYPE1) //BRANCH =====================================================================
+//		{
+//			BranchPage* pBranchPage = pBranchPages[contentCellValueOrOffset >> 16];
+//			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
+//
+//			//try find value in the list
+//			uint32* values = branchCell.Values;
+//
+//			for (uint32 i = 0; i < contentCellType; i++)
+//			{
+//				if (values[i] == keyValue)
+//				{
+//					contentOffset = branchCell.Offsets[i];
+//					keyOffset++;
+//
+//					goto NEXT_KEY_PART;
+//				}
+//			}
+//
+//			return;
+//		}
+//		else if (VALUE_TYPE_1 <= contentCellType && contentCellType <= VALUE_TYPE_5)
+//		{
+//			pairs[countPairs++].setPair(keyLen,
+//				key,
+//				keyOffset,
+//				contentCellValueOrOffset,
+//				contentCellType);
+//
+//			return;
+//		}
+//		else if (contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
+//		{
+//			uchar8 idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
+//
+//			uint32 startOffset = contentCellValueOrOffset;
+//
+//		NEXT_BLOCK:
+//			uint32 subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
+//			uint32 blockOffset = startOffset + subOffset;
+//
+//			BlockPage* pBlockPage = pBlockPages[blockOffset >> 16];
+//			BlockCell& blockCell = pBlockPage->pBlock[blockOffset & 0xFFFF];
+//
+//			uchar8& blockCellType = blockCell.Type;
+//
+//			if (blockCellType == EMPTY_TYPE)
+//			{
+//				return;
+//			}
+//			else if (blockCellType == CURRENT_VALUE_TYPE) //current value
+//			{
+//				if (blockCell.ValueOrOffset == keyValue) //value is exists
+//				{
+//					contentOffset = blockCell.Offset;
+//					keyOffset++;
+//
+//					goto NEXT_KEY_PART;
+//				}
+//				else
+//				{
+//					return;
+//				}
+//			}
+//			else if (blockCellType <= MAX_BRANCH_TYPE1) //branch cell
+//			{
+//				BranchPage* pBranchPage = pBranchPages[blockCell.Offset >> 16];
+//				BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
+//
+//				//try find value in the list
+//				for (uint32 i = 0; i < blockCellType; i++)
+//				{
+//					if (branchCell1.Values[i] == keyValue)
+//					{
+//						contentOffset = branchCell1.Offsets[i];
+//						keyOffset++;
+//
+//						goto NEXT_KEY_PART;
+//					}
+//				}
+//
+//				return;
+//			}
+//			else if (blockCellType <= MAX_BRANCH_TYPE2) //branch cell
+//			{
+//				BranchPage* pBranchPage1 = pBranchPages[blockCell.Offset >> 16];
+//				BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
+//
+//				//try find value in the list
+//				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+//				{
+//					if (branchCell1.Values[i] == keyValue)
+//					{
+//						contentOffset = branchCell1.Offsets[i];
+//						keyOffset++;
+//
+//						goto NEXT_KEY_PART;
+//					}
+//				}
+//
+//				BranchPage* pBranchPage2 = pBranchPages[blockCell.ValueOrOffset >> 16];
+//				BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
+//
+//				//try find value in the list
+//				uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
+//
+//				for (uint32 i = 0; i < countValues; i++)
+//				{
+//					if (branchCell2.Values[i] == keyValue)
+//					{
+//						contentOffset = branchCell2.Offsets[i];
+//						keyOffset++;
+//
+//						goto NEXT_KEY_PART;
+//					}
+//				}
+//
+//				return;
+//			}
+//			else if (blockCell.Type <= MAX_BLOCK_TYPE)
+//			{
+//				//go to block
+//				idxKeyValue = (blockCell.Type - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
+//				startOffset = blockCell.Offset;
+//
+//				goto NEXT_BLOCK;
+//			}
+//			else
+//			{
+//				return;
+//			}
+//		}
+//		else if (contentCellType == CURRENT_VALUE_TYPE) //PART OF KEY =========================================================================
+//		{
+//			if (contentCellValueOrOffset == keyValue)
+//			{
+//				contentOffset++;
+//				keyOffset++;
+//
+//				goto NEXT_KEY_PART;
+//			}
+//			else
+//			{
+//				return;
+//			}
+//		}
+//	}
+//
+//	return;
+//}

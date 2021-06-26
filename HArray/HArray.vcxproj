@@ -94,6 +94,8 @@
     <ClInclude Include="HArray.h" />
     <ClInclude Include="HArrayChar.h" />
     <ClInclude Include="HArrayInt.h" />
+    <ClInclude Include="HArrayLongValue.h" />
+    <ClInclude Include="HArrayUniqueIntValueList.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

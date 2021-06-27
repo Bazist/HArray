@@ -32,7 +32,7 @@ private:
 		void* pData;
 	};
 
-	static bool scanValues(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
+	static bool scanValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
 	{
 		ScanLongValuesData* pScanData = (ScanLongValuesData*)pData;
 
@@ -56,9 +56,9 @@ private:
 public:
 
 	bool insert(uint32* key,
-				uint32 keyLen,
-				uint32* value,
-				uint32 valueLen)
+		uint32 keyLen,
+		uint32* value,
+		uint32 valueLen)
 	{
 		if (HArray::hasPartKey(key, keyLen)) //it is update
 		{

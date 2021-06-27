@@ -20,7 +20,7 @@
 
 #include "HArray.h"
 
-typedef bool HARRAY_VALUE_VISIT_FUNC(uint32 value, uchar8 valueType, void* pData);
+typedef bool HARRAY_VALUE_VISIT_FUNC(uint32 value, void* pData);
 
 class HArrayUniqueIntValueList : public HArray
 {
@@ -33,13 +33,13 @@ private:
 		void* pData;
 	};
 
-	static bool scanValues(uint32* key, uint32 keyLen, uint32 value, uchar8 valueType, void* pData)
+	static bool scanValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
 	{
 		ScanValuesData* pScanData = (ScanValuesData*)pData;
 
 		if (pScanData->KeyLenWithValueLen == keyLen && !value)
 		{
-			return pScanData->pVisitor(key[keyLen - 1], valueType, pScanData->pData);
+			return pScanData->pVisitor(key[keyLen - 1], pScanData->pData);
 		}
 		else
 		{
@@ -50,8 +50,8 @@ private:
 public:
 
 	bool insert(uint32* key,
-				uint32 keyLen,
-				uint32 value)
+		uint32 keyLen,
+		uint32 value)
 	{
 		uint32 existingValue;
 
@@ -92,16 +92,15 @@ public:
 	}
 
 	bool getIntValuesByKey(uint32* key,
-						   uint32 keyLen,
-						   HARRAY_VALUE_VISIT_FUNC visitor,
-						   void* pData)
+		uint32 keyLen,
+		HARRAY_VALUE_VISIT_FUNC visitor,
+		void* pData)
 	{
 		uint32 value;
-		uchar8 valueType;
 
-		if (HArray::getValueByKey(key, keyLen, value, valueType)) //list with one value
+		if (HArray::getValueByKey(key, keyLen, value)) //list with one value
 		{
-			return visitor(value, valueType, pData);
+			return visitor(value, pData);
 		}
 		else
 		{

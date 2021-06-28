@@ -20,156 +20,152 @@
 
 #include "HArrayLongValue.h"
 
-class HArrayChar : public HArrayLongValue
+class HArrayChar : public HArray
 {
+private:
+
+	struct ScanGetValueData
+	{
+		uint32 KeyLen;
+		char* Value;
+		uint32 ValueLen;
+		void* pData;
+	};
+
+	static bool scanGetValue(uint32* key, uint32 keyLen, uint32 value, void* pData)
+	{
+		ScanGetValueData* pScanData = (ScanGetValueData*)pData;
+
+		uint32 valueLenInSegments;
+
+		keyLen--;
+
+		uint32 valueLen = key[keyLen];
+
+		if (valueLen & 0x3)
+		{
+			valueLenInSegments = (valueLen >> 2) + 1;
+		}
+		else
+		{
+			valueLenInSegments = (valueLen >> 2);
+		}
+
+		if (pScanData->KeyLen + valueLenInSegments == keyLen) //our key is composite key: key + value
+		{
+			for (uint32 i = 0; i < valueLenInSegments; i++)
+			{
+				pScanData->Value[i] = key[pScanData->KeyLen++];
+			}
+
+			pScanData->ValueLen = valueLen; //value len in chars
+
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
 public:
 
 	bool insert(const char* key,
 		uint32 keyLen,
-		uint32 value)
+		const char* value,
+		uint32 valueLen)
 	{
-		uint32 lastSegmentKeyLen = keyLen & 0x3;
+		char newKey[MAX_KEY_SEGMENTS];
+		uint32 j = 0;
 
-		if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
+		//add key
+		for (uint32 i = 0; i < keyLen; i++, j++)
 		{
-			return HArray::insert((uint32*)key, keyLen / 4, value);
+			newKey[j] = key[i];
 		}
-		else
+
+		//align
+		while (j & 0x3)
 		{
-			uint32* keyInSegments = (uint32*)key;
-			uint32 keyLenInSegments = keyLen >> 2;
-
-			uint32 newKey[MAX_KEY_SEGMENTS];
-
-			uint32 i = 0;
-
-			for (; i < keyLenInSegments; i++)
-			{
-				newKey[i] = keyInSegments[i];
-			}
-
-			newKey[i] = 0;
-
-			char* lastSegmentNewKey = (char*)&newKey[i];
-			char* lastSegmentKey = (char*)&keyInSegments[i];
-
-			for (uint32 j = 0; j < lastSegmentKeyLen; j++)
-			{
-				lastSegmentNewKey[j] = lastSegmentKey[j];
-			}
-
-			return HArray::insert((uint32*)newKey, keyLen / 4 + 1, value);
+			newKey[j++] = 0;
 		}
+
+		//add value
+		for (uint32 i = 0; i < valueLen; i++, j++)
+		{
+			newKey[j] = value[i];
+		}
+
+		//align
+		while (j & 0x3)
+		{
+			newKey[j++] = 0;
+		}
+
+		//add value len
+		*(uint32*)(newKey + j) = valueLen;
+
+		j += 4;
+
+		return HArray::insert((uint32*)newKey, j >> 2, 0);
 	}
 
 	bool getValueByKey(const char* key,
 		uint32 keyLen,
-		uint32& value)
+		char* value,
+		uint32& valueLen)
 	{
-		uint32 lastSegmentKeyLen = keyLen & 0x3;
+		char newKey[MAX_KEY_SEGMENTS];
+		uint32 j = 0;
 
-		if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
+		//add key
+		for (uint32 i = 0; i < keyLen; i++, j++)
 		{
-			return HArray::getValueByKey((uint32*)key, keyLen / 4, value);
+			newKey[j] = key[i];
 		}
-		else
+		
+		//align
+		while (j & 0x3)
 		{
-			uint32* keyInSegments = (uint32*)key;
-			uint32 keyLenInSegments = keyLen >> 2;
-
-			uint32 newKey[MAX_KEY_SEGMENTS];
-
-			uint32 i = 0;
-
-			for (; i < keyLenInSegments; i++)
-			{
-				newKey[i] = keyInSegments[i];
-			}
-
-			newKey[i] = 0;
-
-			char* lastSegmentNewKey = (char*)&newKey[i];
-			char* lastSegmentKey = (char*)&keyInSegments[i];
-
-			for (uint32 j = 0; j < lastSegmentKeyLen; j++)
-			{
-				lastSegmentNewKey[j] = lastSegmentKey[j];
-			}
-
-			return HArray::getValueByKey((uint32*)newKey, keyLen / 4 + 1, value);
+			newKey[j++] = 0;
 		}
+
+		keyLen = j >> 2;
+
+		ScanGetValueData scanData;
+		scanData.KeyLen = keyLen;
+		scanData.Value = value;
+		scanData.ValueLen = 0;
+
+		HArray::scanKeysAndValues((uint32*)newKey, keyLen, scanGetValue, &scanData);
+
+		valueLen = scanData.ValueLen;
+
+		return (valueLen > 0);
 	}
 
 	bool hasPartKey(const char* key, uint32 keyLen)
 	{
-		uint32 lastSegmentKeyLen = keyLen & 0x3;
+		char newKey[MAX_KEY_SEGMENTS];
+		uint32 j = 0;
 
-		if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
+		//add key
+		for (uint32 i = 0; i < keyLen; i++, j++)
 		{
-			return HArray::hasPartKey((uint32*)key, keyLen / 4);
+			newKey[j] = key[i];
 		}
-		else
+
+		//align
+		while (j & 0x3)
 		{
-			uint32* keyInSegments = (uint32*)key;
-			uint32 keyLenInSegments = keyLen >> 2;
-
-			uint32 newKey[MAX_KEY_SEGMENTS];
-
-			uint32 i = 0;
-
-			for (; i < keyLenInSegments; i++)
-			{
-				newKey[i] = keyInSegments[i];
-			}
-
-			newKey[i] = 0;
-
-			char* lastSegmentNewKey = (char*)&newKey[i];
-			char* lastSegmentKey = (char*)&keyInSegments[i];
-
-			for (uint32 j = 0; j < lastSegmentKeyLen; j++)
-			{
-				lastSegmentNewKey[j] = lastSegmentKey[j];
-			}
-
-			return HArray::hasPartKey((uint32*)newKey, keyLen / 4 + 1);
+			newKey[j++] = 0;
 		}
+
+		return HArray::hasPartKey((uint32*)newKey, j >> 2);
 	}
 
 	bool delValueByKey(const char* key, uint32 keyLen)
 	{
-		uint32 lastSegmentKeyLen = keyLen & 0x3;
-
-		if (!lastSegmentKeyLen) //key is aligned by 4 bytes, just pass as is
-		{
-			return HArray::delValueByKey((uint32*)key, keyLen / 4);
-		}
-		else
-		{
-			uint32* keyInSegments = (uint32*)key;
-			uint32 keyLenInSegments = keyLen >> 2;
-
-			uint32 newKey[MAX_KEY_SEGMENTS];
-
-			uint32 i = 0;
-
-			for (; i < keyLenInSegments; i++)
-			{
-				newKey[i] = keyInSegments[i];
-			}
-
-			newKey[i] = 0;
-
-			char* lastSegmentNewKey = (char*)&newKey[i];
-			char* lastSegmentKey = (char*)&keyInSegments[i];
-
-			for (uint32 j = 0; j < lastSegmentKeyLen; j++)
-			{
-				lastSegmentNewKey[j] = lastSegmentKey[j];
-			}
-
-			return HArray::delValueByKey((uint32*)newKey, keyLen / 4 + 1);
-		}
+		
 	}
-
 };

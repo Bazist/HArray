@@ -36,7 +36,9 @@ private:
 	{
 		ScanLongValuesData* pScanData = (ScanLongValuesData*)pData;
 
-		pScanData->ValueLen = value; //valueLen was saved in value
+		keyLen--;
+
+		pScanData->ValueLen = key[keyLen]; //valueLen was saved as last segment in key
 
 		if (pScanData->KeyLen + pScanData->ValueLen == keyLen) //our key is composite key: key + value
 		{
@@ -62,7 +64,7 @@ public:
 	{
 		if (HArray::hasPartKey(key, keyLen)) //it is update
 		{
-			HArray::delValueByKey(key, keyLen);
+			delValueByKey(key, keyLen);
 		}
 
 		for (uint32 i = 0; i < valueLen; i++, keyLen++)
@@ -70,7 +72,9 @@ public:
 			key[keyLen] = value[i];
 		}
 
-		return HArray::insert(key, keyLen, valueLen);
+		key[keyLen++] = valueLen;
+
+		return HArray::insert(key, keyLen, 0);
 	}
 
 	bool getValueByKey(uint32* key,
@@ -101,6 +105,8 @@ public:
 			{
 				key[keyLen] = value[i];
 			}
+
+			key[keyLen++] = valueLen;
 
 			return HArray::delValueByKey(key, keyLen);
 		}

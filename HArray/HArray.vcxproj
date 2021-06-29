@@ -93,6 +93,7 @@
     <ClInclude Include="HArrayBase.h" />
     <ClInclude Include="HArray.h" />
     <ClInclude Include="HArrayChar.h" />
+    <ClInclude Include="HArrayGeneric.h" />
     <ClInclude Include="HArrayInt.h" />
     <ClInclude Include="HArrayLongValue.h" />
     <ClInclude Include="HArrayUniqueIntValueList.h" />

@@ -25,6 +25,8 @@
 #include <unordered_map>
 #include "HArrayInt.h"
 #include "HArray.h"
+#include "HArrayChar.h"
+#include "HArrayGeneric.h"
 
 //======== NATURE OF KEYS =============
 #define SEQUENCE_TESTS
@@ -1434,26 +1436,58 @@ void HArray_VS_StdMap_StrKey_Var(uint32 startOnAmount, uint32 stepOfAmount, uint
 
 int main()
 {
-	HArrayInt_VS_StdMap_IntKey(1000000,   //start
-								2000000,   //step
-								10000000); //stop
+	std::vector<int> bla;
+	bla.push_back(1);
+	bla.push_back(2);
+	bla.push_back(3);
 
-	HArray_VS_StdMap_BinKey(1000000, //start
-							2000000, //step
-							10000000,//stop
-							false);  //shuffle
 
-	HArray_VS_StdMap_StrKey(1000000,  //start
-							1000000,  //step
-							3000000); //stop
+	std::string boo = "Insert / Search / Delete % u RANDOM VAR keys(% u bytes each) ...\n";
 
-	HArray_VS_StdMap_StrKey_Var(1000000,  //start
-								1000000,  //step
-								3000000); //stop
+	char* boo2 = (char*)&bla;
 
-	printf("COEF HArray VS Map: In average HArray faster in %.2f times.\n", (double)totalMapTime / (double)totalHArrayTime);
-	printf("COEF HArray VS Unordered Map: In average HArray faster in %.2f times.\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);
-	printf("COEF HArray VS Dense: In average HArray faster in %.2f times.\n", (double)totalDenseTime / (double)totalHArrayTime);
+	HArrayChar ha;
+
+	HArrayGeneric<int, int> ha2;
+
+	ha2.insert(2, 2);
+
+	std::string key = "a";
+	std::string val = "b";
+
+	ha.insert(key.c_str(), key.length(), val.c_str(), val.length());
+
+	char value[16];
+	uint32 valueLen = 0;
+
+	ha.getValueByKey(key.c_str(), key.length(), value, valueLen);
+
+	value[valueLen] = 0;
+
+	std::string outVal(value);
+
+	return 0;
+
+	//HArrayInt_VS_StdMap_IntKey(1000000,   //start
+	//							2000000,   //step
+	//							10000000); //stop
+
+	//HArray_VS_StdMap_BinKey(1000000, //start
+	//						2000000, //step
+	//						10000000,//stop
+	//						false);  //shuffle
+
+	//HArray_VS_StdMap_StrKey(1000000,  //start
+	//						1000000,  //step
+	//						3000000); //stop
+
+	//HArray_VS_StdMap_StrKey_Var(1000000,  //start
+	//							1000000,  //step
+	//							3000000); //stop
+
+	//printf("COEF HArray VS Map: In average HArray faster in %.2f times.\n", (double)totalMapTime / (double)totalHArrayTime);
+	//printf("COEF HArray VS Unordered Map: In average HArray faster in %.2f times.\n", (double)totalUnorderedMapTime / (double)totalHArrayTime);
+	//printf("COEF HArray VS Dense: In average HArray faster in %.2f times.\n", (double)totalDenseTime / (double)totalHArrayTime);
 
 	return 0;
 };

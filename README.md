@@ -4,6 +4,10 @@
 
 **HArray** - Key\Value In Memory structure for keys with variety size
 
+**HArrayChar** - Wrapper for HArray with interfaces: char* key, uint32 keyLen, char* value, uint32 valueLen
+
+**HArrayUniqueIntValueList** - Wrapper for HArray with inteterfaces: uint32* key, uint32 keyLen, List<uint32> listOfUniqueValues
+
 ------------------
 
 # [Start overview from Benchmarks](https://github.com/Bazist/HArray/blob/master/Benchmarks.md)

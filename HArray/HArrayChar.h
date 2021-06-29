@@ -166,6 +166,49 @@ public:
 
 	bool delValueByKey(const char* key, uint32 keyLen)
 	{
-		
+		char value[MAX_KEY_SEGMENTS];
+		uint32 valueLen;
+
+		if (getValueByKey(key, keyLen, value, valueLen))
+		{
+			char newKey[MAX_KEY_SEGMENTS];
+			uint32 j = 0;
+
+			//add key
+			for (uint32 i = 0; i < keyLen; i++, j++)
+			{
+				newKey[j] = key[i];
+			}
+
+			//align
+			while (j & 0x3)
+			{
+				newKey[j++] = 0;
+			}
+
+			//add value
+			for (uint32 i = 0; i < valueLen; i++, j++)
+			{
+				newKey[j] = value[i];
+			}
+
+			//align
+			while (j & 0x3)
+			{
+				newKey[j++] = 0;
+			}
+
+			//add value len
+			*(uint32*)(newKey + j) = valueLen;
+
+			j += 4;
+
+			HArray::delValueByKey((uint32*)newKey, j >> 2);
+
+		}
+		else
+		{
+			return false;
+		}
 	}
 };

@@ -6,7 +6,7 @@
 
 **HArrayChar** - Wrapper for HArray with interfaces: char* key, uint32 keyLen, char* value, uint32 valueLen
 
-**HArrayUniqueIntValueList** - Wrapper for HArray with inteterfaces: uint32* key, uint32 keyLen, List<uint32> listOfUniqueValues
+**HArrayUniqueIntValueList** - Wrapper for HArray with inteterfaces: uint32* key, uint32 keyLen, List\<uint32\>  listOfUniqueValues
 
 ------------------
 

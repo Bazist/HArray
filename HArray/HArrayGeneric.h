@@ -20,25 +20,110 @@
 
 #include "HArrayLongValue.h"
 
-template <class K, class V>
+
+template <typename K, typename V>
 class HArrayGeneric : public HArray
 {
 private:
-	uint32 keyLen;
 	uint32 valueLen;
+
+	template<class T>
+	inline uint32* getKeySegments(T& obj, uint32* keyBuff, uint32& keyLen)
+	{
+		return obj.getKeySegments(keyBuff, keyLen);
+	}
+
+	template<class S>
+	inline uint32* getKeySegments_STL(const S& obj, uint32* keyBuff, uint32& keyLen)
+	{
+		keyLen = obj.size() * sizeof(S);
+
+		char* keyBuffBytes = (char*)keyBuff;
+
+		std::copy(obj.begin(), obj.end(), keyBuffBytes);
+
+		while (keyLen & 0x3)
+		{
+			keyBuffBytes[keyLen++] = 0;
+		}
+
+		keyLen >>= 2;
+
+		return keyBuff;
+	}
+
+	template<typename C>
+	inline uint32* getKeySegments(const std::vector<C>& obj, uint32* keyBuff, uint32& keyLen)
+	{
+		return getKeySegments_STL(obj, keyBuff, keyLen);
+	}
+
+	inline uint32* getKeySegments(const int& obj, uint32* keyBuff, uint32& keyLen)
+	{
+		keyLen = 1;
+
+		return (uint32*)&obj;
+	}
+
+	inline uint32* getKeySegments(const unsigned int& obj, uint32* keyBuff, uint32& keyLen)
+	{
+		keyLen = 1;
+
+		return (uint32*)&obj;
+	}
+
+	inline uint32* getKeySegments(const std::string& obj, uint32* keyBuff, uint32& keyLen)
+	{
+		uint32 keyLen = obj.length();
+		char* keyBuffBytes = (char*)keyBuff;
+
+		memcpy(keyBuff, obj.c_str(), keyLen);
+
+		while (keyLen & 0x3)
+		{
+			keyBuffBytes[keyLen++] = 0;
+		}
+
+		keyLen >>= 2;
+
+		return keyBuff;
+	}
+
+	inline uint32* getKeySegments(const char*& obj, uint32* keyBuff, uint32& keyLen)
+	{
+		uint32 keyLen = strlen(obj);
+		char* keyBuffBytes = (char*)keyBuff;
+
+		for (uint32 i = 0; i < keyLen; i++)
+		{
+			keyBuffBytes[i] = obj[i];
+		}
+
+		while (keyLen & 0x3)
+		{
+			keyBuffBytes[keyLen++] = 0;
+		}
+
+		keyLen >>= 2;
+
+		return keyBuff;
+	}
 
 public:
 	HArrayGeneric()
 	{
-		keyLen = sizeof(K);
 		valueLen = sizeof(V);
 	}
 
-	bool insert(const K key,
-				const V value)
+	bool insert(const K& key,
+				const V& value)
 	{
+		uint32 keyBuff[MAX_KEY_SEGMENTS];
+		uint32 keyLen = 0;
 
-		return true;
+		uint32* keySegments = getKeySegments(key, keyBuff, keyLen);
+
+		return HArray::insert(keySegments, keyLen, value);
 	}
 
 	bool getValueByKey(const K key,

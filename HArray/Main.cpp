@@ -1433,24 +1433,32 @@ void HArray_VS_StdMap_StrKey_Var(uint32 startOnAmount, uint32 stepOfAmount, uint
 
 	#endif
 }
-
-int main()
+int main(int argc, char* argv[])
 {
 	std::vector<int> bla;
 	bla.push_back(1);
 	bla.push_back(2);
 	bla.push_back(3);
 
+	HArrayGeneric<std::vector<int>, int> ha2;
+
+	ha2.insert(bla, 1);
+
+	return 0;
+}
+
+int main2()
+{
+	
+
 
 	std::string boo = "Insert / Search / Delete % u RANDOM VAR keys(% u bytes each) ...\n";
-
-	char* boo2 = (char*)&bla;
 
 	HArrayChar ha;
 
 	HArrayGeneric<int, int> ha2;
 
-	ha2.insert(2, 2);
+	//ha2.insert(2, 2);
 
 	std::string key = "a";
 	std::string val = "b";

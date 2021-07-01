@@ -76,28 +76,7 @@ jobs:
 
 
     - name: Build
-      shell: cmake -P {0}
-      run: |
-        file(STRINGS environment_script_output.txt output_lines)
-        foreach(line IN LISTS output_lines)
-          if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
-            set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
-          endif()
-        endforeach()
-
-        execute_process(
-          COMMAND cmake --build build
-          RESULT_VARIABLE result
-          OUTPUT_VARIABLE output
-          ERROR_VARIABLE output
-          ECHO_OUTPUT_VARIABLE ECHO_ERROR_VARIABLE
-        )
-        if (NOT result EQUAL 0)
-          string(REGEX MATCH "FAILED:.*$" error_message "${output}")
-          string(REPLACE "\n" "%0A" error_message "${error_message}")
-          message("::error::${error_message}")
-          message(FATAL_ERROR "Build failed")
-        endif()
+      run: msbuild build\HArray.sln /property:Configuration=Release
 
     - name: Run benchmarks
       run: |

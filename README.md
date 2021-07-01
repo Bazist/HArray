@@ -70,6 +70,21 @@ msbuild build\HArray.sln /property:Configuration=Release
 
 The benchmark application `HArray.exe` will be in `build\Debug` or `build\Release` folder.
 
+### Code::Blocks
+
+To generate Code::Blocks project files run the following commands. On Linux:
+
+```bash
+cmake -Bbuild -G"CodeBlocks - Unis Makefiles"
+```
+
+On Windows:
+
+```cmd
+cmake -Bbuild -G"CodeBlocks - NMake Makefiles"
+```
+
+Code::Blocks project files will be generated in `build` folder.
 
 ## Why we love Trie ? Because it has much more functionality and stability than Hashtables and much more faster than Binary Trees. Let's compare properties:
 

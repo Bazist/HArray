@@ -20,23 +20,23 @@
 #include "HArray.h"
 
 //SCAN BY VISITOR ======================================================================================================================
-void HArray::scanKeysAndValuesFromBlock(uint32* key,
-											  uint32 contentOffset,
-											  uint32 keyOffset,
-											  uint32 blockOffset,
+void HArray::scanKeysAndValuesFromBlock(int32_t* key,
+											  int32_t contentOffset,
+											  int32_t keyOffset,
+											  int32_t blockOffset,
 											  HARRAY_ITEM_VISIT_FUNC visitor,
 											  void* pData)
 {
 	//printf("getValuesByRangeFromBlock count=%d size=%d contentOffset=%d keyOffset=%d blockOffset=%d\n", count, size, contentOffset, keyOffset, blockOffset);
 
-	uint32 maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
+	int32_t maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
 
-	for(uint32 offset = blockOffset; offset < maxOffset; offset++)
+	for(int32_t offset = blockOffset; offset < maxOffset; offset++)
 	{
 		BlockPage* pBlockPage = pBlockPages[offset >> 16];
 		BlockCell& blockCell = pBlockPage->pBlock[offset & 0xFFFF];
 
-		uchar8& blockCellType = blockCell.Type;
+		uint8_t& blockCellType = blockCell.Type;
 
 		if(blockCellType == EMPTY_TYPE)
 		{
@@ -44,7 +44,7 @@ void HArray::scanKeysAndValuesFromBlock(uint32* key,
 		}
 		else if(blockCellType == CURRENT_VALUE_TYPE) //current value
 		{
-			uint32& keyValue = blockCell.ValueOrOffset;
+			int32_t& keyValue = blockCell.ValueOrOffset;
 
 			key[keyOffset] = keyValue;
 
@@ -56,9 +56,9 @@ void HArray::scanKeysAndValuesFromBlock(uint32* key,
 			BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
 
 			//try find value in the list
-			for(uint32 i=0; i<blockCellType; i++)
+			for(int32_t i=0; i<blockCellType; i++)
 			{
-				uint32& keyValue = branchCell1.Values[i];
+				int32_t& keyValue = branchCell1.Values[i];
 
 				key[keyOffset] = keyValue;
 
@@ -71,9 +71,9 @@ void HArray::scanKeysAndValuesFromBlock(uint32* key,
 			BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
 
 			//try find value in the list
-			for(uint32 i=0; i < BRANCH_ENGINE_SIZE; i++)
+			for(int32_t i=0; i < BRANCH_ENGINE_SIZE; i++)
 			{
-				uint32& keyValue = branchCell1.Values[i];
+				int32_t& keyValue = branchCell1.Values[i];
 
 				key[keyOffset] = keyValue;
 
@@ -84,11 +84,11 @@ void HArray::scanKeysAndValuesFromBlock(uint32* key,
 			BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 
 			//try find value in the list
-			uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
+			int32_t countValues = blockCellType - MAX_BRANCH_TYPE1;
 
-			for(uint32 i=0; i<countValues; i++)
+			for(int32_t i=0; i<countValues; i++)
 			{
-				uint32& keyValue = branchCell2.Values[i];
+				int32_t& keyValue = branchCell2.Values[i];
 
 				key[keyOffset] = keyValue;
 
@@ -108,9 +108,9 @@ void HArray::scanKeysAndValuesFromBlock(uint32* key,
 	}
 }
 
-void HArray::scanKeysAndValues(uint32* key,
-									 uint32 keyOffset,
-									 uint32 contentOffset,
+void HArray::scanKeysAndValues(int32_t* key,
+									 int32_t keyOffset,
+									 int32_t contentOffset,
 									 HARRAY_ITEM_VISIT_FUNC visitor,
 									 void* pData)
 {
@@ -119,18 +119,18 @@ void HArray::scanKeysAndValues(uint32* key,
 	for(;; keyOffset++, contentOffset++)
 	{
 		ContentPage* pContentPage = pContentPages[contentOffset>>16];
-		ushort16 contentIndex = contentOffset&0xFFFF;
+		uint16_t contentIndex = contentOffset&0xFFFF;
 
-		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
-		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
+		int32_t contentCellValueOrOffset = pContentPage->pContent[contentIndex];
+		uint8_t contentCellType = pContentPage->pType[contentIndex]; //move to type part
 
 		if(contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
-			uint32 keyLen =  contentCellType - ONLY_CONTENT_TYPE;
+			int32_t keyLen =  contentCellType - ONLY_CONTENT_TYPE;
 
-			for(uint32 i = 0; i < keyLen; i++, keyOffset++, contentOffset++)
+			for(int32_t i = 0; i < keyLen; i++, keyOffset++, contentOffset++)
 			{
-				uint32& keyValue = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF];
+				int32_t& keyValue = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF];
 
 				key[keyOffset] = keyValue;
 			}
@@ -176,9 +176,9 @@ void HArray::scanKeysAndValues(uint32* key,
 			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
 
 			//check other
-			for(uint32 i = 0; i<contentCellType; i++) //from 1
+			for(int32_t i = 0; i<contentCellType; i++) //from 1
 			{
-				uint32& keyValue = branchCell.Values[i];
+				int32_t& keyValue = branchCell.Values[i];
 
 				key[keyOffset] = keyValue;
 
@@ -209,21 +209,21 @@ void HArray::scanKeysAndValues(uint32* key,
 		}
 		else if(contentCellType == CURRENT_VALUE_TYPE)
 		{
-			uint32& keyValue = contentCellValueOrOffset;
+			int32_t& keyValue = contentCellValueOrOffset;
 
 			key[keyOffset] = keyValue;
 		}
 	}
 }
 
-void HArray::scanKeysAndValues(uint32* key,
-								uint32 keyLen,
+void HArray::scanKeysAndValues(int32_t* key,
+								int32_t keyLen,
 								HARRAY_ITEM_VISIT_FUNC visitor,
 								void* pData)
 {
-	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
+	int32_t maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
-	uint32 headerOffset;
+	int32_t headerOffset;
 
 	if (!normalizeFunc)
 	{
@@ -234,21 +234,21 @@ void HArray::scanKeysAndValues(uint32* key,
 		headerOffset = (*normalizeFunc)(key);
 	}
 
-	uint32 contentOffset = pHeader[headerOffset];
+	int32_t contentOffset = pHeader[headerOffset];
 
 	if(contentOffset)
 	{
-		uint32 keyOffset = 0;
+		int32_t keyOffset = 0;
 
 NEXT_KEY_PART:
 		ContentPage* pContentPage = pContentPages[contentOffset>>16];
-		ushort16 contentIndex = contentOffset&0xFFFF;
+		uint16_t contentIndex = contentOffset&0xFFFF;
 
-		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
+		uint8_t contentCellType = pContentPage->pType[contentIndex]; //move to type part
 
 		if(contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
-			uint32 fullKeyLen = keyOffset + contentCellType - ONLY_CONTENT_TYPE;
+			int32_t fullKeyLen = keyOffset + contentCellType - ONLY_CONTENT_TYPE;
 
 			if(contentIndex < maxSafeShort) //content in one page
 			{
@@ -299,8 +299,8 @@ NEXT_KEY_PART:
 			}
 		}
 
-		uint32& keyValue = key[keyOffset];
-		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
+		int32_t& keyValue = key[keyOffset];
+		int32_t contentCellValueOrOffset = pContentPage->pContent[contentIndex];
 
 		if(contentCellType == VAR_TYPE) //VAR =====================================================================
 		{
@@ -354,9 +354,9 @@ NEXT_KEY_PART:
 			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
 
 			//try find value in the list
-			uint32* values = branchCell.Values;
+			int32_t* values = branchCell.Values;
 
-			for(uint32 i=0; i<contentCellType; i++)
+			for(int32_t i=0; i<contentCellType; i++)
 			{
 				if(values[i] == keyValue)
 				{
@@ -380,18 +380,18 @@ NEXT_KEY_PART:
 		}
 		else if(contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
 		{
-			uchar8 idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
+			uint8_t idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 
-			uint32 startOffset = contentCellValueOrOffset;
+			int32_t startOffset = contentCellValueOrOffset;
 
 	NEXT_BLOCK:
-			uint32 subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
-			uint32 blockOffset = startOffset + subOffset;
+			int32_t subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
+			int32_t blockOffset = startOffset + subOffset;
 
 			BlockPage* pBlockPage = pBlockPages[blockOffset >> 16];
 			BlockCell& blockCell = pBlockPage->pBlock[blockOffset & 0xFFFF];
 
-			uchar8& blockCellType = blockCell.Type;
+			uint8_t& blockCellType = blockCell.Type;
 
 			if(blockCellType == EMPTY_TYPE)
 			{
@@ -417,7 +417,7 @@ NEXT_KEY_PART:
 				BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
 
 				//try find value in the list
-				for(uint32 i=0; i<blockCellType; i++)
+				for(int32_t i=0; i<blockCellType; i++)
 				{
 					if(branchCell1.Values[i] == keyValue)
 					{
@@ -436,7 +436,7 @@ NEXT_KEY_PART:
 				BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
 
 				//try find value in the list
-				for(uint32 i=0; i < BRANCH_ENGINE_SIZE; i++)
+				for(int32_t i=0; i < BRANCH_ENGINE_SIZE; i++)
 				{
 					if(branchCell1.Values[i] == keyValue)
 					{
@@ -451,9 +451,9 @@ NEXT_KEY_PART:
 				BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 
 				//try find value in the list
-				uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
+				int32_t countValues = blockCellType - MAX_BRANCH_TYPE1;
 
-				for(uint32 i=0; i<countValues; i++)
+				for(int32_t i=0; i<countValues; i++)
 				{
 					if(branchCell2.Values[i] == keyValue)
 					{
@@ -502,11 +502,11 @@ NEXT_KEY_PART:
 void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 								void* pData)
 {
-	uint32 key[1024];
+	int32_t key[1024];
 
-	for (uint32 i = 0; i < HeaderSize; i++)
+	for (int32_t i = 0; i < HeaderSize; i++)
 	{
-		uint32 contentOffset = pHeader[i];
+		int32_t contentOffset = pHeader[i];
 
 		if (contentOffset)
 		{
@@ -520,24 +520,24 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 }
 
 ////RETURN ARRAY ======================================================================================================================
-//void HArray::scanKeysAndValuesFromBlock(uint32* key,
-//	uint32 keyLen,
-//	uint32 contentOffset,
-//	uint32 keyOffset,
-//	uint32 blockOffset,
+//void HArray::scanKeysAndValuesFromBlock(int32_t* key,
+//	int32_t keyLen,
+//	int32_t contentOffset,
+//	int32_t keyOffset,
+//	int32_t blockOffset,
 //	HArrayPair* pairs,
-//	uint32& countPairs)
+//	int32_t& countPairs)
 //{
 //	//printf("getValuesByRangeFromBlock count=%d size=%d contentOffset=%d keyOffset=%d blockOffset=%d\n", count, size, contentOffset, keyOffset, blockOffset);
 //
-//	uint32 maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
+//	int32_t maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
 //
-//	for (uint32 offset = blockOffset; offset < maxOffset; offset++)
+//	for (int32_t offset = blockOffset; offset < maxOffset; offset++)
 //	{
 //		BlockPage* pBlockPage = pBlockPages[offset >> 16];
 //		BlockCell& blockCell = pBlockPage->pBlock[offset & 0xFFFF];
 //
-//		uchar8& blockCellType = blockCell.Type;
+//		uint8_t& blockCellType = blockCell.Type;
 //
 //		if (blockCellType == EMPTY_TYPE)
 //		{
@@ -545,7 +545,7 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //		}
 //		else if (blockCellType == CURRENT_VALUE_TYPE) //current value
 //		{
-//			uint32& keyValue = blockCell.ValueOrOffset;
+//			int32_t& keyValue = blockCell.ValueOrOffset;
 //
 //			key[keyOffset] = keyValue;
 //
@@ -557,9 +557,9 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //			BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
 //
 //			//try find value in the list
-//			for (uint32 i = 0; i < blockCellType; i++)
+//			for (int32_t i = 0; i < blockCellType; i++)
 //			{
-//				uint32& keyValue = branchCell1.Values[i];
+//				int32_t& keyValue = branchCell1.Values[i];
 //
 //				key[keyOffset] = keyValue;
 //
@@ -572,9 +572,9 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //			BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
 //
 //			//try find value in the list
-//			for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+//			for (int32_t i = 0; i < BRANCH_ENGINE_SIZE; i++)
 //			{
-//				uint32& keyValue = branchCell1.Values[i];
+//				int32_t& keyValue = branchCell1.Values[i];
 //
 //				key[keyOffset] = keyValue;
 //
@@ -585,11 +585,11 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //			BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 //
 //			//try find value in the list
-//			uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
+//			int32_t countValues = blockCellType - MAX_BRANCH_TYPE1;
 //
-//			for (uint32 i = 0; i < countValues; i++)
+//			for (int32_t i = 0; i < countValues; i++)
 //			{
-//				uint32& keyValue = branchCell2.Values[i];
+//				int32_t& keyValue = branchCell2.Values[i];
 //
 //				key[keyOffset] = keyValue;
 //
@@ -610,30 +610,30 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //	}
 //}
 //
-//void HArray::scanKeysAndValues(uint32* key,
-//	uint32 keyLen,
-//	uint32 keyOffset,
-//	uint32 contentOffset,
-//	uint32* values,
-//	uint32& countValues)
+//void HArray::scanKeysAndValues(int32_t* key,
+//	int32_t keyLen,
+//	int32_t keyOffset,
+//	int32_t contentOffset,
+//	int32_t* values,
+//	int32_t& countValues)
 //{
 //	//printf("getValuesByRange count=%d size=%d contentOffset=%d keyOffset=%d\n", count, size, contentOffset, keyOffset);
 //
 //	for (;; keyOffset++, contentOffset++)
 //	{
 //		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
-//		ushort16 contentIndex = contentOffset & 0xFFFF;
+//		uint16_t contentIndex = contentOffset & 0xFFFF;
 //
-//		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
-//		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
+//		int32_t contentCellValueOrOffset = pContentPage->pContent[contentIndex];
+//		uint8_t contentCellType = pContentPage->pType[contentIndex]; //move to type part
 //
 //		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 //		{
-//			uint32 keyLen = contentCellType - ONLY_CONTENT_TYPE;
+//			int32_t keyLen = contentCellType - ONLY_CONTENT_TYPE;
 //
-//			for (uint32 i = 0; i < keyLen; i++, keyOffset++, contentOffset++)
+//			for (int32_t i = 0; i < keyLen; i++, keyOffset++, contentOffset++)
 //			{
-//				uint32& keyValue = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF];
+//				int32_t& keyValue = pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF];
 //
 //				key[keyOffset] = keyValue;
 //			}
@@ -679,9 +679,9 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
 //
 //			//check other
-//			for (uint32 i = 0; i < contentCellType; i++) //from 1
+//			for (int32_t i = 0; i < contentCellType; i++) //from 1
 //			{
-//				uint32& keyValue = branchCell.Values[i];
+//				int32_t& keyValue = branchCell.Values[i];
 //
 //				key[keyOffset] = keyValue;
 //
@@ -714,22 +714,22 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //		}
 //		else if (contentCellType == CURRENT_VALUE_TYPE)
 //		{
-//			uint32& keyValue = contentCellValueOrOffset;
+//			int32_t& keyValue = contentCellValueOrOffset;
 //
 //			key[keyOffset] = keyValue;
 //		}
 //	}
 //}
 //
-//void HArray::scanKeysAndValues(uint32* key,
-//	uint32 keyLen,
-//	uint32 filterKeyLen, //set 
-//	uint32* values,
-//	uint32& countValues)
+//void HArray::scanKeysAndValues(int32_t* key,
+//	int32_t keyLen,
+//	int32_t filterKeyLen, //set 
+//	int32_t* values,
+//	int32_t& countValues)
 //{
-//	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
+//	int32_t maxSafeShort = MAX_SAFE_SHORT - keyLen;
 //
-//	uint32 headerOffset;
+//	int32_t headerOffset;
 //
 //	if (!normalizeFunc)
 //	{
@@ -740,21 +740,21 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //		headerOffset = (*normalizeFunc)(key);
 //	}
 //
-//	uint32 contentOffset = pHeader[headerOffset];
+//	int32_t contentOffset = pHeader[headerOffset];
 //
 //	if (contentOffset)
 //	{
-//		uint32 keyOffset = 0;
+//		int32_t keyOffset = 0;
 //
 //	NEXT_KEY_PART:
 //		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
-//		ushort16 contentIndex = contentOffset & 0xFFFF;
+//		uint16_t contentIndex = contentOffset & 0xFFFF;
 //
-//		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
+//		uint8_t contentCellType = pContentPage->pType[contentIndex]; //move to type part
 //
 //		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 //		{
-//			uint32 fullKeyLen = keyOffset + contentCellType - ONLY_CONTENT_TYPE;
+//			int32_t fullKeyLen = keyOffset + contentCellType - ONLY_CONTENT_TYPE;
 //
 //			if (contentIndex < maxSafeShort) //content in one page
 //			{
@@ -807,8 +807,8 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //			}
 //		}
 //
-//		uint32& keyValue = key[keyOffset];
-//		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
+//		int32_t& keyValue = key[keyOffset];
+//		int32_t contentCellValueOrOffset = pContentPage->pContent[contentIndex];
 //
 //		if (contentCellType == VAR_TYPE) //VAR =====================================================================
 //		{
@@ -863,9 +863,9 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
 //
 //			//try find value in the list
-//			uint32* values = branchCell.Values;
+//			int32_t* values = branchCell.Values;
 //
-//			for (uint32 i = 0; i < contentCellType; i++)
+//			for (int32_t i = 0; i < contentCellType; i++)
 //			{
 //				if (values[i] == keyValue)
 //				{
@@ -890,18 +890,18 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //		}
 //		else if (contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
 //		{
-//			uchar8 idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
+//			uint8_t idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 //
-//			uint32 startOffset = contentCellValueOrOffset;
+//			int32_t startOffset = contentCellValueOrOffset;
 //
 //		NEXT_BLOCK:
-//			uint32 subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
-//			uint32 blockOffset = startOffset + subOffset;
+//			int32_t subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
+//			int32_t blockOffset = startOffset + subOffset;
 //
 //			BlockPage* pBlockPage = pBlockPages[blockOffset >> 16];
 //			BlockCell& blockCell = pBlockPage->pBlock[blockOffset & 0xFFFF];
 //
-//			uchar8& blockCellType = blockCell.Type;
+//			uint8_t& blockCellType = blockCell.Type;
 //
 //			if (blockCellType == EMPTY_TYPE)
 //			{
@@ -927,7 +927,7 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //				BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
 //
 //				//try find value in the list
-//				for (uint32 i = 0; i < blockCellType; i++)
+//				for (int32_t i = 0; i < blockCellType; i++)
 //				{
 //					if (branchCell1.Values[i] == keyValue)
 //					{
@@ -946,7 +946,7 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //				BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
 //
 //				//try find value in the list
-//				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+//				for (int32_t i = 0; i < BRANCH_ENGINE_SIZE; i++)
 //				{
 //					if (branchCell1.Values[i] == keyValue)
 //					{
@@ -961,9 +961,9 @@ void HArray::scanKeysAndValues(HARRAY_ITEM_VISIT_FUNC visitor,
 //				BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 //
 //				//try find value in the list
-//				uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
+//				int32_t countValues = blockCellType - MAX_BRANCH_TYPE1;
 //
-//				for (uint32 i = 0; i < countValues; i++)
+//				for (int32_t i = 0; i < countValues; i++)
 //				{
 //					if (branchCell2.Values[i] == keyValue)
 //					{

@@ -33,31 +33,31 @@
 #include <inttypes.h>
 
 #ifdef _WIN32
-typedef __int32 int32;
+typedef __int32_t int32_t;
 typedef __int64 long64;
-typedef unsigned __int32 uint32;
-typedef unsigned __int64 ulong64;
-typedef unsigned __int16 ushort16;
-typedef unsigned __int8 uchar8;
+typedef unsigned __int32_t int32_t;
+typedef unsigned __int64 uint64_t;
+typedef unsigned __int16 uint16_t;
+typedef unsigned __int8 uint8_t;
 typedef unsigned __int8 ucode8;
 #endif
 
 #ifdef linux
-typedef int32_t int32;
+typedef int32_t_t int32_t;
 typedef int64_t long64;
-typedef uint32_t uint32;
-typedef uint64_t ulong64;
-typedef uint16_t ushort16;
-typedef uint8_t uchar8;
+typedef int32_t_t int32_t;
+typedef uint64_t uint64_t;
+typedef uint16_t uint16_t;
+typedef uint8_t uint8_t;
 typedef uint8_t ucode8;
 #endif
 
-const uint32 MAX_CHAR = 256;
-const uint32 MAX_SHORT = 65536;
+const int32_t MAX_CHAR = 256;
+const int32_t MAX_SHORT = 65536;
 
-const uint32 INIT_MAX_PAGES = 256;
-const uint32 PAGE_SIZE = MAX_SHORT*2;
-const uchar8 BLOCK_SIZE = 16;
-const uchar8 ROW_LEN = 3;
+const int32_t INIT_MAX_PAGES = 256;
+const int32_t PAGE_SIZE = MAX_SHORT*2;
+const uint8_t BLOCK_SIZE = 16;
+const uint8_t ROW_LEN = 3;
 
 // TODO: reference additional headers your program requires here

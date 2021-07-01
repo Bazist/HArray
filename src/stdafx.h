@@ -30,6 +30,8 @@
 #include <cstdint>
 #include <string>
 #include <cstring>
+#include <limits>
+
 #include <stdio.h>
 #include <inttypes.h>
 

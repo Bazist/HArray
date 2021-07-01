@@ -32,16 +32,6 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#ifdef _WIN32
-typedef __int32_t int32_t;
-typedef __int64 long64;
-typedef unsigned __int32_t int32_t;
-typedef unsigned __int64 uint64_t;
-typedef unsigned __int16 uint16_t;
-typedef unsigned __int8 uint8_t;
-typedef unsigned __int8 ucode8;
-#endif
-
 #ifdef linux
 typedef int32_t_t int32_t;
 typedef int64_t long64;

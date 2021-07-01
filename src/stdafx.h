@@ -32,16 +32,6 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#ifdef linux
-typedef int32_t_t int32_t;
-typedef int64_t long64;
-typedef int32_t_t int32_t;
-typedef uint64_t uint64_t;
-typedef uint16_t uint16_t;
-typedef uint8_t uint8_t;
-typedef uint8_t ucode8;
-#endif
-
 const int32_t MAX_CHAR = 256;
 const int32_t MAX_SHORT = 65536;
 

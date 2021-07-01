@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "HArrayLongValue.h"
 
 class ValuePool

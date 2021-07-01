@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 env:
   CMAKE_VERSION: 3.18.3
-  BUILD_TYPE: Release
+  BUILD_TYPE: Debug
 
 jobs:
   build:

@@ -51,7 +51,7 @@ cd build && make
 To build release version of the library and benchmarks run instead:
 
 ```bash
-cmake -Bbuild --config Release
+cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
 ```
 
 ### Build on Windows

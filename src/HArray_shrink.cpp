@@ -20,17 +20,17 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-uint32 HArray::moveContentCells(uint32& startContentOffset,
+uint32_t HArray::moveContentCells(uint32_t& startContentOffset,
 	ContentPage** newContentPages,
-	uint32& countNewContentPages,
-	uint32 shrinkLastContentOffset,
-	uint32* lastContentOffsetOnNewPages)
+	uint32_t& countNewContentPages,
+	uint32_t shrinkLastContentOffset,
+	uint32_t* lastContentOffsetOnNewPages)
 {
-	uchar8* pSourceStartContentCellType = &pContentPages[startContentOffset >> 16]->pType[startContentOffset & 0xFFFF];
-	uint32* pSourceStartContentCellValue = &pContentPages[startContentOffset >> 16]->pContent[startContentOffset & 0xFFFF];
+	uint8_t* pSourceStartContentCellType = &pContentPages[startContentOffset >> 16]->pType[startContentOffset & 0xFFFF];
+	uint32_t* pSourceStartContentCellValue = &pContentPages[startContentOffset >> 16]->pContent[startContentOffset & 0xFFFF];
 
 	//identify key len
-	uint32 keyLen;
+	uint32_t keyLen;
 
 	if (*pSourceStartContentCellType >= ONLY_CONTENT_TYPE)
 	{
@@ -39,8 +39,8 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 	else
 	{
 		//detect key len
-		uchar8* pEndContentCellType = pSourceStartContentCellType;
-		uint32* pEndContentCellValue = pSourceStartContentCellValue;
+		uint8_t* pEndContentCellType = pSourceStartContentCellType;
+		uint32_t* pEndContentCellValue = pSourceStartContentCellValue;
 
 		while (true)
 		{
@@ -70,17 +70,17 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 		keyLen = pEndContentCellValue - pSourceStartContentCellValue;
 	}
 
-	uint32 dataLen = (keyLen + ValueLen);
+	uint32_t dataLen = (keyLen + ValueLen);
 
 	//get key from pool
-	uchar8* pDestStartContentCellType = 0;
-	uint32* pDestStartContentCellValue = 0;
+	uint8_t* pDestStartContentCellType = 0;
+	uint32_t* pDestStartContentCellValue = 0;
 
-	uint32 index;
-	uint32 subOffset = 0;
+	uint32_t index;
+	uint32_t subOffset = 0;
 
 	//key not found, try get key from bigger slots
-	for (uint32 currKeyLen = keyLen; currKeyLen < MAX_KEY_SEGMENTS; currKeyLen++)
+	for (uint32_t currKeyLen = keyLen; currKeyLen < MAX_KEY_SEGMENTS; currKeyLen++)
 	{
 		while (tailReleasedContentOffsets[keyLen]) //to existing page
 		{
@@ -89,8 +89,8 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 
 			ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
 
-			uchar8& contentCellType = pContentPage->pType[startContentOffset & 0xFFFF];
-			uint32& contentCellValue = pContentPage->pContent[startContentOffset & 0xFFFF];
+			uint8_t& contentCellType = pContentPage->pType[startContentOffset & 0xFFFF];
+			uint32_t& contentCellValue = pContentPage->pContent[startContentOffset & 0xFFFF];
 
 			tailReleasedContentOffsets[keyLen] = contentCellValue;
 
@@ -103,7 +103,7 @@ uint32 HArray::moveContentCells(uint32& startContentOffset,
 
 				if (keyLen < currKeyLen)
 				{
-					uint32 len = keyLen + 1;
+					uint32_t len = keyLen + 1;
 
 					releaseContentCells(pDestStartContentCellValue + len,
 						startContentOffset + len,
@@ -156,37 +156,37 @@ MOVE_KEY:
 
 	//copy data
 	memcpy(pDestStartContentCellType, pSourceStartContentCellType, dataLen);
-	memcpy(pDestStartContentCellValue, pSourceStartContentCellValue, dataLen * sizeof(uint32));
+	memcpy(pDestStartContentCellValue, pSourceStartContentCellValue, dataLen * sizeof(uint32_t));
 
 	memset(pSourceStartContentCellType, 0, dataLen);
-	memset(pSourceStartContentCellValue, 0, dataLen * sizeof(uint32));
+	memset(pSourceStartContentCellValue, 0, dataLen * sizeof(uint32_t));
 
 	return (keyLen + ValueLen);
 }
 
 void HArray::shrinkContentPages()
 {
-	uint32 amountShrinkPages = countReleasedContentCells / MAX_SHORT;
-	uint32 shrinkLastPage = (((lastContentOffset - 1) >> 16) - (amountShrinkPages - 1));
-	uint32 shrinkLastContentOffset = shrinkLastPage << 16; //begin of previous page
+	uint32_t amountShrinkPages = countReleasedContentCells / MAX_SHORT;
+	uint32_t shrinkLastPage = (((lastContentOffset - 1) >> 16) - (amountShrinkPages - 1));
+	uint32_t shrinkLastContentOffset = shrinkLastPage << 16; //begin of previous page
 
-	uint32 currMovedLen = 0;
-	uint32 totalMovedLen = lastContentOffset - shrinkLastContentOffset;
+	uint32_t currMovedLen = 0;
+	uint32_t totalMovedLen = lastContentOffset - shrinkLastContentOffset;
 
 	ContentPage** newContentPages = new ContentPage*[amountShrinkPages];
 	memset(newContentPages, 0, amountShrinkPages * sizeof(ContentPage*));
 
-	uint32 countNewContentPages = 0;
+	uint32_t countNewContentPages = 0;
 
-	uint32* lastContentOffsetOnNewPages = new uint32[amountShrinkPages];
-	memset(lastContentOffsetOnNewPages, 0, amountShrinkPages * sizeof(uint32));
+	uint32_t* lastContentOffsetOnNewPages = new uint32_t[amountShrinkPages];
+	memset(lastContentOffsetOnNewPages, 0, amountShrinkPages * sizeof(uint32_t));
 
-	uint32 lastPage;
+	uint32_t lastPage;
 
 	//1. scan header ==============================================================================================
-	for (uint32 cell = 0; cell < HeaderSize; cell++)
+	for (uint32_t cell = 0; cell < HeaderSize; cell++)
 	{
-		uint32& contentOffset = pHeader[cell];
+		uint32_t& contentOffset = pHeader[cell];
 
 		if (contentOffset >= shrinkLastContentOffset)
 		{
@@ -208,11 +208,11 @@ void HArray::shrinkContentPages()
 	{
 		lastPage = BranchPagesCount - 1;
 
-		for (uint32 page = 0; page < BranchPagesCount; page++)
+		for (uint32_t page = 0; page < BranchPagesCount; page++)
 		{
 			BranchPage* pBranchPage = pBranchPages[page];
 
-			uint32 countCells;
+			uint32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -223,11 +223,11 @@ void HArray::shrinkContentPages()
 				countCells = ((lastBranchOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (uint32_t cell = 0; cell < countCells; cell++)
 			{
 				BranchCell& branchCell = pBranchPage->pBranch[cell];
 
-				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+				for (uint32_t i = 0; i < BRANCH_ENGINE_SIZE; i++)
 				{
 					if (branchCell.Offsets[i]) //not empty
 					{
@@ -259,11 +259,11 @@ void HArray::shrinkContentPages()
 	{
 		lastPage = BlockPagesCount - 1;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (uint32_t page = 0; page < BlockPagesCount; page++)
 		{
 			BlockPage* pBlockPage = pBlockPages[page];
 
-			uint32 countCells;
+			uint32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -274,7 +274,7 @@ void HArray::shrinkContentPages()
 				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (uint32_t cell = 0; cell < countCells; cell++)
 			{
 				BlockCell& blockCell = pBlockPage->pBlock[cell];
 
@@ -301,11 +301,11 @@ void HArray::shrinkContentPages()
 	{
 		lastPage = VarPagesCount - 1;
 
-		for (uint32 page = 0; page < VarPagesCount; page++)
+		for (uint32_t page = 0; page < VarPagesCount; page++)
 		{
 			VarPage* pVarPage = pVarPages[page];
 
-			uint32 countCells;
+			uint32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -316,7 +316,7 @@ void HArray::shrinkContentPages()
 				countCells = ((lastVarOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (uint32_t cell = 0; cell < countCells; cell++)
 			{
 				VarCell& varCell = pVarPage->pVar[cell];
 
@@ -339,10 +339,10 @@ void HArray::shrinkContentPages()
 	}
 
 	//5. clear shrinked spaces in pool ===========================================================================
-	for (uint32 i = 0; i < MAX_KEY_SEGMENTS; i++)
+	for (uint32_t i = 0; i < MAX_KEY_SEGMENTS; i++)
 	{
-		uint32 contentOffset = tailReleasedContentOffsets[i];
-		uint32 prevContentOffset = 0;
+		uint32_t contentOffset = tailReleasedContentOffsets[i];
+		uint32_t prevContentOffset = 0;
 
 		while (contentOffset)
 		{
@@ -376,7 +376,7 @@ void HArray::shrinkContentPages()
 EXIT:
 
 	//6. remove pages ==============================================================================================
-	for (uint32 i = 0, currPage = shrinkLastPage; i < amountShrinkPages; i++, currPage++)
+	for (uint32_t i = 0, currPage = shrinkLastPage; i < amountShrinkPages; i++, currPage++)
 	{
 		delete pContentPages[currPage];
 		pContentPages[currPage] = 0;
@@ -384,7 +384,7 @@ EXIT:
 
 	if (countNewContentPages) //not all content were moved to existing pages
 	{
-		for (uint32 i = 0, currPage = shrinkLastPage; i < countNewContentPages; i++, currPage++)
+		for (uint32_t i = 0, currPage = shrinkLastPage; i < countNewContentPages; i++, currPage++)
 		{
 			pContentPages[currPage] = newContentPages[i];
 		}
@@ -396,9 +396,9 @@ EXIT:
 		notMovedContentCellsAfterLastShrink = lastContentOffset - shrinkLastContentOffset;
 
 		//release rest content cells
-		for (uint32 i = 0, currPage = shrinkLastPage; i < countNewContentPages - 1; i++, currPage++)
+		for (uint32_t i = 0, currPage = shrinkLastPage; i < countNewContentPages - 1; i++, currPage++)
 		{
-			uint32 restLen = MAX_SHORT - lastContentOffsetOnNewPages[i];
+			uint32_t restLen = MAX_SHORT - lastContentOffsetOnNewPages[i];
 
 			if (restLen)
 			{
@@ -423,7 +423,7 @@ EXIT:
 
 void HArray::shrinkBranchPages()
 {
-	uint32 shrinkLastBranchOffset = lastBranchOffset - countReleasedBranchCells;
+	uint32_t shrinkLastBranchOffset = lastBranchOffset - countReleasedBranchCells;
 
 	//the are no branches in ha, delete all branch pages
 	if (!shrinkLastBranchOffset)
@@ -431,7 +431,7 @@ void HArray::shrinkBranchPages()
 		tailReleasedBranchOffset = 0;
 		countReleasedBranchCells = 0;
 
-		for (uint32 page = 0; page < BranchPagesCount; page++)
+		for (uint32_t page = 0; page < BranchPagesCount; page++)
 		{
 			if (pBranchPages[page])
 			{
@@ -448,28 +448,28 @@ void HArray::shrinkBranchPages()
 	}
 
 	//content ===================================================================================================================
-	memset(tailReleasedContentOffsets, 0, sizeof(uint32) * MAX_KEY_SEGMENTS);
+	memset(tailReleasedContentOffsets, 0, sizeof(uint32_t) * MAX_KEY_SEGMENTS);
 	countReleasedContentCells = 0;
 
-	uchar8* pStartReleasedContentCellsType = 0;
-	uint32* pStartReleasedContentCellsValue = 0;
+	uint8_t* pStartReleasedContentCellsType = 0;
+	uint32_t* pStartReleasedContentCellsValue = 0;
 
-	uint32 countReleasedContentCells = 0;
-	uint32 startReleasedContentCellsOffset = 0;
+	uint32_t countReleasedContentCells = 0;
+	uint32_t startReleasedContentCellsOffset = 0;
 
-	uint32 skipContentCells = 0;
+	uint32_t skipContentCells = 0;
 
-	uint32 lastPage = 0;
+	uint32_t lastPage = 0;
 
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;
 
-		for (uint32 page = 0; page < ContentPagesCount; page++)
+		for (uint32_t page = 0; page < ContentPagesCount; page++)
 		{
 			ContentPage* pContentPage = pContentPages[page];
 
-			uint32 countCells;
+			uint32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -480,16 +480,16 @@ void HArray::shrinkBranchPages()
 				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = (page == 0 ? 1 : 0); cell < countCells; cell++)
+			for (uint32_t cell = (page == 0 ? 1 : 0); cell < countCells; cell++)
 			{
-				uchar8& contentCellType = pContentPage->pType[cell];
-				uint32& contentCellValue = pContentPage->pContent[cell];
+				uint8_t& contentCellType = pContentPage->pType[cell];
+				uint32_t& contentCellValue = pContentPage->pContent[cell];
 
 				if (MIN_BRANCH_TYPE1 <= contentCellType && contentCellType <= MAX_BRANCH_TYPE1) //in content
 				{
 					if (contentCellValue >= shrinkLastBranchOffset)
 					{
-						uint32 newBranchOffset = 0xFFFFFFFF;
+						uint32_t newBranchOffset = 0xFFFFFFFF;
 
 						//find free var cell
 						while (countReleasedBranchCells)
@@ -542,7 +542,7 @@ void HArray::shrinkBranchPages()
 					{
 						if (varCell.ContCellValue >= shrinkLastBranchOffset)
 						{
-							uint32 newBranchOffset = 0xFFFFFFFF;
+							uint32_t newBranchOffset = 0xFFFFFFFF;
 
 							//find free var cell
 							while (countReleasedBranchCells)
@@ -658,11 +658,11 @@ void HArray::shrinkBranchPages()
 	{
 		lastPage = BlockPagesCount - 1;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (uint32_t page = 0; page < BlockPagesCount; page++)
 		{
 			BlockPage* pBlockPage = pBlockPages[page];
 
-			uint32 countCells;
+			uint32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -673,7 +673,7 @@ void HArray::shrinkBranchPages()
 				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (uint32_t cell = 0; cell < countCells; cell++)
 			{
 				BlockCell& blockCell = pBlockPage->pBlock[cell];
 
@@ -684,7 +684,7 @@ void HArray::shrinkBranchPages()
 						//first barnch
 						if (blockCell.Offset >= shrinkLastBranchOffset)
 						{
-							uint32 newBranchOffset = 0xFFFFFFFF;
+							uint32_t newBranchOffset = 0xFFFFFFFF;
 
 							//find free branch cell
 							while (countReleasedBranchCells)
@@ -734,7 +734,7 @@ void HArray::shrinkBranchPages()
 						//first branch
 						if (blockCell.Offset >= shrinkLastBranchOffset)
 						{
-							uint32 newBranchOffset = 0xFFFFFFFF;
+							uint32_t newBranchOffset = 0xFFFFFFFF;
 
 							//find free branch cell
 							while (countReleasedBranchCells)
@@ -782,7 +782,7 @@ void HArray::shrinkBranchPages()
 						//second branch
 						if (blockCell.ValueOrOffset >= shrinkLastBranchOffset)
 						{
-							uint32 newBranchOffset = 0xFFFFFFFF;
+							uint32_t newBranchOffset = 0xFFFFFFFF;
 
 							//find free branch cell
 							while (countReleasedBranchCells)
@@ -833,7 +833,7 @@ void HArray::shrinkBranchPages()
 	}
 
 	//check state
-	for (uint32 i = 0; i < countReleasedBranchCells; i++)
+	for (uint32_t i = 0; i < countReleasedBranchCells; i++)
 	{
 		if (tailReleasedBranchOffset < shrinkLastBranchOffset)
 		{
@@ -853,11 +853,11 @@ void HArray::shrinkBranchPages()
 EXIT:
 
 	//delete shrinked pages
-	uint32 startPage = (shrinkLastBranchOffset >> 16) + 1;
+	uint32_t startPage = (shrinkLastBranchOffset >> 16) + 1;
 
-	uint32 endPage = (lastBranchOffset >> 16);
+	uint32_t endPage = (lastBranchOffset >> 16);
 
-	for (uint32 page = startPage; page <= endPage; page++)
+	for (uint32_t page = startPage; page <= endPage; page++)
 	{
 		if (pBranchPages[page])
 		{
@@ -875,14 +875,14 @@ EXIT:
 }
 
 
-bool HArray::shrinkBlock(uint32 startBlockOffset,
-						 uint32 shrinkLastBlockOffset)
+bool HArray::shrinkBlock(uint32_t startBlockOffset,
+						 uint32_t shrinkLastBlockOffset)
 {
 	//sub blocks ===================================================================================================================
 	BlockPage* pBlockPage = pBlockPages[startBlockOffset >> 16];
 
-	uint32 startOffset = startBlockOffset & 0xFFFF;
-	uint32 endOffset = startOffset + BLOCK_ENGINE_SIZE;
+	uint32_t startOffset = startBlockOffset & 0xFFFF;
+	uint32_t endOffset = startOffset + BLOCK_ENGINE_SIZE;
 
 	//remove warning of compilator
 	if (endOffset > MAX_SHORT)
@@ -892,7 +892,7 @@ bool HArray::shrinkBlock(uint32 startBlockOffset,
 		return false;
 	}
 
-	for (uint32 cell = startOffset; cell < endOffset; cell++)
+	for (uint32_t cell = startOffset; cell < endOffset; cell++)
 	{
 		BlockCell& blockCell = pBlockPage->pBlock[cell];
 
@@ -900,7 +900,7 @@ bool HArray::shrinkBlock(uint32 startBlockOffset,
 		{
 			if (blockCell.Offset >= shrinkLastBlockOffset)
 			{
-				uint32 newBlockOffset = 0xFFFFFFFF;
+				uint32_t newBlockOffset = 0xFFFFFFFF;
 
 				//find free block cell
 				while (countReleasedBlockCells)
@@ -928,7 +928,7 @@ bool HArray::shrinkBlock(uint32 startBlockOffset,
 					return false;
 				}
 
-				uint32 oldBlockOffset = blockCell.Offset;
+				uint32_t oldBlockOffset = blockCell.Offset;
 				blockCell.Offset = newBlockOffset;
 
 				//get cells
@@ -959,7 +959,7 @@ bool HArray::shrinkBlock(uint32 startBlockOffset,
 
 void HArray::shrinkBlockPages()
 {
-	uint32 shrinkLastBlockOffset = lastBlockOffset - countReleasedBlockCells;
+	uint32_t shrinkLastBlockOffset = lastBlockOffset - countReleasedBlockCells;
 
 	//the are no blocks in ha, delete all block pages
 	if (!shrinkLastBlockOffset)
@@ -967,7 +967,7 @@ void HArray::shrinkBlockPages()
 		tailReleasedBlockOffset = 0;
 		countReleasedBlockCells = 0;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (uint32_t page = 0; page < BlockPagesCount; page++)
 		{
 			if (pBlockPages[page])
 			{
@@ -984,28 +984,28 @@ void HArray::shrinkBlockPages()
 	}
 
 	//content ===================================================================================================================
-	memset(tailReleasedContentOffsets, 0, sizeof(uint32) * MAX_KEY_SEGMENTS);
+	memset(tailReleasedContentOffsets, 0, sizeof(uint32_t) * MAX_KEY_SEGMENTS);
 	countReleasedContentCells = 0;
 
-	uchar8* pStartReleasedContentCellsType = 0;
-	uint32* pStartReleasedContentCellsValue = 0;
+	uint8_t* pStartReleasedContentCellsType = 0;
+	uint32_t* pStartReleasedContentCellsValue = 0;
 
-	uint32 countReleasedContentCells = 0;
-	uint32 startReleasedContentCellsOffset = 0;
+	uint32_t countReleasedContentCells = 0;
+	uint32_t startReleasedContentCellsOffset = 0;
 
-	uint32 skipContentCells = 0;
+	uint32_t skipContentCells = 0;
 
-	uint32 lastPage = 0;
+	uint32_t lastPage = 0;
 
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;
 
-		for (uint32 page = 0; page < ContentPagesCount; page++)
+		for (uint32_t page = 0; page < ContentPagesCount; page++)
 		{
 			ContentPage* pContentPage = pContentPages[page];
 
-			uint32 countCells;
+			uint32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -1016,16 +1016,16 @@ void HArray::shrinkBlockPages()
 				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = (page == 0 ? 1 : 0); cell < countCells; cell++)
+			for (uint32_t cell = (page == 0 ? 1 : 0); cell < countCells; cell++)
 			{
-				uchar8& contentCellType = pContentPage->pType[cell];
-				uint32& contentCellValue = pContentPage->pContent[cell];
+				uint8_t& contentCellType = pContentPage->pType[cell];
+				uint32_t& contentCellValue = pContentPage->pContent[cell];
 
 				if (MIN_BLOCK_TYPE <= contentCellType && contentCellType <= MAX_BLOCK_TYPE) //in content
 				{
 					if (contentCellValue >= shrinkLastBlockOffset)
 					{
-						uint32 newBlockOffset = 0xFFFFFFFF;
+						uint32_t newBlockOffset = 0xFFFFFFFF;
 
 						//find free block cell
 						while (countReleasedBlockCells)
@@ -1053,7 +1053,7 @@ void HArray::shrinkBlockPages()
 							return;
 						}
 
-						uint32 oldBlockOffset = contentCellValue;
+						uint32_t oldBlockOffset = contentCellValue;
 						contentCellValue = newBlockOffset;
 
 						//get cells
@@ -1140,11 +1140,11 @@ void HArray::shrinkBlockPages()
 	{
 		lastPage = BlockPagesCount - 1;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (uint32_t page = 0; page < BlockPagesCount; page++)
 		{
 			BlockPage* pBlockPage = pBlockPages[page];
 
-			uint32 countCells;
+			uint32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -1155,7 +1155,7 @@ void HArray::shrinkBlockPages()
 				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (uint32_t cell = 0; cell < countCells; cell++)
 			{
 				BlockCell& blockCell = pBlockPage->pBlock[cell];
 
@@ -1163,7 +1163,7 @@ void HArray::shrinkBlockPages()
 				{
 					if (blockCell.Offset >= shrinkLastBlockOffset)
 					{
-						uint32 newBlockOffset = 0xFFFFFFFF;
+						uint32_t newBlockOffset = 0xFFFFFFFF;
 
 						//find free block cell
 						while (countReleasedBlockCells)
@@ -1191,7 +1191,7 @@ void HArray::shrinkBlockPages()
 							return;
 						}
 
-						uint32 oldBlockOffset = blockCell.Offset;
+						uint32_t oldBlockOffset = blockCell.Offset;
 						blockCell.Offset = newBlockOffset;
 
 						//get cells
@@ -1208,7 +1208,7 @@ void HArray::shrinkBlockPages()
 						}
 
 						//after move block, we need check position and rescan range
-						uint32 currBlockOffset = (page << 16) | cell;
+						uint32_t currBlockOffset = (page << 16) | cell;
 
 						if (newBlockOffset < currBlockOffset)
 						{
@@ -1222,7 +1222,7 @@ void HArray::shrinkBlockPages()
 	}
 
 	//check state
-	for (uint32 i = 0; i < countReleasedBlockCells; i += BLOCK_ENGINE_SIZE)
+	for (uint32_t i = 0; i < countReleasedBlockCells; i += BLOCK_ENGINE_SIZE)
 	{
 		if (tailReleasedBlockOffset < shrinkLastBlockOffset)
 		{
@@ -1242,11 +1242,11 @@ void HArray::shrinkBlockPages()
 EXIT:
 
 	//delete shrinked pages
-	uint32 startPage = (shrinkLastBlockOffset >> 16) + 1;
+	uint32_t startPage = (shrinkLastBlockOffset >> 16) + 1;
 
-	uint32 endPage = (lastBlockOffset >> 16);
+	uint32_t endPage = (lastBlockOffset >> 16);
 
-	for (uint32 page = startPage; page <= endPage; page++)
+	for (uint32_t page = startPage; page <= endPage; page++)
 	{
 		if (pBlockPages[page])
 		{
@@ -1265,7 +1265,7 @@ EXIT:
 
 void HArray::shrinkVarPages()
 {
-	uint32 shrinkLastVarOffset = lastVarOffset - countReleasedVarCells;
+	uint32_t shrinkLastVarOffset = lastVarOffset - countReleasedVarCells;
 
 	//the are no vars in ha, delete all var pages
 	if (!shrinkLastVarOffset)
@@ -1273,7 +1273,7 @@ void HArray::shrinkVarPages()
 		tailReleasedVarOffset = 0;
 		countReleasedVarCells = 0;
 
-		for (uint32 page = 0; page < VarPagesCount; page++)
+		for (uint32_t page = 0; page < VarPagesCount; page++)
 		{
 			if (pVarPages[page])
 			{
@@ -1290,28 +1290,28 @@ void HArray::shrinkVarPages()
 	}
 
 	//content ====================================================================================
-	memset(tailReleasedContentOffsets, 0, sizeof(uint32) * MAX_KEY_SEGMENTS);
+	memset(tailReleasedContentOffsets, 0, sizeof(uint32_t) * MAX_KEY_SEGMENTS);
 	countReleasedContentCells = 0;
 
-	uchar8* pStartReleasedContentCellsType = 0;
-	uint32* pStartReleasedContentCellsValue = 0;
+	uint8_t* pStartReleasedContentCellsType = 0;
+	uint32_t* pStartReleasedContentCellsValue = 0;
 
-	uint32 countReleasedContentCells = 0;
-	uint32 startReleasedContentCellsOffset = 0;
+	uint32_t countReleasedContentCells = 0;
+	uint32_t startReleasedContentCellsOffset = 0;
 
-	uint32 skipContentCells = 0;
+	uint32_t skipContentCells = 0;
 
-	uint32 lastPage = 0;
+	uint32_t lastPage = 0;
 
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;
 
-		for (uint32 page = 0; page < ContentPagesCount; page++)
+		for (uint32_t page = 0; page < ContentPagesCount; page++)
 		{
 			ContentPage* pContentPage = pContentPages[page];
 
-			uint32 countCells;
+			uint32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -1322,16 +1322,16 @@ void HArray::shrinkVarPages()
 				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = (page == 0 ? 1 : 0); cell < countCells; cell++)
+			for (uint32_t cell = (page == 0 ? 1 : 0); cell < countCells; cell++)
 			{
-				uchar8& contentCellType = pContentPage->pType[cell];
-				uint32& contentCellValue = pContentPage->pContent[cell];
+				uint8_t& contentCellType = pContentPage->pType[cell];
+				uint32_t& contentCellValue = pContentPage->pContent[cell];
 
 				if (contentCellType == VAR_TYPE)
 				{
 					if (contentCellValue >= shrinkLastVarOffset) //should be moved
 					{
-						uint32 newVarOffset = 0xFFFFFFFF;
+						uint32_t newVarOffset = 0xFFFFFFFF;
 
 						//find free var cell
 						while (countReleasedVarCells)
@@ -1443,11 +1443,11 @@ void HArray::shrinkVarPages()
 	countReleasedVarCells = 0;
 
 	//delete shrinked pages
-	uint32 startPage = (shrinkLastVarOffset >> 16) + 1;
+	uint32_t startPage = (shrinkLastVarOffset >> 16) + 1;
 
-	uint32 endPage = (lastVarOffset >> 16);
+	uint32_t endPage = (lastVarOffset >> 16);
 
-	for (uint32 page = startPage; page <= endPage; page++)
+	for (uint32_t page = startPage; page <= endPage; page++)
 	{
 		if (pVarPages[page])
 		{

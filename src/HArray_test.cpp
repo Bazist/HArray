@@ -20,13 +20,13 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-uint32 HArray::getFullContentLen(uint32 contentOffset)
+int32_t HArray::getFullContentLen(int32_t contentOffset)
 {
-	uchar8* pSourceStartContentCellType = &pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF];
-	uint32* pSourceStartContentCellValue = &pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF];
+	uint8_t* pSourceStartContentCellType = &pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF];
+	int32_t* pSourceStartContentCellValue = &pContentPages[contentOffset >> 16]->pContent[contentOffset & 0xFFFF];
 
-	uchar8* pEndContentCellType = pSourceStartContentCellType;
-	uint32* pEndContentCellValue = pSourceStartContentCellValue;
+	uint8_t* pEndContentCellType = pSourceStartContentCellType;
+	int32_t* pEndContentCellValue = pSourceStartContentCellValue;
 
 	while (true)
 	{
@@ -58,12 +58,12 @@ uint32 HArray::getFullContentLen(uint32 contentOffset)
 
 bool HArray::testContentConsistency()
 {
-	uint32 count = 0;
+	int32_t count = 0;
 
 	//1. scan header ==============================================================================================
-	for (uint32 cell = 0; cell < HeaderSize; cell++)
+	for (int32_t cell = 0; cell < HeaderSize; cell++)
 	{
-		uint32 contentOffset = pHeader[cell];
+		int32_t contentOffset = pHeader[cell];
 
 		if (contentOffset)
 		{
@@ -72,17 +72,17 @@ bool HArray::testContentConsistency()
 	}
 
 	//2. scan branches =============================================================================================
-	uint32 lastPage = 0;
+	int32_t lastPage = 0;
 
 	if (BranchPagesCount > 0)
 	{
 		lastPage = BranchPagesCount - 1;
 
-		for (uint32 page = 0; page < BranchPagesCount; page++)
+		for (int32_t page = 0; page < BranchPagesCount; page++)
 		{
 			BranchPage* pBranchPage = pBranchPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -93,11 +93,11 @@ bool HArray::testContentConsistency()
 				countCells = ((lastBranchOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				BranchCell& branchCell = pBranchPage->pBranch[cell];
 
-				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+				for (int32_t i = 0; i < BRANCH_ENGINE_SIZE; i++)
 				{
 					if (branchCell.Offsets[i]) //not empty
 					{
@@ -117,11 +117,11 @@ bool HArray::testContentConsistency()
 	{
 		lastPage = BlockPagesCount - 1;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (int32_t page = 0; page < BlockPagesCount; page++)
 		{
 			BlockPage* pBlockPage = pBlockPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -132,7 +132,7 @@ bool HArray::testContentConsistency()
 				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				BlockCell& blockCell = pBlockPage->pBlock[cell];
 
@@ -149,11 +149,11 @@ bool HArray::testContentConsistency()
 	{
 		lastPage = VarPagesCount - 1;
 
-		for (uint32 page = 0; page < VarPagesCount; page++)
+		for (int32_t page = 0; page < VarPagesCount; page++)
 		{
 			VarPage* pVarPage = pVarPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -164,7 +164,7 @@ bool HArray::testContentConsistency()
 				countCells = ((lastVarOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				VarCell& varCell = pVarPage->pVar[cell];
 
@@ -181,20 +181,20 @@ bool HArray::testContentConsistency()
 
 bool HArray::testBranchConsistency()
 {
-	uint32 count = 0;
+	int32_t count = 0;
 
 	//content ===================================================================================================================
-	uint32 lastPage = 0;
+	int32_t lastPage = 0;
 
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;
 
-		for (uint32 page = 0; page < ContentPagesCount; page++)
+		for (int32_t page = 0; page < ContentPagesCount; page++)
 		{
 			ContentPage* pContentPage = pContentPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -205,10 +205,10 @@ bool HArray::testBranchConsistency()
 				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
-				uchar8& contentCellType = pContentPage->pType[cell];
-				uint32& contentCellValue = pContentPage->pContent[cell];
+				uint8_t& contentCellType = pContentPage->pType[cell];
+				int32_t& contentCellValue = pContentPage->pContent[cell];
 
 				if (MIN_BRANCH_TYPE1 <= contentCellType && contentCellType <= MAX_BRANCH_TYPE1) //in content
 				{
@@ -232,11 +232,11 @@ bool HArray::testBranchConsistency()
 	{
 		lastPage = BlockPagesCount - 1;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (int32_t page = 0; page < BlockPagesCount; page++)
 		{
 			BlockPage* pBlockPage = pBlockPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -247,7 +247,7 @@ bool HArray::testBranchConsistency()
 				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				BlockCell& blockCell = pBlockPage->pBlock[cell];
 
@@ -271,20 +271,20 @@ bool HArray::testBranchConsistency()
 
 bool HArray::testBlockConsistency()
 {
-	uint32 count = 0;
+	int32_t count = 0;
 
 	//content ===================================================================================================================
-	uint32 lastPage = 0;
+	int32_t lastPage = 0;
 
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;
 
-		for (uint32 page = 0; page < ContentPagesCount; page++)
+		for (int32_t page = 0; page < ContentPagesCount; page++)
 		{
 			ContentPage* pContentPage = pContentPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -295,7 +295,7 @@ bool HArray::testBlockConsistency()
 				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				if (MIN_BLOCK_TYPE <= pContentPage->pType[cell] && pContentPage->pType[cell] <= MAX_BLOCK_TYPE) //in content
 				{
@@ -310,11 +310,11 @@ bool HArray::testBlockConsistency()
 	{
 		lastPage = BlockPagesCount - 1;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (int32_t page = 0; page < BlockPagesCount; page++)
 		{
 			BlockPage* pBlockPage = pBlockPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -325,7 +325,7 @@ bool HArray::testBlockConsistency()
 				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				BlockCell& blockCell = pBlockPage->pBlock[cell];
 
@@ -342,17 +342,17 @@ bool HArray::testBlockConsistency()
 
 bool HArray::testVarConsistency()
 {
-	uint32 count = 0;
+	int32_t count = 0;
 
 	if (ContentPagesCount > 0)
 	{
-		uint32 lastPage = ContentPagesCount - 1;
+		int32_t lastPage = ContentPagesCount - 1;
 
-		for (uint32 page = 0; page < ContentPagesCount; page++)
+		for (int32_t page = 0; page < ContentPagesCount; page++)
 		{
 			ContentPage* pContentPage = pContentPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -363,7 +363,7 @@ bool HArray::testVarConsistency()
 				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				if (pContentPage->pType[cell] == VAR_TYPE)
 				{
@@ -382,15 +382,15 @@ bool HArray::testFillContentPages()
 	memset(control, 0, lastContentOffset);
 
 	//1. scan header ==============================================================================================
-	for (uint32 cell = 0; cell < HeaderSize; cell++)
+	for (int32_t cell = 0; cell < HeaderSize; cell++)
 	{
-		uint32 contentOffset = pHeader[cell];
+		int32_t contentOffset = pHeader[cell];
 
 		if (contentOffset)
 		{
-			uint32 len = getFullContentLen(contentOffset);
+			int32_t len = getFullContentLen(contentOffset);
 
-			for (uint32 j = contentOffset; j < contentOffset + len; j++)
+			for (int32_t j = contentOffset; j < contentOffset + len; j++)
 			{
 				control[j]++;
 			}
@@ -398,17 +398,17 @@ bool HArray::testFillContentPages()
 	}
 
 	//2. scan branches =============================================================================================
-	uint32 lastPage = 0;
+	int32_t lastPage = 0;
 
 	if (BranchPagesCount > 0)
 	{
 		lastPage = BranchPagesCount - 1;
 
-		for (uint32 page = 0; page < BranchPagesCount; page++)
+		for (int32_t page = 0; page < BranchPagesCount; page++)
 		{
 			BranchPage* pBranchPage = pBranchPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -419,17 +419,17 @@ bool HArray::testFillContentPages()
 				countCells = ((lastBranchOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				BranchCell& branchCell = pBranchPage->pBranch[cell];
 
-				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+				for (int32_t i = 0; i < BRANCH_ENGINE_SIZE; i++)
 				{
 					if (branchCell.Offsets[i]) //not empty
 					{
-						uint32 len = getFullContentLen(branchCell.Offsets[i]);
+						int32_t len = getFullContentLen(branchCell.Offsets[i]);
 
-						for (uint32 j = branchCell.Offsets[i]; j < branchCell.Offsets[i] + len; j++)
+						for (int32_t j = branchCell.Offsets[i]; j < branchCell.Offsets[i] + len; j++)
 						{
 							control[j]++;
 						}
@@ -448,11 +448,11 @@ bool HArray::testFillContentPages()
 	{
 		lastPage = BlockPagesCount - 1;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (int32_t page = 0; page < BlockPagesCount; page++)
 		{
 			BlockPage* pBlockPage = pBlockPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -463,15 +463,15 @@ bool HArray::testFillContentPages()
 				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				BlockCell& blockCell = pBlockPage->pBlock[cell];
 
 				if (blockCell.Type == CURRENT_VALUE_TYPE)
 				{
-					uint32 len = getFullContentLen(blockCell.Offset);
+					int32_t len = getFullContentLen(blockCell.Offset);
 
-					for (uint32 j = blockCell.Offset; j < blockCell.Offset + len; j++)
+					for (int32_t j = blockCell.Offset; j < blockCell.Offset + len; j++)
 					{
 						control[j]++;
 					}
@@ -485,11 +485,11 @@ bool HArray::testFillContentPages()
 	{
 		lastPage = VarPagesCount - 1;
 
-		for (uint32 page = 0; page < VarPagesCount; page++)
+		for (int32_t page = 0; page < VarPagesCount; page++)
 		{
 			VarPage* pVarPage = pVarPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -500,15 +500,15 @@ bool HArray::testFillContentPages()
 				countCells = ((lastVarOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				VarCell& varCell = pVarPage->pVar[cell];
 
 				if (varCell.ContCellType == CONTINUE_VAR_TYPE)
 				{
-					uint32 len = getFullContentLen(varCell.ContCellValue);
+					int32_t len = getFullContentLen(varCell.ContCellValue);
 
-					for (uint32 j = varCell.ContCellValue; j < varCell.ContCellValue + len; j++)
+					for (int32_t j = varCell.ContCellValue; j < varCell.ContCellValue + len; j++)
 					{
 						control[j]++;
 					}
@@ -518,15 +518,15 @@ bool HArray::testFillContentPages()
 	}
 
 	//5. content cells =================================================================================================
-	for (uint32 i = 0; i < MAX_KEY_SEGMENTS; i++)
+	for (int32_t i = 0; i < MAX_KEY_SEGMENTS; i++)
 	{
-		uint32 contentOffset = tailReleasedContentOffsets[i];
+		int32_t contentOffset = tailReleasedContentOffsets[i];
 
 		while (contentOffset)
 		{
-			uint32 len = i + 1;
+			int32_t len = i + 1;
 
-			for (uint32 j = contentOffset; j < contentOffset + len; j++)
+			for (int32_t j = contentOffset; j < contentOffset + len; j++)
 			{
 				control[j]++;
 			}
@@ -536,7 +536,7 @@ bool HArray::testFillContentPages()
 	}
 
 	//check control values
-	for (uint32 i = 1; i < lastContentOffset; i++)
+	for (int32_t i = 1; i < lastContentOffset; i++)
 	{
 		if (control[i] != 1)
 		{
@@ -561,21 +561,21 @@ bool HArray::testFillBranchPages()
 	char* control = new char[lastBranchOffset];
 	memset(control, 0, lastBranchOffset);
 
-	uint32 currTailReleasedBranchOffset = tailReleasedBranchOffset;
-	uint32 currCountReleasedBranchCells = countReleasedBranchCells;
+	int32_t currTailReleasedBranchOffset = tailReleasedBranchOffset;
+	int32_t currCountReleasedBranchCells = countReleasedBranchCells;
 
 	//content ===================================================================================================================
-	uint32 lastPage = 0;
+	int32_t lastPage = 0;
 
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;
 
-		for (uint32 page = 0; page < ContentPagesCount; page++)
+		for (int32_t page = 0; page < ContentPagesCount; page++)
 		{
 			ContentPage* pContentPage = pContentPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -586,10 +586,10 @@ bool HArray::testFillBranchPages()
 				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
-				uchar8 contentCellType = pContentPage->pType[cell];
-				uint32 contentCellValue = pContentPage->pContent[cell];
+				uint8_t contentCellType = pContentPage->pType[cell];
+				int32_t contentCellValue = pContentPage->pContent[cell];
 
 				if (MIN_BRANCH_TYPE1 <= contentCellType && contentCellType <= MAX_BRANCH_TYPE1) //in content
 				{
@@ -613,11 +613,11 @@ bool HArray::testFillBranchPages()
 	{
 		lastPage = BlockPagesCount - 1;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (int32_t page = 0; page < BlockPagesCount; page++)
 		{
 			BlockPage* pBlockPage = pBlockPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -628,7 +628,7 @@ bool HArray::testFillBranchPages()
 				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				BlockCell& blockCell = pBlockPage->pBlock[cell];
 
@@ -649,14 +649,14 @@ bool HArray::testFillBranchPages()
 	}
 
 	//check state
-	for (uint32 i = 0; i < currCountReleasedBranchCells; i++)
+	for (int32_t i = 0; i < currCountReleasedBranchCells; i++)
 	{
 		control[currTailReleasedBranchOffset]++;
 
 		currTailReleasedBranchOffset = pBranchPages[currTailReleasedBranchOffset >> 16]->pBranch[currTailReleasedBranchOffset & 0xFFFF].Values[0];
 	}
 
-	for (uint32 i = 0; i < lastBranchOffset; i++)
+	for (int32_t i = 0; i < lastBranchOffset; i++)
 	{
 		if (control[i] != 1)
 		{
@@ -681,21 +681,21 @@ bool HArray::testFillBlockPages()
 	char* control = new char[lastBlockOffset / BLOCK_ENGINE_SIZE];
 	memset(control, 0, lastBlockOffset / BLOCK_ENGINE_SIZE);
 
-	uint32 currTailReleasedBlockOffset = tailReleasedBlockOffset;
-	uint32 currCountReleasedBlockCells = countReleasedBlockCells;
+	int32_t currTailReleasedBlockOffset = tailReleasedBlockOffset;
+	int32_t currCountReleasedBlockCells = countReleasedBlockCells;
 
 	//content ===================================================================================================================
-	uint32 lastPage = 0;
+	int32_t lastPage = 0;
 
 	if (ContentPagesCount > 0)
 	{
 		lastPage = ContentPagesCount - 1;
 
-		for (uint32 page = 0; page < ContentPagesCount; page++)
+		for (int32_t page = 0; page < ContentPagesCount; page++)
 		{
 			ContentPage* pContentPage = pContentPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -706,7 +706,7 @@ bool HArray::testFillBlockPages()
 				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				if (MIN_BLOCK_TYPE <= pContentPage->pType[cell] && pContentPage->pType[cell] <= MAX_BLOCK_TYPE) //in content
 				{
@@ -721,11 +721,11 @@ bool HArray::testFillBlockPages()
 	{
 		lastPage = BlockPagesCount - 1;
 
-		for (uint32 page = 0; page < BlockPagesCount; page++)
+		for (int32_t page = 0; page < BlockPagesCount; page++)
 		{
 			BlockPage* pBlockPage = pBlockPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -736,7 +736,7 @@ bool HArray::testFillBlockPages()
 				countCells = ((lastBlockOffset - BLOCK_ENGINE_SIZE) & 0xFFFF) + BLOCK_ENGINE_SIZE;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				BlockCell& blockCell = pBlockPage->pBlock[cell];
 
@@ -749,14 +749,14 @@ bool HArray::testFillBlockPages()
 	}
 
 	//check state
-	for (uint32 i = 0; i < currCountReleasedBlockCells; i += BLOCK_ENGINE_SIZE)
+	for (int32_t i = 0; i < currCountReleasedBlockCells; i += BLOCK_ENGINE_SIZE)
 	{
 		control[currTailReleasedBlockOffset / BLOCK_ENGINE_SIZE]++;
 
 		currTailReleasedBlockOffset = pBlockPages[currTailReleasedBlockOffset >> 16]->pBlock[currTailReleasedBlockOffset & 0xFFFF].Offset;
 	}
 
-	for (uint32 i = 0; i < lastBlockOffset / BLOCK_ENGINE_SIZE; i++)
+	for (int32_t i = 0; i < lastBlockOffset / BLOCK_ENGINE_SIZE; i++)
 	{
 		if (control[i] != 1)
 		{
@@ -781,19 +781,19 @@ bool HArray::testFillVarPages()
 	char* control = new char[lastVarOffset];
 	memset(control, 0, lastVarOffset);
 
-	uint32 currTailReleasedVarOffset = tailReleasedVarOffset;
-	uint32 currCountReleasedVarCells = countReleasedVarCells;
+	int32_t currTailReleasedVarOffset = tailReleasedVarOffset;
+	int32_t currCountReleasedVarCells = countReleasedVarCells;
 
 	//content ===================================================================================================================
 	if (ContentPagesCount > 0)
 	{
-		uint32 lastPage = ContentPagesCount - 1;
+		int32_t lastPage = ContentPagesCount - 1;
 
-		for (uint32 page = 0; page < ContentPagesCount; page++)
+		for (int32_t page = 0; page < ContentPagesCount; page++)
 		{
 			ContentPage* pContentPage = pContentPages[page];
 
-			uint32 countCells;
+			int32_t countCells;
 
 			if (page < lastPage) //not last page
 			{
@@ -804,7 +804,7 @@ bool HArray::testFillVarPages()
 				countCells = ((lastContentOffset - 1) & 0xFFFF) + 1;
 			}
 
-			for (uint32 cell = 0; cell < countCells; cell++)
+			for (int32_t cell = 0; cell < countCells; cell++)
 			{
 				if (pContentPage->pType[cell] == VAR_TYPE) //in content
 				{
@@ -815,14 +815,14 @@ bool HArray::testFillVarPages()
 	}
 
 	//check state
-	for (uint32 i = 0; i < currCountReleasedVarCells; i++)
+	for (int32_t i = 0; i < currCountReleasedVarCells; i++)
 	{
 		control[currTailReleasedVarOffset]++;
 
 		currTailReleasedVarOffset = pVarPages[currTailReleasedVarOffset >> 16]->pVar[currTailReleasedVarOffset & 0xFFFF].ValueContCellValue;
 	}
 
-	for (uint32 i = 0; i < lastVarOffset; i++)
+	for (int32_t i = 0; i < lastVarOffset; i++)
 	{
 		if (control[i] != 1)
 		{

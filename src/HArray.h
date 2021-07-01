@@ -35,17 +35,17 @@ public:
 		init();
 	}
 
-	uint32 ContentPagesCount;
-	uint32 VarPagesCount;
-	uint32 BranchPagesCount;
-	uint32 BlockPagesCount;
+	int32_t ContentPagesCount;
+	int32_t VarPagesCount;
+	int32_t BranchPagesCount;
+	int32_t BlockPagesCount;
 
-	uint32 ContentPagesSize;
-	uint32 VarPagesSize;
-	uint32 BranchPagesSize;
-	uint32 BlockPagesSize;
+	int32_t ContentPagesSize;
+	int32_t VarPagesSize;
+	int32_t BranchPagesSize;
+	int32_t BlockPagesSize;
 
-	uint32* pHeader;
+	int32_t* pHeader;
 
 	ContentPage** pContentPages;
 	VarPage** pVarPages;
@@ -56,24 +56,24 @@ public:
 	CompareFunc compareFunc;
 	CompareSegmentFunc compareSegmentFunc;
 
-	uint32 HeaderBase;
-	uint32 HeaderBits;
-	uint32 HeaderSize;
+	int32_t HeaderBase;
+	int32_t HeaderBits;
+	int32_t HeaderSize;
 
-	uint32 ValueLen;
-	uint32 NewParentID;
+	int32_t ValueLen;
+	int32_t NewParentID;
 
-	uint32 MAX_SAFE_SHORT;
+	int32_t MAX_SAFE_SHORT;
 
-	uint32 lastHeaderBranchOffset;
-	uint32 lastContentOffset;
-	uint32 lastVarOffset;
-	uint32 lastBranchOffset;
-	uint32 lastBlockOffset;
+	int32_t lastHeaderBranchOffset;
+	int32_t lastContentOffset;
+	int32_t lastVarOffset;
+	int32_t lastBranchOffset;
+	int32_t lastBlockOffset;
 
-	uint32 autoShrinkOnPercents;
-	uint32 notMovedContentCellsAfterLastShrink;
-	uint32 amountFreeSlotsBeforeHeaderResize;
+	int32_t autoShrinkOnPercents;
+	int32_t notMovedContentCellsAfterLastShrink;
+	int32_t amountFreeSlotsBeforeHeaderResize;
 
 	void init()
 	{
@@ -84,7 +84,7 @@ public:
 			INIT_MAX_PAGES);
 	}
 
-	void init(uchar8 headerBase)
+	void init(uint8_t headerBase)
 	{
 		init(headerBase,
 			 INIT_MAX_PAGES,
@@ -93,11 +93,11 @@ public:
 			 INIT_MAX_PAGES);
 	}
 
-	void init(uchar8 headerBase,
-			  uint32 contentPagesSize,
-			  uint32 varPagesSize,
-			  uint32 branchPagesSize,
-			  uint32 blockPagesSize)
+	void init(uint8_t headerBase,
+			  int32_t contentPagesSize,
+			  int32_t varPagesSize,
+			  int32_t branchPagesSize,
+			  int32_t blockPagesSize)
 	{
 		destroy();
 
@@ -139,15 +139,15 @@ public:
 
             MAX_SAFE_SHORT = MAX_SHORT - ValueLen;
 
-            pHeader = new uint32[HeaderSize];
-            for(uint32 i=0; i < HeaderSize; i++)
+            pHeader = new int32_t[HeaderSize];
+            for(int32_t i=0; i < HeaderSize; i++)
             {
                 pHeader[i] = 0;
             }
 
 			#ifndef _RELEASE
 
-            for(uint32 i=0; i<COUNT_TEMPS; i++)
+            for(int32_t i=0; i<COUNT_TEMPS; i++)
             {
                 tempValues[i] = 0;
                 tempCaptions[i] = 0;
@@ -193,9 +193,9 @@ public:
             lastBranchOffset = 0;
             lastBlockOffset = 0;
 
-            tailReleasedContentOffsets = new uint32[MAX_KEY_SEGMENTS];
+            tailReleasedContentOffsets = new int32_t[MAX_KEY_SEGMENTS];
 
-            for(uint32 i=0; i<MAX_KEY_SEGMENTS; i++)
+            for(int32_t i=0; i<MAX_KEY_SEGMENTS; i++)
             	tailReleasedContentOffsets[i] = 0;
 		}
 		catch(...)
@@ -215,7 +215,7 @@ public:
         if (!errorCode)
   		#endif // _WIN32
 
-		#ifdef linux
+#if defined linux  || defined __APPLE__
 		pFile = fopen(path, "wb");
 		if(pFile != NULL)
         #endif // linux
@@ -227,7 +227,7 @@ public:
 
     		if(pHeader)
 			{
-				if (fwrite(pHeader, sizeof(uint32), HeaderSize, pFile) != HeaderSize)
+				if (fwrite(pHeader, sizeof(int32_t), HeaderSize, pFile) != HeaderSize)
 				{
 					goto ERROR_LABEL;
 				}
@@ -235,7 +235,7 @@ public:
 
 			if(pContentPages)
 			{
-				for(uint32 i=0; i<ContentPagesCount; i++)
+				for(int32_t i=0; i<ContentPagesCount; i++)
 				{
 					if (fwrite(pContentPages[i], sizeof(ContentPage), 1, pFile) != 1)
 					{
@@ -246,7 +246,7 @@ public:
 
 			if(pVarPages)
 			{
-				for(uint32 i=0; i<VarPagesCount; i++)
+				for(int32_t i=0; i<VarPagesCount; i++)
 				{
 					if (fwrite(pVarPages[i], sizeof(VarPage), 1, pFile) != 1)
 					{
@@ -257,7 +257,7 @@ public:
 
 			if(pBranchPages)
 			{
-				for(uint32 i=0; i<BranchPagesCount; i++)
+				for(int32_t i=0; i<BranchPagesCount; i++)
 				{
 					if (fwrite(pBranchPages[i], sizeof(BranchPage), 1, pFile) != 1)
 					{
@@ -268,7 +268,7 @@ public:
 
 			if(pBlockPages)
 			{
-				for(uint32 i=0; i<BlockPagesCount; i++)
+				for(int32_t i=0; i<BlockPagesCount; i++)
 				{
 					if (fwrite(pBlockPages[i], sizeof(BlockPage), 1, pFile) != 1)
 					{
@@ -288,7 +288,7 @@ public:
     		fclose (pFile);
 
 			return true;
-  		}
+    }
 		else
 		{
 			printf("File '%s' is not opened.", path);
@@ -308,7 +308,7 @@ public:
         if (!errorCode)
   		#endif // _WIN32
 
-		#ifdef linux
+		#if defined linux || defined __APPLE__
 		pFile = fopen(path, "rb");
 		if(pFile != NULL)
         #endif // linux
@@ -320,9 +320,9 @@ public:
 
     		if(pHeader)
 			{
-				pHeader = new uint32[HeaderSize];
+				pHeader = new int32_t[HeaderSize];
 
-				if(fread (pHeader, sizeof(uint32), HeaderSize, pFile) != HeaderSize)
+				if(fread (pHeader, sizeof(int32_t), HeaderSize, pFile) != HeaderSize)
 				{
 					goto ERROR_LABEL;
 				}
@@ -333,7 +333,7 @@ public:
 				pContentPages = new ContentPage*[ContentPagesCount];
 				ContentPagesSize = ContentPagesCount;
 
-				for(uint32 i=0; i<ContentPagesCount; i++)
+				for(int32_t i=0; i<ContentPagesCount; i++)
 				{
 					pContentPages[i] = new ContentPage();
 
@@ -349,7 +349,7 @@ public:
 				pVarPages = new VarPage*[VarPagesCount];
 				VarPagesSize = VarPagesCount;
 
-				for(uint32 i=0; i<VarPagesCount; i++)
+				for(int32_t i=0; i<VarPagesCount; i++)
 				{
 					pVarPages[i] = new VarPage();
 
@@ -365,7 +365,7 @@ public:
 				pBranchPages = new BranchPage*[BranchPagesCount];
 				BranchPagesSize = BranchPagesCount;
 
-				for(uint32 i=0; i<BranchPagesCount; i++)
+				for(int32_t i=0; i<BranchPagesCount; i++)
 				{
 					pBranchPages[i] = new BranchPage();
 
@@ -381,7 +381,7 @@ public:
 				pBlockPages = new BlockPage*[BlockPagesCount];
 				BlockPagesSize = BlockPagesCount;
 
-				for(uint32 i=0; i<BlockPagesCount; i++)
+				for(int32_t i=0; i<BlockPagesCount; i++)
 				{
 					pBlockPages[i] = new BlockPage();
 
@@ -407,32 +407,32 @@ public:
 		return false;
 	}
 
-	ulong64 getHeaderSize()
+	uint64_t getHeaderSize()
 	{
-		return (ulong64)HeaderSize * sizeof(uint32);
+		return (uint64_t)HeaderSize * sizeof(int32_t);
 	}
 
-	ulong64 getContentSize()
+	uint64_t getContentSize()
 	{
-		return (ulong64)ContentPagesCount * sizeof(ContentPage);
+		return (uint64_t)ContentPagesCount * sizeof(ContentPage);
 	}
 
-	ulong64 getVarSize()
+	uint64_t getVarSize()
 	{
-		return (ulong64)VarPagesCount * sizeof(VarPage);
+		return (uint64_t)VarPagesCount * sizeof(VarPage);
 	}
 
-	ulong64 getBranchSize()
+	uint64_t getBranchSize()
 	{
-		return (ulong64)BranchPagesCount * sizeof(BranchPage);
+		return (uint64_t)BranchPagesCount * sizeof(BranchPage);
 	}
 
-	ulong64 getBlockSize()
+	uint64_t getBlockSize()
 	{
-		return (ulong64)BlockPagesCount * sizeof(BlockPage);
+		return (uint64_t)BlockPagesCount * sizeof(BlockPage);
 	}
 
-	ulong64 getUsedMemory()
+	uint64_t getUsedMemory()
 	{
 		return	getHeaderSize() +
 				getContentSize() +
@@ -441,7 +441,7 @@ public:
 				getBlockSize();
 	}
 
-	ulong64 getTotalMemory()
+	uint64_t getTotalMemory()
 	{
 		return	getHeaderSize() +
 				getContentSize() +
@@ -452,10 +452,10 @@ public:
 	}
 
 	//str comparator =====================================================
-	static uint32 NormalizeStr(void* key)
+	static int32_t NormalizeStr(void* key)
 	{
 		//swap bytes
-		uint32 num = ((uint32*)key)[0];
+		int32_t num = ((int32_t*)key)[0];
 
 		return (num >> 24) |			 // move byte 3 to byte 0
 			   ((num << 8) & 0xff0000) | // move byte 1 to byte 2
@@ -463,20 +463,20 @@ public:
 			   (num << 24);			     // byte 0 to byte 3
 	}
 
-	static int CompareSegmentStr(void* keySeg1, void* keySeg2, uint32 index)
+	static int CompareSegmentStr(void* keySeg1, void* keySeg2, int32_t index)
 	{
 		return memcmp(keySeg1, keySeg2, 4);
 	}
 
-	static int CompareStr(void* key1, uint32 keyLen1,
-						  void* key2, uint32 keyLen2)
+	static int CompareStr(void* key1, int32_t keyLen1,
+						  void* key2, int32_t keyLen2)
 	{
 		return strcmp((char*)key1, (char*)key2);
 	}
 
 	//int comparator =====================================================
 
-	static uint32 NormalizeInt32(void* key)
+	static int32_t NormalizeInt32(void* key)
 	{
 		int num = ((int*)key)[0];
 
@@ -486,11 +486,11 @@ public:
 		}
 		else
 		{
-			return (uint32)num + 2147483647;
+			return (int32_t)num + 2147483647;
 		}
 	}
 
-	static int CompareSegmentInt32(void* keySeg1, void* keySeg2, uint32 index)
+	static int CompareSegmentInt32(void* keySeg1, void* keySeg2, int32_t index)
 	{
 		if (((int*)keySeg1)[0] < ((int*)keySeg2)[0])
 			return -1;
@@ -501,12 +501,12 @@ public:
 		return 0;
 	}
 
-	static int CompareInt32(void* key1, uint32 keyLen1,
-						    void* key2, uint32 keyLen2)
+	static int CompareInt32(void* key1, int32_t keyLen1,
+						    void* key2, int32_t keyLen2)
 	{
-		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
+		int32_t keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
 
-		for (uint32 i = 0; i < keyLen; i++)
+		for (int32_t i = 0; i < keyLen; i++)
 		{
 			if (((int*)key1)[i] < ((int*)key2)[i])
 				return -1;
@@ -526,9 +526,9 @@ public:
 
 	//float comparator =====================================================
 
-	static uint32 NormalizeFloat(void* key)
+	static int32_t NormalizeFloat(void* key)
 	{
-		uint32 dw = *(uint32*)key;
+		int32_t dw = *(int32_t*)key;
 
 		if (dw >> 31)
 		{
@@ -540,7 +540,7 @@ public:
 		}
 	}
 
-	static int CompareSegmentFloat(void* keySeg1, void* keySeg2, uint32 index)
+	static int CompareSegmentFloat(void* keySeg1, void* keySeg2, int32_t index)
 	{
 		if (((float*)keySeg1)[0] < ((float*)keySeg2)[0])
 			return -1;
@@ -551,12 +551,12 @@ public:
 		return 0;
 	}
 
-	static int CompareFloat(void* key1, uint32 keyLen1,
-							void* key2, uint32 keyLen2)
+	static int CompareFloat(void* key1, int32_t keyLen1,
+							void* key2, int32_t keyLen2)
 	{
-		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
+		int32_t keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
 
-		for (uint32 i = 0; i < keyLen; i++)
+		for (int32_t i = 0; i < keyLen; i++)
 		{
 			if (((float*)key1)[i] < ((float*)key2)[i])
 				return -1;
@@ -574,29 +574,29 @@ public:
 		return 0;
 	}
 
-	//uint32 comparator =====================================================
-	static int CompareSegmentUInt32(void* keySeg1, void* keySeg2, uint32 index)
+	//int32_t comparator =====================================================
+	static int CompareSegmentUInt32(void* keySeg1, void* keySeg2, int32_t index)
 	{
-		if (((uint32*)keySeg1)[0] < ((uint32*)keySeg2)[0])
+		if (((int32_t*)keySeg1)[0] < ((int32_t*)keySeg2)[0])
 			return -1;
 
-		if (((uint32*)keySeg1)[0] > ((uint32*)keySeg2)[0])
+		if (((int32_t*)keySeg1)[0] > ((int32_t*)keySeg2)[0])
 			return 1;
 
 		return 0;
 	}
 
-	static int CompareUInt32(void* key1, uint32 keyLen1,
-						     void* key2, uint32 keyLen2)
+	static int CompareUInt32(void* key1, int32_t keyLen1,
+						     void* key2, int32_t keyLen2)
 	{
-		uint32 keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
+		int32_t keyLen = keyLen1 < keyLen2 ? keyLen1 : keyLen2;
 
-		for (uint32 i = 0; i < keyLen; i++)
+		for (int32_t i = 0; i < keyLen; i++)
 		{
-			if (((uint32*)key1)[i] < ((uint32*)key2)[i])
+			if (((int32_t*)key1)[i] < ((int32_t*)key2)[i])
 				return -1;
 
-			if (((uint32*)key1)[i] > ((uint32*)key2)[i])
+			if (((int32_t*)key1)[i] > ((int32_t*)key2)[i])
 				return 1;
 		}
 
@@ -662,7 +662,7 @@ public:
 		#ifndef _RELEASE
 
 		printf("=================== STAT =========================\n");
-		for (uint32 i = 0; i<COUNT_TEMPS; i++)
+		for (int32_t i = 0; i<COUNT_TEMPS; i++)
 		{
 			if (tempCaptions[i])
 			{
@@ -675,7 +675,7 @@ public:
 
 	void clear()
 	{
-        uint32 headerBase = this->HeaderBase;
+        int32_t headerBase = this->HeaderBase;
 
 		destroy();
 
@@ -685,17 +685,17 @@ public:
 	//types: 0-empty, 1..4 branches, 5 value, 6..9 blocks offset, 10 empty branch, 11 value
 #ifndef _RELEASE
 
-	uint32 tempValues[COUNT_TEMPS];
+	int32_t tempValues[COUNT_TEMPS];
 	char* tempCaptions[COUNT_TEMPS];
 
 #endif
 
 	void reallocateContentPages()
 	{
-		uint32 newSizeContentPages = ContentPagesSize * 2;
+		int32_t newSizeContentPages = ContentPagesSize * 2;
 		ContentPage** pTempContentPages = new ContentPage*[newSizeContentPages];
 
-		uint32 j=0;
+		int32_t j=0;
 		for(; j < ContentPagesSize ; j++)
 		{
 			pTempContentPages[j] = pContentPages[j];
@@ -714,10 +714,10 @@ public:
 
 	void reallocateVarPages()
 	{
-		uint32 newSizeVarPages = VarPagesSize * 2;
+		int32_t newSizeVarPages = VarPagesSize * 2;
 		VarPage** pTempVarPages = new VarPage*[newSizeVarPages];
 
-		uint32 j=0;
+		int32_t j=0;
 		for(; j < VarPagesSize ; j++)
 		{
 			pTempVarPages[j] = pVarPages[j];
@@ -736,10 +736,10 @@ public:
 
 	void reallocateBranchPages()
 	{
-		uint32 newSizeBranchPages = BranchPagesSize * 2;
+		int32_t newSizeBranchPages = BranchPagesSize * 2;
 		BranchPage** pTempBranchPages = new BranchPage*[newSizeBranchPages];
 
-		uint32 j=0;
+		int32_t j=0;
 		for(; j < BranchPagesSize ; j++)
 		{
 			pTempBranchPages[j] = pBranchPages[j];
@@ -758,10 +758,10 @@ public:
 
 	void reallocateBlockPages()
 	{
-		uint32 newSizeBlockPages = BlockPagesSize * 2;
+		int32_t newSizeBlockPages = BlockPagesSize * 2;
 		BlockPage** pTempBlockPages = new BlockPage*[newSizeBlockPages];
 
-		uint32 j=0;
+		int32_t j=0;
 		for(; j < BlockPagesSize ; j++)
 		{
 			pTempBlockPages[j] = pBlockPages[j];
@@ -779,75 +779,75 @@ public:
 	}
 	//INSERT =============================================================================================================
 
-	bool insert(uint32* key, uint32 keyLen, uint32 value);
+	bool insert(int32_t* key, int32_t keyLen, int32_t value);
 
 	//GET =============================================================================================================
 
-	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value);
+	bool getValueByKey(int32_t* key, int32_t keyLen, int32_t& value);
 
 	//HAS =============================================================================================================
 
-	bool hasPartKey(uint32* key, uint32 keyLen);
+	bool hasPartKey(int32_t* key, int32_t keyLen);
 
 	//DELL =============================================================================================================
 
-	bool delValueByKey(uint32* key, uint32 keyLen);
+	bool delValueByKey(int32_t* key, int32_t keyLen);
 
 	//REBUILD =========================================================================================================
 
-	static bool rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, void* pData);
+	static bool rebuildVisitor(int32_t* key, int32_t keyLen, int32_t value, void* pData);
 
-	uint32 rebuild(uint32 headerBase = 0, bool removeEmptyKeys = false);
+	int32_t rebuild(int32_t headerBase = 0, bool removeEmptyKeys = false);
 
 	//RANGE keys and values =============================================================================================================
 	void sortLastItem(HArrayPair* pairs,
-					  uint32 count);
+					  int32_t count);
 
 	void getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
-										  uint32& count,
-										  uint32 size,
-										  uint32 contentOffset,
-										  uint32 keyOffset,
-										  uint32 blockOffset,
-										  uint32* minKey,
-										  uint32 minKeyLen,
-										  uint32* maxKey,
-										  uint32 maxKeyLen);
+										  int32_t& count,
+										  int32_t size,
+										  int32_t contentOffset,
+										  int32_t keyOffset,
+										  int32_t blockOffset,
+										  int32_t* minKey,
+										  int32_t minKeyLen,
+										  int32_t* maxKey,
+										  int32_t maxKeyLen);
 
 	void getKeysAndValuesByRange(HArrayPair* pairs,
-								 uint32& count,
-								 uint32 size,
-								 uint32 keyOffset,
-								 uint32 contentOffset,
-								 uint32* minKey,
-								 uint32 minKeyLen,
-								 uint32* maxKey,
-								 uint32 maxKeyLen);
+								 int32_t& count,
+								 int32_t size,
+								 int32_t keyOffset,
+								 int32_t contentOffset,
+								 int32_t* minKey,
+								 int32_t minKeyLen,
+								 int32_t* maxKey,
+								 int32_t maxKeyLen);
 
-	uint32 getKeysAndValuesByRange(HArrayPair* pairs,
-								uint32 size,
-								uint32* minKey,
-								uint32 minKeyLen,
-								uint32* maxKey,
-								uint32 maxKeyLen);
+	int32_t getKeysAndValuesByRange(HArrayPair* pairs,
+								int32_t size,
+								int32_t* minKey,
+								int32_t minKeyLen,
+								int32_t* maxKey,
+								int32_t maxKeyLen);
 
 	//TEMPLATE ====================================================================================================
 	//SCAN BY VISITOR
-	void scanKeysAndValuesFromBlock(uint32* key,
-									uint32 contentOffset,
-									uint32 keyOffset,
-									uint32 blockOffset,
+	void scanKeysAndValuesFromBlock(int32_t* key,
+									int32_t contentOffset,
+									int32_t keyOffset,
+									int32_t blockOffset,
 									HARRAY_ITEM_VISIT_FUNC visitor,
 									void* pData);
 
-	void scanKeysAndValues(uint32* key,
-						   uint32 keyOffset,
-						   uint32 contentOffset,
+	void scanKeysAndValues(int32_t* key,
+						   int32_t keyOffset,
+						   int32_t contentOffset,
 						   HARRAY_ITEM_VISIT_FUNC visitor,
 						   void* pData);
 
-	void scanKeysAndValues(uint32* key,
-						 uint32 keyLen,
+	void scanKeysAndValues(int32_t* key,
+						 int32_t keyLen,
 						 HARRAY_ITEM_VISIT_FUNC visitor,
 						 void* pData);
 
@@ -856,15 +856,15 @@ public:
 
 	//DISMANTLING ====================================================================================================
 
-	void autoShrinkIfCouldBeReleasedAtLeast(uint32 percents)
+	void autoShrinkIfCouldBeReleasedAtLeast(int32_t percents)
 	{
 		autoShrinkOnPercents = percents;
 	}
 
-	void releaseContentCells(uint32* pContentCell, uint32 contentOffset, uint32 len);
-	void releaseBranchCell(BranchCell* pBranchCell, uint32 branchOffset);
-	void releaseVarCell(VarCell* pVarCell, uint32 varOffset);
-	void releaseBlockCells(BlockCell* pBlockCell, uint32 startBlockOffset);
+	void releaseContentCells(int32_t* pContentCell, int32_t contentOffset, int32_t len);
+	void releaseBranchCell(BranchCell* pBranchCell, int32_t branchOffset);
+	void releaseVarCell(VarCell* pVarCell, int32_t varOffset);
+	void releaseBlockCells(BlockCell* pBlockCell, int32_t startBlockOffset);
 
 	void shrinkContentPages();
 	void shrinkBranchPages();
@@ -873,24 +873,24 @@ public:
 
 	void shrink();
 
-	uint32* tailReleasedContentOffsets;
-	uint32 tailReleasedBranchOffset;
-	uint32 tailReleasedBlockOffset;
-	uint32 tailReleasedVarOffset;
+	int32_t* tailReleasedContentOffsets;
+	int32_t tailReleasedBranchOffset;
+	int32_t tailReleasedBlockOffset;
+	int32_t tailReleasedVarOffset;
 
-	uint32 countReleasedContentCells;
-	uint32 countReleasedBranchCells;
-	uint32 countReleasedBlockCells;
-	uint32 countReleasedVarCells;
+	int32_t countReleasedContentCells;
+	int32_t countReleasedBranchCells;
+	int32_t countReleasedBlockCells;
+	int32_t countReleasedVarCells;
 
-	bool tryReleaseBlock(SegmentPath* path, uint32 pathLen, int32& currPathLen);
-	bool dismantling(SegmentPath* path, uint32 pathLen);
-	bool dismantlingContentCells(SegmentPath* path, int32& currPathLen);
-	uint32 moveContentCells(uint32& startContentOffset,
+	bool tryReleaseBlock(SegmentPath* path, int32_t pathLen, int32_t& currPathLen);
+	bool dismantling(SegmentPath* path, int32_t pathLen);
+	bool dismantlingContentCells(SegmentPath* path, int32_t& currPathLen);
+	int32_t moveContentCells(int32_t& startContentOffset,
 							ContentPage** newContentPages,
-							uint32& countNewContentPages,
-							uint32 shrinkLastContentOffset,
-							uint32* lastContentOffsetOnNewPages);
+							int32_t& countNewContentPages,
+							int32_t shrinkLastContentOffset,
+							int32_t* lastContentOffsetOnNewPages);
 
 	//for testing
 	bool testContentConsistency();
@@ -903,9 +903,9 @@ public:
 	bool testFillBranchPages();
 	bool testFillVarPages();
 
-	uint32 getFullContentLen(uint32 contentOffset);
-	bool shrinkBlock(uint32 startBlockOffset,
-					 uint32 shrinkLastBlockOffset);
+	int32_t getFullContentLen(int32_t contentOffset);
+	bool shrinkBlock(int32_t startBlockOffset,
+					 int32_t shrinkLastBlockOffset);
 
 	//=============================================================================================================
 
@@ -919,7 +919,7 @@ public:
 
 		if(pContentPages)
 		{
-			for(uint32 i=0; i<ContentPagesCount; i++)
+			for(int32_t i=0; i<ContentPagesCount; i++)
 			{
 				delete pContentPages[i];
 			}
@@ -930,7 +930,7 @@ public:
 
 		if(pVarPages)
 		{
-			for(uint32 i=0; i<VarPagesCount; i++)
+			for(int32_t i=0; i<VarPagesCount; i++)
 			{
 				delete pVarPages[i];
 			}
@@ -941,7 +941,7 @@ public:
 
 		if(pBranchPages)
 		{
-			for(uint32 i=0; i<BranchPagesCount; i++)
+			for(int32_t i=0; i<BranchPagesCount; i++)
 			{
 				delete pBranchPages[i];
 			}
@@ -952,7 +952,7 @@ public:
 
 		if(pBlockPages)
 		{
-			for(uint32 i=0; i<BlockPagesCount; i++)
+			for(int32_t i=0; i<BlockPagesCount; i++)
 			{
 				delete pBlockPages[i];
 			}

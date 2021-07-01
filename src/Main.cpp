@@ -1436,13 +1436,6 @@ void HArray_VS_StdMap_StrKey_Var(uint32 startOnAmount, uint32 stepOfAmount, uint
 
 int main()
 {
-	HArrayGeneric<std::string, std::string> ha;
-
-	ha["dou"] = "hello";
-
-	std::string sayHello = ha["dou"];
-	
-	return 0;
 	HArrayInt_VS_StdMap_IntKey(1000000,   //start
 								2000000,   //step
 								10000000); //stop

@@ -28,7 +28,7 @@ private:
 	uint32 valueLen;
 
 	template<class T>
-	inline uint32* getKeySegments(T& obj, uint32* keyBuff, uint32& keyLen)
+	inline uint32* getKeySegments(const T& obj, uint32* keyBuff, uint32& keyLen)
 	{
 		return obj.getKeySegments(keyBuff, keyLen);
 	}
@@ -124,6 +124,11 @@ public:
 		uint32* keySegments = getKeySegments(key, keyBuff, keyLen);
 
 		return HArray::insert(keySegments, keyLen, value);
+	}
+
+	int& operator[](const K& key)
+	{
+
 	}
 
 	bool getValueByKey(const K key,

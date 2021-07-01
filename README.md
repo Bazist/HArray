@@ -1,3 +1,4 @@
+# HArray
 ## Probably, this is most optimized Trie structure in the World ! Thats all what you need know about this project :)
 
 **HArrayInt** - Key\Value In Memory structure for 32bit keys
@@ -10,7 +11,7 @@
 
 ------------------
 
-# [Start overview from Benchmarks](https://github.com/Bazist/HArray/blob/master/Benchmarks.md)
+## [Start overview from Benchmarks](https://github.com/Bazist/HArray/blob/master/Benchmarks.md)
 
 ------------------
 ### Overview
@@ -29,6 +30,46 @@
   Dead fibres are used for insert new keys, so structure perfect works in massive insert/delete scenarios.
 
 ------------------
+
+## Build and Run Benchmarks
+
+### Prerquisites
+
+The following need to be installed and configured on development box:
+
+- C++ development tools.
+- [CMake](https://cmake.org/).
+
+### Build on Linux and Mac
+
+```bash
+mkdir build
+cmake -Bbuild
+cd build && make
+```
+
+To build release version of the library and benchmarks run instead:
+
+```bash
+cmake -Bbuild --config Release
+```
+
+### Build on Windows
+
+```cmd
+md build
+cmake -Bbuild
+msbuild build\HArray.sln
+```
+
+To build release version run:
+
+```cmd
+msbuild build\HArray.sln /property:Configuration=Release
+```
+
+The benchmark application `HArray.exe` will be in `build\Debug` or `build\Release` folder.
+
 
 ## Why we love Trie ? Because it has much more functionality and stability than Hashtables and much more faster than Binary Trees. Let's compare properties:
 

@@ -15,14 +15,10 @@ jobs:
       matrix:
         config:
         - {
-            name: "Ubuntu Latest GCC", artifact: "Linux.7z",
-            os: ubuntu-latest,
-            cc: "gcc", cxx: "g++"
-          }
-        - {
-            name: "macOS Latest Clang", artifact: "macOS.7z",
-            os: macos-latest,
-            cc: "clang", cxx: "clang++"
+            name: "Windows Latest MSVC", artifact: "Windows-MSVC.7z",
+            os: windows-latest,
+            cc: "cl", cxx: "cl",
+            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
           }
 
     steps:
@@ -35,13 +31,8 @@ jobs:
 
         message(STATUS "Using host CMake version: ${CMAKE_VERSION}")
 
-        if ("${{ runner.os }}" STREQUAL "Linux")
-          set(cmake_suffix "Linux-x86_64.tar.gz")
-          set(cmake_dir "cmake-${cmake_version}-Linux-x86_64/bin")
-        elseif ("${{ runner.os }}" STREQUAL "macOS")
-          set(cmake_suffix "Darwin-x86_64.tar.gz")
-          set(cmake_dir "cmake-${cmake_version}-Darwin-x86_64/CMake.app/Contents/bin")
-        endif()
+        set(cmake_suffix "win64-x64.zip")
+        set(cmake_dir "cmake-${cmake_version}-win64-x64/bin")
 
         set(cmake_url "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-${cmake_suffix}")
         file(DOWNLOAD "${cmake_url}" ./cmake.zip SHOW_PROGRESS)
@@ -49,12 +40,8 @@ jobs:
 
         # Add to PATH environment variable
         file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/${cmake_dir}" cmake_dir)
-        set(path_separator ":")
+        set(path_separator ";")
         file(APPEND "$ENV{GITHUB_PATH}" "$ENV{GITHUB_WORKSPACE}${path_separator}${cmake_dir}")
-
-        execute_process(
-          COMMAND chmod +x ${cmake_dir}/cmake
-        )
 
     - name: Configure
       shell: cmake -P {0}
@@ -62,7 +49,18 @@ jobs:
         set(ENV{CC} ${{ matrix.config.cc }})
         set(ENV{CXX} ${{ matrix.config.cxx }})
 
-        set(path_separator ":")
+        execute_process(
+          COMMAND "${{ matrix.config.environment_script }}" && set
+          OUTPUT_FILE environment_script_output.txt
+        )
+        file(STRINGS environment_script_output.txt output_lines)
+        foreach(line IN LISTS output_lines)
+          if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
+            set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
+          endif()
+        endforeach()
+
+        set(path_separator ";")
         set(ENV{PATH} "$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
 
         execute_process(
@@ -80,6 +78,13 @@ jobs:
     - name: Build
       shell: cmake -P {0}
       run: |
+        file(STRINGS environment_script_output.txt output_lines)
+        foreach(line IN LISTS output_lines)
+          if (line MATCHES "^([a-zA-Z0-9_-]+)=(.*)$")
+            set(ENV{${CMAKE_MATCH_1}} "${CMAKE_MATCH_2}")
+          endif()
+        endforeach()
+
         execute_process(
           COMMAND cmake --build build
           RESULT_VARIABLE result
@@ -95,5 +100,8 @@ jobs:
         endif()
 
     - name: Run benchmarks
-      run: cd build && ./HArray
+      run: |
+        cd build\Release
+        HArray.exe
+
 

@@ -1,9 +1,6 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.10)
 
-project(HArray
-	VERSION 0.1
-	DESCRIPTION "Highly optimized trie structure"
-	LANGUAGES CXX)
+project(HArray)
 
 add_executable(HArray
 	src/HArray_delValueByKey.cpp

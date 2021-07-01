@@ -13,3 +13,8 @@ add_executable(HArray
 	src/HArray_test.cpp
 	src/HArray_insert.cpp
 	src/Main.cpp)
+
+install(TARGETS HArray)
+
+enable_testing()
+add_test(NAME HArray COMMAND HArray)

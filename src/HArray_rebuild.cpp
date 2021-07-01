@@ -26,10 +26,10 @@ public:
 	HArray* pNewHA;
 
 	bool RemoveEmptyKeys;
-	int32_t Count;
+	uint32 Count;
 };
 
-bool HArray::rebuildVisitor(int32_t* key, int32_t keyLen, int32_t value, void* pData)
+bool HArray::rebuildVisitor(uint32* key, uint32 keyLen, uint32 value, void* pData)
 {
 	RebuildData* pRD = (RebuildData*)pData;
 
@@ -43,7 +43,7 @@ bool HArray::rebuildVisitor(int32_t* key, int32_t keyLen, int32_t value, void* p
 	return true;
 }
 
-int32_t HArray::rebuild(int32_t headerBase, bool removeEmptyKeys)
+uint32 HArray::rebuild(uint32 headerBase, bool removeEmptyKeys)
 {
 	if(!headerBase)
 	{

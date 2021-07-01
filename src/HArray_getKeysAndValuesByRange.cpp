@@ -20,7 +20,7 @@
 #include "HArray.h"
 
 void HArray::sortLastItem(HArrayPair* pairs,
-								int32_t count)
+								uint32 count)
 {
 	if(count > 1)
 	{
@@ -28,7 +28,7 @@ void HArray::sortLastItem(HArrayPair* pairs,
 		HArrayPair lastItem = pairs[count - 1];
 
 		//find element
-		int32_t idx = count - 2;
+		uint32 idx = count - 2;
 		HArrayPair& prevItem = pairs[idx];
 
 		if((*compareFunc)(lastItem.Key, lastItem.KeyLen,
@@ -49,7 +49,7 @@ void HArray::sortLastItem(HArrayPair* pairs,
 				idx++;
 
 				//move elements
-				for(int32_t i = count - 1; i > idx; i--)
+				for(uint32 i = count - 1; i > idx; i--)
 				{
 					pairs[i] = pairs[i-1];
 				}
@@ -63,19 +63,19 @@ void HArray::sortLastItem(HArrayPair* pairs,
 }
 
 void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
-													int32_t& count,
-													int32_t size,
-													int32_t contentOffset,
-													int32_t keyOffset,
-													int32_t blockOffset,
-													int32_t* minKey,
-													int32_t minKeyLen,
-													int32_t* maxKey,
-													int32_t maxKeyLen)
+													uint32& count,
+													uint32 size,
+													uint32 contentOffset,
+													uint32 keyOffset,
+													uint32 blockOffset,
+													uint32* minKey,
+													uint32 minKeyLen,
+													uint32* maxKey,
+													uint32 maxKeyLen)
 {
-	int32_t maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
+	uint32 maxOffset = blockOffset + BLOCK_ENGINE_SIZE;
 
-	for(int32_t offset = blockOffset; offset < maxOffset; offset++)
+	for(uint32 offset = blockOffset; offset < maxOffset; offset++)
 	{
 		if(count == size && pairs)
 			return;
@@ -83,7 +83,7 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 		BlockPage* pBlockPage = pBlockPages[offset >> 16];
 		BlockCell& blockCell = pBlockPage->pBlock[offset & 0xFFFF];
 
-		uint8_t& blockCellType = blockCell.Type;
+		uchar8& blockCellType = blockCell.Type;
 
 		if(blockCellType == EMPTY_TYPE)
 		{
@@ -91,15 +91,15 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 		}
 		else if(blockCellType == CURRENT_VALUE_TYPE) //current value
 		{
-			int32_t& keyValue = blockCell.ValueOrOffset;
+			uint32& keyValue = blockCell.ValueOrOffset;
 
 			pairs[count].Key[keyOffset] = keyValue;
 
-			int32_t* subMinKey = 0;
-			int32_t subMinKeyLen = 0;
+			uint32* subMinKey = 0;
+			uint32 subMinKeyLen = 0;
 
-			int32_t* subMaxKey = 0;
-			int32_t subMaxKeyLen = 0;
+			uint32* subMaxKey = 0;
+			uint32 subMaxKeyLen = 0;
 
 			if (minKey)
 			{
@@ -152,17 +152,17 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 			BranchCell& branchCell1 = pBranchPage->pBranch[blockCell.Offset & 0xFFFF];
 
 			//try find value in the list
-			for(int32_t i=0; i<blockCellType; i++)
+			for(uint32 i=0; i<blockCellType; i++)
 			{
-				int32_t& keyValue = branchCell1.Values[i];
+				uint32& keyValue = branchCell1.Values[i];
 
 				pairs[count].Key[keyOffset] = keyValue;
 
-				int32_t* subMinKey = 0;
-				int32_t subMinKeyLen = 0;
+				uint32* subMinKey = 0;
+				uint32 subMinKeyLen = 0;
 
-				int32_t* subMaxKey = 0;
-				int32_t subMaxKeyLen = 0;
+				uint32* subMaxKey = 0;
+				uint32 subMaxKeyLen = 0;
 
 				if (minKey)
 				{
@@ -216,17 +216,17 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 			BranchCell branchCell1 = pBranchPage1->pBranch[blockCell.Offset & 0xFFFF];
 
 			//try find value in the list
-			for(int32_t i=0; i < BRANCH_ENGINE_SIZE; i++)
+			for(uint32 i=0; i < BRANCH_ENGINE_SIZE; i++)
 			{
-				int32_t& keyValue = branchCell1.Values[i];
+				uint32& keyValue = branchCell1.Values[i];
 
 				pairs[count].Key[keyOffset] = keyValue;
 
-				int32_t* subMinKey = 0;
-				int32_t subMinKeyLen = 0;
+				uint32* subMinKey = 0;
+				uint32 subMinKeyLen = 0;
 
-				int32_t* subMaxKey = 0;
-				int32_t subMaxKeyLen = 0;
+				uint32* subMaxKey = 0;
+				uint32 subMaxKeyLen = 0;
 
 				if (minKey)
 				{
@@ -278,19 +278,19 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 			BranchCell branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 
 			//try find value in the list
-			int32_t countValues = blockCellType - MAX_BRANCH_TYPE1;
+			uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
 
-			for(int32_t i=0; i<countValues; i++)
+			for(uint32 i=0; i<countValues; i++)
 			{
-				int32_t& keyValue = branchCell2.Values[i];
+				uint32& keyValue = branchCell2.Values[i];
 
 				pairs[count].Key[keyOffset] = keyValue;
 
-				int32_t* subMinKey = 0;
-				int32_t subMinKeyLen = 0;
+				uint32* subMinKey = 0;
+				uint32 subMinKeyLen = 0;
 
-				int32_t* subMaxKey = 0;
-				int32_t subMaxKeyLen = 0;
+				uint32* subMaxKey = 0;
+				uint32 subMaxKeyLen = 0;
 
 				if (minKey)
 				{
@@ -356,14 +356,14 @@ void HArray::getKeysAndValuesByRangeFromBlock(HArrayPair* pairs,
 }
 
 void HArray::getKeysAndValuesByRange(HArrayPair* pairs,
-									int32_t& count,
-									int32_t size,
-									int32_t keyOffset,
-									int32_t contentOffset,
-									int32_t* minKey,
-									int32_t minKeyLen,
-									int32_t* maxKey,
-									int32_t maxKeyLen)
+									uint32& count,
+									uint32 size,
+									uint32 keyOffset,
+									uint32 contentOffset,
+									uint32* minKey,
+									uint32 minKeyLen,
+									uint32* maxKey,
+									uint32 maxKeyLen)
 {
 	//printf("getValuesByRange count=%d size=%d contentOffset=%d keyOffset=%d\n", count, size, contentOffset, keyOffset);
 
@@ -373,18 +373,18 @@ void HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 			return;
 
 		ContentPage* pContentPage = pContentPages[contentOffset>>16];
-		uint16_t contentIndex = contentOffset&0xFFFF;
+		ushort16 contentIndex = contentOffset&0xFFFF;
 
-		int32_t contentCellValueOrOffset = pContentPage->pContent[contentIndex];
-		uint8_t contentCellType = pContentPage->pType[contentIndex]; //move to type part
+		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
+		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
 
 		if(contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
-			int32_t keyLen =  contentCellType - ONLY_CONTENT_TYPE;
+			uint32 keyLen =  contentCellType - ONLY_CONTENT_TYPE;
 
-			for(int32_t i = 0; i < keyLen; i++, keyOffset++, contentOffset++)
+			for(uint32 i = 0; i < keyLen; i++, keyOffset++, contentOffset++)
 			{
-				int32_t& keyValue = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF];
+				uint32& keyValue = pContentPages[contentOffset>>16]->pContent[contentOffset&0xFFFF];
 
 				pairs[count].Key[keyOffset] = keyValue;
 
@@ -488,17 +488,17 @@ void HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
 
 			//check other
-			for(int32_t i = 0; i<contentCellType; i++) //from 1
+			for(uint32 i = 0; i<contentCellType; i++) //from 1
 			{
-				int32_t& keyValue = branchCell.Values[i];
+				uint32& keyValue = branchCell.Values[i];
 
 				pairs[count].Key[keyOffset] = keyValue;
 
-				int32_t* subMinKey = 0;
-				int32_t subMinKeyLen = 0;
+				uint32* subMinKey = 0;
+				uint32 subMinKeyLen = 0;
 
-				int32_t* subMaxKey = 0;
-				int32_t subMaxKeyLen = 0;
+				uint32* subMaxKey = 0;
+				uint32 subMaxKeyLen = 0;
 
 				if (minKey)
 				{
@@ -586,7 +586,7 @@ void HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 		}
 		else if(contentCellType == CURRENT_VALUE_TYPE)
 		{
-			int32_t& keyValue = contentCellValueOrOffset;
+			uint32& keyValue = contentCellValueOrOffset;
 
 			pairs[count].Key[keyOffset] = keyValue;
 
@@ -644,20 +644,20 @@ void HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 }
 
 
-int32_t HArray::getKeysAndValuesByRange(HArrayPair* pairs,
-									    int32_t pairsSize,
-										int32_t* minKey,
-										int32_t minKeyLen,
-										int32_t* maxKey,
-										int32_t maxKeyLen)
+uint32 HArray::getKeysAndValuesByRange(HArrayPair* pairs,
+									    uint32 pairsSize,
+										uint32* minKey,
+										uint32 minKeyLen,
+										uint32* maxKey,
+										uint32 maxKeyLen)
 {
 	minKeyLen >>= 2;
 	maxKeyLen >>= 2;
 
-	int32_t count = 0;
+	uint32 count = 0;
 
-	int32_t startHeader;
-	int32_t endHeader;
+	uint32 startHeader;
+	uint32 endHeader;
 
 	if (!normalizeFunc)
 	{
@@ -703,14 +703,14 @@ int32_t HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 	//start range
 	if(startHeader < endHeader)
 	{
-		int32_t contentOffset = pHeader[startHeader];
+		uint32 contentOffset = pHeader[startHeader];
 		if(contentOffset)
 		{
 			getKeysAndValuesByRange(pairs, count, pairsSize, 0, contentOffset, minKey, minKeyLen, 0, 0);
 		}
 
 		//middle range
-		for(int32_t currKey = startHeader + 1; currKey < endHeader; currKey++)
+		for(uint32 currKey = startHeader + 1; currKey < endHeader; currKey++)
 		{
 			if(count == pairsSize)
 				return count;
@@ -732,7 +732,7 @@ int32_t HArray::getKeysAndValuesByRange(HArrayPair* pairs,
 	}
 	else
 	{
-		int32_t contentOffset = pHeader[startHeader];
+		uint32 contentOffset = pHeader[startHeader];
 		if(contentOffset)
 		{
 			getKeysAndValuesByRange(pairs, count, pairsSize, 0, contentOffset, minKey, minKeyLen, maxKey, maxKeyLen);

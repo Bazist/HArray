@@ -20,7 +20,7 @@
 
 #include "HArray.h"
 
-typedef bool HARRAY_VALUE_VISIT_FUNC(int32_t value, void* pData);
+typedef bool HARRAY_VALUE_VISIT_FUNC(uint32 value, void* pData);
 
 class HArrayUniqueIntValueList : public HArray
 {
@@ -28,12 +28,12 @@ private:
 
 	struct ScanValuesData
 	{
-		int32_t KeyLenWithValueLen;
+		uint32 KeyLenWithValueLen;
 		HARRAY_VALUE_VISIT_FUNC* pVisitor;
 		void* pData;
 	};
 
-	static bool scanValues(int32_t* key, int32_t keyLen, int32_t value, void* pData)
+	static bool scanValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
 	{
 		ScanValuesData* pScanData = (ScanValuesData*)pData;
 
@@ -49,11 +49,11 @@ private:
 
 public:
 
-	bool insert(int32_t* key,
-		int32_t keyLen,
-		int32_t value)
+	bool insert(uint32* key,
+		uint32 keyLen,
+		uint32 value)
 	{
-		int32_t existingValue;
+		uint32 existingValue;
 
 		if (HArray::getValueByKey(key, keyLen, existingValue)) //list with one value
 		{
@@ -91,12 +91,12 @@ public:
 		}
 	}
 
-	bool getIntValuesByKey(int32_t* key,
-		int32_t keyLen,
+	bool getIntValuesByKey(uint32* key,
+		uint32 keyLen,
 		HARRAY_VALUE_VISIT_FUNC visitor,
 		void* pData)
 	{
-		int32_t value;
+		uint32 value;
 
 		if (HArray::getValueByKey(key, keyLen, value)) //list with one value
 		{
@@ -115,9 +115,9 @@ public:
 		}
 	}
 
-	bool delValueByKey(int32_t* key, int32_t keyLen, int32_t value)
+	bool delValueByKey(uint32* key, uint32 keyLen, uint32 value)
 	{
-		int32_t existingValue;
+		uint32 existingValue;
 
 		if (HArray::getValueByKey(key, keyLen, existingValue)) //list with one value
 		{

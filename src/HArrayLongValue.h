@@ -26,13 +26,13 @@ private:
 
 	struct ScanLongValuesData
 	{
-		int32_t KeyLen;
-		int32_t* Value;
-		int32_t ValueLen;
+		uint32 KeyLen;
+		uint32* Value;
+		uint32 ValueLen;
 		void* pData;
 	};
 
-	static bool scanValues(int32_t* key, int32_t keyLen, int32_t value, void* pData)
+	static bool scanValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
 	{
 		ScanLongValuesData* pScanData = (ScanLongValuesData*)pData;
 
@@ -42,7 +42,7 @@ private:
 
 		if (pScanData->KeyLen + pScanData->ValueLen == keyLen) //our key is composite key: key + value
 		{
-			for (int32_t i = 0; i < pScanData->ValueLen; i++)
+			for (uint32 i = 0; i < pScanData->ValueLen; i++)
 			{
 				pScanData->Value[i] = key[pScanData->KeyLen++];
 			}
@@ -57,17 +57,17 @@ private:
 
 public:
 
-	bool insert(int32_t* key,
-		int32_t keyLen,
-		int32_t* value,
-		int32_t valueLen)
+	bool insert(uint32* key,
+		uint32 keyLen,
+		uint32* value,
+		uint32 valueLen)
 	{
 		if (HArray::hasPartKey(key, keyLen)) //it is update
 		{
 			delValueByKey(key, keyLen);
 		}
 
-		for (int32_t i = 0; i < valueLen; i++, keyLen++)
+		for (uint32 i = 0; i < valueLen; i++, keyLen++)
 		{
 			key[keyLen] = value[i];
 		}
@@ -77,10 +77,10 @@ public:
 		return HArray::insert(key, keyLen, 0);
 	}
 
-	bool getValueByKey(int32_t* key,
-		int32_t keyLen,
-		int32_t* value,
-		int32_t& valueLen)
+	bool getValueByKey(uint32* key,
+		uint32 keyLen,
+		uint32* value,
+		uint32& valueLen)
 	{
 		ScanLongValuesData scanData;
 		scanData.KeyLen = keyLen;
@@ -94,14 +94,14 @@ public:
 		return (valueLen > 0);
 	}
 
-	bool delValueByKey(int32_t* key, int32_t keyLen)
+	bool delValueByKey(uint32* key, uint32 keyLen)
 	{
-		int32_t value[MAX_CHAR - ONLY_CONTENT_TYPE];
-		int32_t valueLen = 0;
+		uint32 value[MAX_CHAR - ONLY_CONTENT_TYPE];
+		uint32 valueLen = 0;
 
 		if (getValueByKey(key, keyLen, value, valueLen))
 		{
-			for (int32_t i = 0; i < valueLen; i++, keyLen++)
+			for (uint32 i = 0; i < valueLen; i++, keyLen++)
 			{
 				key[keyLen] = value[i];
 			}

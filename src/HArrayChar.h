@@ -26,21 +26,21 @@ private:
 
 	struct ScanGetValueData
 	{
-		int32_t KeyLen;
+		uint32 KeyLen;
 		char* Value;
-		int32_t ValueLen;
+		uint32 ValueLen;
 		void* pData;
 	};
 
-	static bool scanGetValue(int32_t* key, int32_t keyLen, int32_t value, void* pData)
+	static bool scanGetValue(uint32* key, uint32 keyLen, uint32 value, void* pData)
 	{
 		ScanGetValueData* pScanData = (ScanGetValueData*)pData;
 
-		int32_t valueLenInSegments;
+		uint32 valueLenInSegments;
 
 		keyLen--;
 
-		int32_t valueLen = key[keyLen];
+		uint32 valueLen = key[keyLen];
 
 		if (valueLen & 0x3)
 		{
@@ -53,7 +53,7 @@ private:
 
 		if (pScanData->KeyLen + valueLenInSegments == keyLen) //our key is composite key: key + value
 		{
-			for (int32_t i = 0; i < valueLenInSegments; i++)
+			for (uint32 i = 0; i < valueLenInSegments; i++)
 			{
 				pScanData->Value[i] = key[pScanData->KeyLen++];
 			}
@@ -71,15 +71,15 @@ private:
 public:
 
 	bool insert(const char* key,
-		int32_t keyLen,
+		uint32 keyLen,
 		const char* value,
-		int32_t valueLen)
+		uint32 valueLen)
 	{
 		char newKey[MAX_KEY_SEGMENTS];
-		int32_t j = 0;
+		uint32 j = 0;
 
 		//add key
-		for (int32_t i = 0; i < keyLen; i++, j++)
+		for (uint32 i = 0; i < keyLen; i++, j++)
 		{
 			newKey[j] = key[i];
 		}
@@ -91,7 +91,7 @@ public:
 		}
 
 		//add value
-		for (int32_t i = 0; i < valueLen; i++, j++)
+		for (uint32 i = 0; i < valueLen; i++, j++)
 		{
 			newKey[j] = value[i];
 		}
@@ -103,23 +103,23 @@ public:
 		}
 
 		//add value len
-		*(int32_t*)(newKey + j) = valueLen;
+		*(uint32*)(newKey + j) = valueLen;
 
 		j += 4;
 
-		return HArray::insert((int32_t*)newKey, j >> 2, 0);
+		return HArray::insert((uint32*)newKey, j >> 2, 0);
 	}
 
 	bool getValueByKey(const char* key,
-		int32_t keyLen,
+		uint32 keyLen,
 		char* value,
-		int32_t& valueLen)
+		uint32& valueLen)
 	{
 		char newKey[MAX_KEY_SEGMENTS];
-		int32_t j = 0;
+		uint32 j = 0;
 
 		//add key
-		for (int32_t i = 0; i < keyLen; i++, j++)
+		for (uint32 i = 0; i < keyLen; i++, j++)
 		{
 			newKey[j] = key[i];
 		}
@@ -137,20 +137,20 @@ public:
 		scanData.Value = value;
 		scanData.ValueLen = 0;
 
-		HArray::scanKeysAndValues((int32_t*)newKey, keyLen, scanGetValue, &scanData);
+		HArray::scanKeysAndValues((uint32*)newKey, keyLen, scanGetValue, &scanData);
 
 		valueLen = scanData.ValueLen;
 
 		return (valueLen > 0);
 	}
 
-	bool hasPartKey(const char* key, int32_t keyLen)
+	bool hasPartKey(const char* key, uint32 keyLen)
 	{
 		char newKey[MAX_KEY_SEGMENTS];
-		int32_t j = 0;
+		uint32 j = 0;
 
 		//add key
-		for (int32_t i = 0; i < keyLen; i++, j++)
+		for (uint32 i = 0; i < keyLen; i++, j++)
 		{
 			newKey[j] = key[i];
 		}
@@ -161,21 +161,21 @@ public:
 			newKey[j++] = 0;
 		}
 
-		return HArray::hasPartKey((int32_t*)newKey, j >> 2);
+		return HArray::hasPartKey((uint32*)newKey, j >> 2);
 	}
 
-	bool delValueByKey(const char* key, int32_t keyLen)
+	bool delValueByKey(const char* key, uint32 keyLen)
 	{
 		char value[MAX_KEY_SEGMENTS];
-		int32_t valueLen;
+		uint32 valueLen;
 
 		if (getValueByKey(key, keyLen, value, valueLen))
 		{
 			char newKey[MAX_KEY_SEGMENTS];
-			int32_t j = 0;
+			uint32 j = 0;
 
 			//add key
-			for (int32_t i = 0; i < keyLen; i++, j++)
+			for (uint32 i = 0; i < keyLen; i++, j++)
 			{
 				newKey[j] = key[i];
 			}
@@ -187,7 +187,7 @@ public:
 			}
 
 			//add value
-			for (int32_t i = 0; i < valueLen; i++, j++)
+			for (uint32 i = 0; i < valueLen; i++, j++)
 			{
 				newKey[j] = value[i];
 			}
@@ -199,11 +199,11 @@ public:
 			}
 
 			//add value len
-			*(int32_t*)(newKey + j) = valueLen;
+			*(uint32*)(newKey + j) = valueLen;
 
 			j += 4;
 
-			HArray::delValueByKey((int32_t*)newKey, j >> 2);
+			HArray::delValueByKey((uint32*)newKey, j >> 2);
 
 		}
 		else

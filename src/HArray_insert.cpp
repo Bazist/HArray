@@ -20,13 +20,13 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-bool HArray::insert(int32_t* key,
-	int32_t keyLen,
-	int32_t value) //Type of value parameter: VALUE_TYPE_1 (by default), VALUE_TYPE_2 ... VALUE_TYPE_5
+bool HArray::insert(uint32* key,
+	uint32 keyLen,
+	uint32 value) //Type of value parameter: VALUE_TYPE_1 (by default), VALUE_TYPE_2 ... VALUE_TYPE_5
 {
 	try
 	{
-		int32_t maxSafeShort = MAX_SAFE_SHORT - keyLen;
+		uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
 		//create new page =======================================================================================
 		if (!pContentPages[(lastContentOffset + keyLen + ValueLen) >> 16])
@@ -40,12 +40,12 @@ bool HArray::insert(int32_t* key,
 		}
 
 		//insert value ==========================================================================================
-		int32_t keyOffset = 0;
-		int32_t headerOffset;
-		int32_t keyValue;
+		uint32 keyOffset = 0;
+		uint32 headerOffset;
+		uint32 keyValue;
 
-		uint8_t* pContentCellType;
-		int32_t* pContentCellValue;
+		uchar8* pContentCellType;
+		uint32* pContentCellValue;
 
 		if (!normalizeFunc)
 		{
@@ -56,15 +56,15 @@ bool HArray::insert(int32_t* key,
 			headerOffset = (*normalizeFunc)(key) >> HeaderBits;
 		}
 
-		int32_t contentOffset = pHeader[headerOffset];
+		uint32 contentOffset = pHeader[headerOffset];
 
 		ContentPage* pContentPage;
-		int32_t contentIndex;
+		uint32 contentIndex;
 
-		uint8_t contentCellType;
-		//int32_t contentCellValue;
+		uchar8 contentCellType;
+		//uint32 contentCellValue;
 
-		int32_t* pSetLastContentOffset = 0;
+		uint32* pSetLastContentOffset = 0;
 
 		if (!contentOffset)
 		{
@@ -74,12 +74,12 @@ bool HArray::insert(int32_t* key,
 			//insert key in free slot
 			if (tailReleasedContentOffsets[keyLen])
 			{
-				int32_t startContentOffset = tailReleasedContentOffsets[keyLen];
+				uint32 startContentOffset = tailReleasedContentOffsets[keyLen];
 
 				pHeader[headerOffset] = startContentOffset;
 
 				ContentPage* pContentPage = pContentPages[startContentOffset >> 16];
-				int32_t contentIndex = startContentOffset & 0xFFFF;
+				uint32 contentIndex = startContentOffset & 0xFFFF;
 
 				pContentPage->pType[contentIndex] = (ONLY_CONTENT_TYPE + keyLen);
 				tailReleasedContentOffsets[keyLen] = pContentPage->pContent[contentIndex];
@@ -100,12 +100,12 @@ bool HArray::insert(int32_t* key,
 			else
 			{
 				ContentPage* pContentPage = pContentPages[lastContentOffset >> 16];
-				int32_t contentIndex = lastContentOffset & 0xFFFF;
+				uint32 contentIndex = lastContentOffset & 0xFFFF;
 
 				if (contentIndex > maxSafeShort) //content in one page
 				{
 					//release content cells
-					int32_t spaceLen = MAX_SHORT - contentIndex - 1;
+					uint32 spaceLen = MAX_SHORT - contentIndex - 1;
 
 					pContentPage->pContent[contentIndex] = tailReleasedContentOffsets[spaceLen];
 
@@ -114,7 +114,7 @@ bool HArray::insert(int32_t* key,
 					countReleasedContentCells += (spaceLen + ValueLen);
 
 					//move to next page
-					int32_t page = (lastContentOffset >> 16) + 1;
+					uint32 page = (lastContentOffset >> 16) + 1;
 
 					pContentPage = pContentPages[page];
 
@@ -157,14 +157,14 @@ bool HArray::insert(int32_t* key,
 
 		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================
 		{
-			int32_t originKeyLen = keyOffset + contentCellType - ONLY_CONTENT_TYPE;
+			uint32 originKeyLen = keyOffset + contentCellType - ONLY_CONTENT_TYPE;
 
 			if (contentIndex < maxSafeShort) //content in one page
 			{
 				for (; keyOffset < originKeyLen; contentOffset++, contentIndex++, keyOffset++)
 				{
-					uint8_t& contentCellType = pContentPage->pType[contentIndex];
-					int32_t& contentCellValue = pContentPage->pContent[contentIndex];
+					uchar8& contentCellType = pContentPage->pType[contentIndex];
+					uint32& contentCellValue = pContentPage->pContent[contentIndex];
 
 					//key shorter than already inserted, insert
 					if (keyOffset == keyLen)
@@ -173,7 +173,7 @@ bool HArray::insert(int32_t* key,
 
 						if (countReleasedVarCells)
 						{
-							int32_t varOffset = tailReleasedVarOffset;
+							uint32 varOffset = tailReleasedVarOffset;
 
 							pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
 
@@ -230,7 +230,7 @@ bool HArray::insert(int32_t* key,
 						BranchCell* pBranchCell;
 						if (countReleasedBranchCells)
 						{
-							int32_t branchOffset = tailReleasedBranchOffset;
+							uint32 branchOffset = tailReleasedBranchOffset;
 
 							pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
@@ -285,7 +285,7 @@ bool HArray::insert(int32_t* key,
 
 					if (countReleasedVarCells)
 					{
-						int32_t varOffset = tailReleasedVarOffset;
+						uint32 varOffset = tailReleasedVarOffset;
 
 						pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
 
@@ -343,7 +343,7 @@ bool HArray::insert(int32_t* key,
 
 						if (countReleasedVarCells)
 						{
-							int32_t varOffset = tailReleasedVarOffset;
+							uint32 varOffset = tailReleasedVarOffset;
 
 							pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
 
@@ -400,7 +400,7 @@ bool HArray::insert(int32_t* key,
 						BranchCell* pBranchCell;
 						if (countReleasedBranchCells)
 						{
-							int32_t branchOffset = tailReleasedBranchOffset;
+							uint32 branchOffset = tailReleasedBranchOffset;
 
 							pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
@@ -464,7 +464,7 @@ bool HArray::insert(int32_t* key,
 
 					if (countReleasedVarCells)
 					{
-						int32_t varOffset = tailReleasedVarOffset;
+						uint32 varOffset = tailReleasedVarOffset;
 
 						pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
 
@@ -516,7 +516,7 @@ bool HArray::insert(int32_t* key,
 		pContentCellType = &pContentPage->pType[contentIndex];
 		pContentCellValue = &pContentPage->pContent[contentIndex];
 
-		int32_t contentCellValueOrOffset;
+		uint32 contentCellValueOrOffset;
 
 		contentCellValueOrOffset = pContentPage->pContent[contentIndex];
 
@@ -557,7 +557,7 @@ bool HArray::insert(int32_t* key,
 
 				if (countReleasedVarCells)
 				{
-					int32_t varOffset = tailReleasedVarOffset;
+					uint32 varOffset = tailReleasedVarOffset;
 
 					pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
 
@@ -606,7 +606,7 @@ bool HArray::insert(int32_t* key,
 
 			if (countReleasedVarCells)
 			{
-				int32_t varOffset = tailReleasedVarOffset;
+				uint32 varOffset = tailReleasedVarOffset;
 
 				pVarCell = &pVarPages[varOffset >> 16]->pVar[varOffset & 0xFFFF];
 
@@ -649,7 +649,7 @@ bool HArray::insert(int32_t* key,
 			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
 
 			//try find value in the list
-			for (int32_t i = 0; i < contentCellType; i++)
+			for (uint32 i = 0; i < contentCellType; i++)
 			{
 				if (branchCell.Values[i] == keyValue)
 				{
@@ -678,26 +678,26 @@ bool HArray::insert(int32_t* key,
 #endif
 
 				//EXTRACT BRANCH AND CREATE BLOCK =========================================================
-				uint8_t idxKeyValue = 0;
-				uint8_t currContentCellType = MIN_BLOCK_TYPE;
+				uchar8 idxKeyValue = 0;
+				uchar8 currContentCellType = MIN_BLOCK_TYPE;
 
-				const uint16_t countCell = BRANCH_ENGINE_SIZE + 1;
+				const ushort16 countCell = BRANCH_ENGINE_SIZE + 1;
 
 			EXTRACT_BRANCH:
 
 				BlockCell blockCells[countCell];
-				uint8_t indexes[countCell];
+				uchar8 indexes[countCell];
 
-				for (int32_t i = 0; i < MAX_BRANCH_TYPE1; i++)
+				for (uint32 i = 0; i < MAX_BRANCH_TYPE1; i++)
 				{
 					BlockCell& currBlockCell = blockCells[i];
 					currBlockCell.Type = CURRENT_VALUE_TYPE;
 					currBlockCell.Offset = branchCell.Offsets[i];
 
-					int32_t& value = branchCell.Values[i];
+					uint32& value = branchCell.Values[i];
 					currBlockCell.ValueOrOffset = value;
 
-					indexes[i] = ((value << idxKeyValue) >> BLOCK_ENGINE_SHIFT); //((uint8_t*)&value)[idxKeyValue];
+					indexes[i] = ((value << idxKeyValue) >> BLOCK_ENGINE_SHIFT); //((uchar8*)&value)[idxKeyValue];
 				}
 
 				//add current value
@@ -709,16 +709,16 @@ bool HArray::insert(int32_t* key,
 				indexes[BRANCH_ENGINE_SIZE] = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
 
 				//clear map
-				uint8_t mapIndexes[BLOCK_ENGINE_SIZE];
-				for (int32_t i = 0; i < countCell; i++)
+				uchar8 mapIndexes[BLOCK_ENGINE_SIZE];
+				for (uint32 i = 0; i < countCell; i++)
 				{
 					mapIndexes[indexes[i]] = 0;
 				}
 
 				//fill map
-				for (int32_t i = 0; i < countCell; i++)
+				for (uint32 i = 0; i < countCell; i++)
 				{
-					uint8_t& countIndexes = mapIndexes[indexes[i]];
+					uchar8& countIndexes = mapIndexes[indexes[i]];
 					countIndexes++;
 
 					if (countIndexes > BRANCH_ENGINE_SIZE)
@@ -739,7 +739,7 @@ bool HArray::insert(int32_t* key,
 				countReleasedBranchCells++;
 
 				//get free block
-				int32_t startBlockOffset;
+				uint32 startBlockOffset;
 
 				if (countReleasedBlockCells)
 				{
@@ -753,7 +753,7 @@ bool HArray::insert(int32_t* key,
 				{
 					startBlockOffset = lastBlockOffset;
 
-					int32_t maxLastBlockOffset = startBlockOffset + BLOCK_ENGINE_SIZE * 2;
+					uint32 maxLastBlockOffset = startBlockOffset + BLOCK_ENGINE_SIZE * 2;
 					if (!pBlockPages[maxLastBlockOffset >> 16])
 					{
 						pBlockPages[BlockPagesCount++] = new BlockPage();
@@ -771,15 +771,15 @@ bool HArray::insert(int32_t* key,
 				*pContentCellType = currContentCellType;
 				*pContentCellValue = startBlockOffset;
 
-				for (int32_t i = 0; i < countCell; i++)
+				for (uint32 i = 0; i < countCell; i++)
 				{
-					uint8_t idx = indexes[i];
-					int32_t offset = startBlockOffset + idx;
+					uchar8 idx = indexes[i];
+					uint32 offset = startBlockOffset + idx;
 
 					BlockPage* pBlockPage = pBlockPages[offset >> 16];
 					BlockCell& currBlockCell = pBlockPage->pBlock[offset & 0xFFFF];
 
-					uint8_t count = mapIndexes[idx];
+					uchar8 count = mapIndexes[idx];
 					if (count == 1) //one value in block cell
 					{
 						currBlockCell = blockCells[i];
@@ -797,7 +797,7 @@ bool HArray::insert(int32_t* key,
 							BranchCell* pCurrBranchCell;
 							if (countReleasedBranchCells)
 							{
-								int32_t branchOffset = tailReleasedBranchOffset;
+								uint32 branchOffset = tailReleasedBranchOffset;
 
 								pCurrBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
@@ -868,19 +868,19 @@ bool HArray::insert(int32_t* key,
 		}
 		else if (contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
 		{
-			int32_t level = 1;
+			uint32 level = 1;
 
-			uint8_t idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
+			uchar8 idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 
-			int32_t startOffset = contentCellValueOrOffset;
+			uint32 startOffset = contentCellValueOrOffset;
 
 		NEXT_BLOCK:
-			int32_t subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
-			int32_t blockOffset = startOffset + subOffset;
+			uint32 subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
+			uint32 blockOffset = startOffset + subOffset;
 
 			BlockCell& blockCell = pBlockPages[blockOffset >> 16]->pBlock[blockOffset & 0xFFFF];
 
-			uint8_t& blockCellType = blockCell.Type;
+			uchar8& blockCellType = blockCell.Type;
 
 			if (blockCellType == EMPTY_TYPE) //release cell, fill
 			{
@@ -909,7 +909,7 @@ bool HArray::insert(int32_t* key,
 						BranchCell* pBranchCell;
 						if (countReleasedBranchCells)
 						{
-							int32_t branchOffset = tailReleasedBranchOffset;
+							uint32 branchOffset = tailReleasedBranchOffset;
 
 							pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
@@ -955,7 +955,7 @@ bool HArray::insert(int32_t* key,
 
 					//first branch
 					//try find value in the list
-					for (int32_t i = 0; i < blockCellType; i++)
+					for (uint32 i = 0; i < blockCellType; i++)
 					{
 						if (branchCell1.Values[i] == keyValue)
 						{
@@ -983,7 +983,7 @@ bool HArray::insert(int32_t* key,
 					BranchCell* pBranchCell;
 					if (countReleasedBranchCells)
 					{
-						int32_t branchOffset = tailReleasedBranchOffset;
+						uint32 branchOffset = tailReleasedBranchOffset;
 
 						pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
@@ -1024,7 +1024,7 @@ bool HArray::insert(int32_t* key,
 
 					//first branch
 					//try find value in the list
-					for (int32_t i = 0; i < BRANCH_ENGINE_SIZE; i++)
+					for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
 					{
 						if (branchCell1.Values[i] == keyValue)
 						{
@@ -1040,9 +1040,9 @@ bool HArray::insert(int32_t* key,
 					BranchCell& branchCell2 = pBranchPage2->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 
 					//try find value in the list
-					int32_t countValues = blockCellType - MAX_BRANCH_TYPE1;
+					uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
 
-					for (uint8_t i = 0; i < countValues; i++)
+					for (uchar8 i = 0; i < countValues; i++)
 					{
 						if (branchCell2.Values[i] == keyValue)
 						{
@@ -1098,11 +1098,11 @@ bool HArray::insert(int32_t* key,
 					}
 #endif
 
-						const uint16_t branchesSize = BRANCH_ENGINE_SIZE * 2;
-						const uint16_t countCell = branchesSize + 1;
+						const ushort16 branchesSize = BRANCH_ENGINE_SIZE * 2;
+						const ushort16 countCell = branchesSize + 1;
 
 						BlockCell blockCells[countCell];
-						uint8_t indexes[countCell];
+						uchar8 indexes[countCell];
 
 					EXTRACT_BRANCH2:
 						idxKeyValue += BLOCK_ENGINE_STEP;
@@ -1111,29 +1111,29 @@ bool HArray::insert(int32_t* key,
 
 						//idxKeyValue &= BLOCK_ENGINE_MASK;
 
-						uint8_t j = 0;
+						uchar8 j = 0;
 
 						//first branch
-						for (int32_t i = 0; i < BRANCH_ENGINE_SIZE; i++, j++)
+						for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++, j++)
 						{
 							BlockCell& currBlockCell = blockCells[j];
 							currBlockCell.Type = CURRENT_VALUE_TYPE;
 							currBlockCell.Offset = branchCell1.Offsets[i];
 
-							int32_t& value = branchCell1.Values[i];
+							uint32& value = branchCell1.Values[i];
 							currBlockCell.ValueOrOffset = value;
 
 							indexes[j] = ((value << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
 						}
 
 						//second branch
-						for (int32_t i = 0; i < BRANCH_ENGINE_SIZE; i++, j++)
+						for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++, j++)
 						{
 							BlockCell& currBlockCell = blockCells[j];
 							currBlockCell.Type = CURRENT_VALUE_TYPE;
 							currBlockCell.Offset = branchCell2.Offsets[i];
 
-							int32_t& value = branchCell2.Values[i];
+							uint32& value = branchCell2.Values[i];
 							currBlockCell.ValueOrOffset = value;
 
 							indexes[j] = ((value << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
@@ -1148,16 +1148,16 @@ bool HArray::insert(int32_t* key,
 						indexes[branchesSize] = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
 
 						//clear map
-						uint8_t mapIndexes[BLOCK_ENGINE_SIZE];
-						for (uint8_t i = 0; i < countCell; i++)
+						uchar8 mapIndexes[BLOCK_ENGINE_SIZE];
+						for (uchar8 i = 0; i < countCell; i++)
 						{
 							mapIndexes[indexes[i]] = 0;
 						}
 
 						//fill map
-						for (int32_t i = 0; i < countCell; i++)
+						for (uint32 i = 0; i < countCell; i++)
 						{
-							uint8_t& countIndexes = mapIndexes[indexes[i]];
+							uchar8& countIndexes = mapIndexes[indexes[i]];
 							countIndexes++;
 
 							if (countIndexes > branchesSize)
@@ -1187,7 +1187,7 @@ bool HArray::insert(int32_t* key,
 						countReleasedBranchCells++;
 
 						//get free block
-						int32_t startBlockOffset;
+						uint32 startBlockOffset;
 
 						if (countReleasedBlockCells)
 						{
@@ -1201,7 +1201,7 @@ bool HArray::insert(int32_t* key,
 						{
 							startBlockOffset = lastBlockOffset;
 
-							int32_t maxLastBlockOffset = startBlockOffset + BLOCK_ENGINE_SIZE * 2;
+							uint32 maxLastBlockOffset = startBlockOffset + BLOCK_ENGINE_SIZE * 2;
 							if (!pBlockPages[maxLastBlockOffset >> 16])
 							{
 								pBlockPages[BlockPagesCount++] = new BlockPage();
@@ -1219,15 +1219,15 @@ bool HArray::insert(int32_t* key,
 						blockCellType = MIN_BLOCK_TYPE + (idxKeyValue / BLOCK_ENGINE_STEP);
 						blockCell.Offset = startBlockOffset;
 
-						for (int32_t i = 0; i < countCell; i++)
+						for (uint32 i = 0; i < countCell; i++)
 						{
-							uint8_t idx = indexes[i];
-							int32_t offset = startBlockOffset + idx;
+							uchar8 idx = indexes[i];
+							uint32 offset = startBlockOffset + idx;
 
 							BlockPage* pBlockPage = pBlockPages[offset >> 16];
 							BlockCell& currBlockCell = pBlockPage->pBlock[offset & 0xFFFF];
 
-							uint8_t count = mapIndexes[idx];
+							uchar8 count = mapIndexes[idx];
 							if (count == 1) //one value in block cell
 							{
 								currBlockCell = blockCells[i];
@@ -1245,7 +1245,7 @@ bool HArray::insert(int32_t* key,
 									BranchCell* pCurrBranchCell;
 									if (countReleasedBranchCells)
 									{
-										int32_t branchOffset = tailReleasedBranchOffset;
+										uint32 branchOffset = tailReleasedBranchOffset;
 
 										pCurrBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
@@ -1311,7 +1311,7 @@ bool HArray::insert(int32_t* key,
 									BranchCell* pCurrBranchCell;
 									if (countReleasedBranchCells)
 									{
-										int32_t branchOffset = tailReleasedBranchOffset;
+										uint32 branchOffset = tailReleasedBranchOffset;
 
 										pCurrBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
@@ -1355,7 +1355,7 @@ bool HArray::insert(int32_t* key,
 								}
 								else
 								{
-									int32_t countValues = currBlockCell.Type - MAX_BRANCH_TYPE1;
+									uint32 countValues = currBlockCell.Type - MAX_BRANCH_TYPE1;
 
 									BranchPage* pBranchPage = pBranchPages[currBlockCell.ValueOrOffset >> 16];
 									BranchCell& currBranchCell = pBranchPage->pBranch[currBlockCell.ValueOrOffset & 0xFFFF];
@@ -1408,7 +1408,7 @@ bool HArray::insert(int32_t* key,
 				BranchCell* pBranchCell;
 				if (countReleasedBranchCells)
 				{
-					int32_t branchOffset = tailReleasedBranchOffset;
+					uint32 branchOffset = tailReleasedBranchOffset;
 
 					pBranchCell = &pBranchPages[branchOffset >> 16]->pBranch[branchOffset & 0xFFFF];
 
@@ -1454,11 +1454,11 @@ bool HArray::insert(int32_t* key,
 
 	FILL_KEY2:
 
-		int32_t restKeyLen = keyLen - keyOffset;
+		uint32 restKeyLen = keyLen - keyOffset;
 
 		if (tailReleasedContentOffsets[restKeyLen])
 		{
-			int32_t startContentOffset = *pSetLastContentOffset = tailReleasedContentOffsets[restKeyLen];
+			uint32 startContentOffset = *pSetLastContentOffset = tailReleasedContentOffsets[restKeyLen];
 
 			//fill key
 			pContentPage = pContentPages[startContentOffset >> 16];
@@ -1487,7 +1487,7 @@ bool HArray::insert(int32_t* key,
 			if (contentIndex > maxSafeShort) //content in next page
 			{
 				//release content cells
-				int32_t spaceLen = MAX_SHORT - contentIndex - 1;
+				uint32 spaceLen = MAX_SHORT - contentIndex - 1;
 
 				pContentPage->pContent[contentIndex] = tailReleasedContentOffsets[spaceLen];
 
@@ -1496,7 +1496,7 @@ bool HArray::insert(int32_t* key,
 				countReleasedContentCells += (spaceLen + ValueLen);
 
 				//move to next page
-				int32_t page = (lastContentOffset >> 16) + 1;
+				uint32 page = (lastContentOffset >> 16) + 1;
 
 				pContentPage = pContentPages[page];
 

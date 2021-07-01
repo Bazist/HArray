@@ -781,6 +781,8 @@ public:
 
 	bool insert(uint32* key, uint32 keyLen, uint32 value);
 
+	bool insertOrGet(uint32* key, uint32 keyLen, uint32** pValue);
+
 	//GET =============================================================================================================
 
 	bool getValueByKey(uint32* key, uint32 keyLen, uint32& value);

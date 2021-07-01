@@ -100,6 +100,7 @@
     <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\HArray_insertOrGet.cpp" />
     <ClCompile Include="src\HArray_delValueByKey.cpp" />
     <ClCompile Include="src\HArray_getKeysAndValuesByRange.cpp" />
     <ClCompile Include="src\HArray_getValueByKey.cpp" />

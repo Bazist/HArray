@@ -20,6 +20,107 @@
 
 #include "HArrayLongValue.h"
 
+class ValuePool
+{
+public:
+
+	const static uint32 MIN_COUNT_PAGES = 1;
+	const static uint32 COUNT_VALUE_ON_ONE_PAGE = 1024;
+
+	ValuePool(uint32 valueLen)
+	{
+		PositionOnPage = 0; //skip first byte
+		CurrentPage = 0;
+		SizePages = MIN_COUNT_PAGES;
+
+		Pages = new char* [MIN_COUNT_PAGES];
+		Pages[CurrentPage] = new char[valueLen * COUNT_VALUE_ON_ONE_PAGE];
+
+		ValueLen = valueLen;
+	}
+
+	uint32 ValueLen;
+	uint32 PositionOnPage;
+	uint32 CurrentPage;
+	uint32 SizePages;
+
+	char** Pages;
+
+	void resizePages()
+	{
+		char** pages = new char* [SizePages * 2];
+
+		for (uint32 i = 0; i < SizePages; i++)
+		{
+			pages[i] = Pages[i];
+		}
+
+		delete[] Pages;
+
+		Pages = pages;
+
+		SizePages += 2;
+	}
+
+	void* insValue(uint32 valueLen, uint32& position)
+	{
+		//allocate position
+		if (PositionOnPage + valueLen > MAX_SHORT)
+		{
+			CurrentPage++;
+
+			if (CurrentPage == SizePages)
+			{
+				resizePages();
+			}
+
+			Pages[CurrentPage] = new char[MAX_SHORT];
+		}
+
+		position = PositionOnPage;
+
+		PositionOnPage += ValueLen;
+
+		return &Pages[position >> 16][position & 0xFFFF];
+	}
+
+	void delValue(uint32 position)
+	{
+		char* value = &Pages[position >> 16][position & 0xFFFF];
+
+		for (uint32 i = 0; i < ValueLen; i++)
+		{
+			value[i] = 0;
+		}
+	}
+
+	void* getValue(uint32 position)
+	{
+		return &Pages[position >> 16][position & 0xFFFF];
+	}
+
+	uint32 getUsedMemory()
+	{
+		uint32 usedMemory = sizeof(ValuePool) + ((CurrentPage + 1) * MAX_SHORT);
+
+		return usedMemory;
+	}
+
+	uint32 getTotalMemory()
+	{
+		uint32 usedMemory = sizeof(ValuePool) + (SizePages * sizeof(char*)) + ((CurrentPage + 1) * MAX_SHORT);
+
+		return usedMemory;
+	}
+
+	void destroy()
+	{
+		for (uint32 i = 0; i <= CurrentPage; i++)
+		{
+			delete[] Pages[i];
+		}
+	}
+};
 
 template <typename K, typename V>
 class HArrayGeneric : public HArray
@@ -34,9 +135,9 @@ private:
 	}
 
 	template<class S>
-	inline uint32* getKeySegments_STL(const S& obj, uint32* keyBuff, uint32& keyLen)
+	inline uint32* getKeySegments_STL(const S& obj, uint32 sizeOfElement, uint32* keyBuff, uint32& keyLen)
 	{
-		keyLen = obj.size() * sizeof(S);
+		keyLen = sizeOfElement * sizeof(S);
 
 		char* keyBuffBytes = (char*)keyBuff;
 
@@ -74,7 +175,7 @@ private:
 
 	inline uint32* getKeySegments(const std::string& obj, uint32* keyBuff, uint32& keyLen)
 	{
-		uint32 keyLen = obj.length();
+		keyLen = obj.length();
 		char* keyBuffBytes = (char*)keyBuff;
 
 		memcpy(keyBuff, obj.c_str(), keyLen);
@@ -110,35 +211,71 @@ private:
 	}
 
 public:
+
+	ValuePool* pValuePool;
+
 	HArrayGeneric()
 	{
 		valueLen = sizeof(V);
+
+		pValuePool = new ValuePool(valueLen);
 	}
 
-	bool insert(const K& key,
-				const V& value)
+	V& operator[](const K& key)
 	{
 		uint32 keyBuff[MAX_KEY_SEGMENTS];
 		uint32 keyLen = 0;
 
 		uint32* keySegments = getKeySegments(key, keyBuff, keyLen);
 
-		return HArray::insert(keySegments, keyLen, value);
+		uint32* pValue;
+
+		void* pValueData;
+
+		if (HArray::insertOrGet(keySegments, keyLen, &pValue))
+		{
+			pValueData = pValuePool->insValue(valueLen, *pValue);
+
+			//copy empty value here
+			V v;
+			memcpy(pValueData, &v, valueLen);
+		}
+		else
+		{
+			pValueData = pValuePool->getValue(*pValue);
+		}
+
+		return *(V*)pValueData;
 	}
 
-	int& operator[](const K& key)
+	bool erase(const K key)
 	{
+		uint32 keyBuff[MAX_KEY_SEGMENTS];
+		uint32 keyLen = 0;
 
+		uint32* keySegments = getKeySegments(key, keyBuff, keyLen);
+
+		uint32 value;
+
+		if (HArray::getValueByKey(keySegments, key, value))
+		{
+			pValuePool->delValue(value);
+
+			HArray::delValueByKey(keySegments, keyLen);
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
-	bool getValueByKey(const K key,
-					   V& outValue)
+	~HArrayGeneric()
 	{
-		return true;
-	}
+		pValuePool->destroy();
+		delete pValuePool;
 
-	bool delValueByKey(const K key)
-	{
-		return true;
+		HArray::destroy();
 	}
 };

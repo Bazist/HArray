@@ -28,11 +28,28 @@ private:
 
 	struct ScanValuesData
 	{
+		uint32 KeyLenWithValueLen;
 		HARRAY_VALUE_VISIT_FUNC* pVisitor;
 		void* pData;
 	};
 
-	static bool scanAllValues(uint32* key, uint32 keyLen, uint32 value, std::atomic<uchar8>& blockedByTranID, void* pData)
+	static bool scanKeyValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
+	{
+		ScanValuesData* pScanData = (ScanValuesData*)pData;
+
+		if (pScanData->KeyLenWithValueLen == keyLen && !value)
+		{
+			keyLen--;
+
+			return pScanData->pVisitor(key, keyLen, key[keyLen], pScanData->pData);
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	static bool scanAllValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
 	{
 		ScanValuesData* pScanData = (ScanValuesData*)pData;
 
@@ -58,10 +75,11 @@ public:
 		void* pData)
 	{
 		ScanValuesData scanData;
+		scanData.KeyLenWithValueLen = keyLen + 1;
 		scanData.pVisitor = visitor;
 		scanData.pData = pData;
 
-		HArray::scanKeysAndValues(key, keyLen, scanAllValues, &scanData);
+		HArray::scanKeysAndValues(key, keyLen, scanKeyValues, &scanData);
 
 		return true;
 	}

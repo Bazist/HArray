@@ -26,126 +26,126 @@
 #include "stdafx.h"
 #define _RELEASE 0x1234567
 
-const uint32 REPOSITORY_VERSION = 1;
+const uint32_t REPOSITORY_VERSION = 1;
 
-const uint32 COUNT_TEMPS = 50;
+const uint32_t COUNT_TEMPS = 50;
 
-const uint32 BLOCK_ENGINE_BITS = 4; //bits of block
-const uint32 BLOCK_ENGINE_SIZE = 16; //size of block
-const uint32 BLOCK_ENGINE_SHIFT = 32 - BLOCK_ENGINE_BITS;
-const uint32 BLOCK_ENGINE_STEP = 4;
+const uint32_t BLOCK_ENGINE_BITS = 4; //bits of block
+const uint32_t BLOCK_ENGINE_SIZE = 16; //size of block
+const uint32_t BLOCK_ENGINE_SHIFT = 32 - BLOCK_ENGINE_BITS;
+const uint32_t BLOCK_ENGINE_STEP = 4;
 
-//const uint32 BLOCK_ENGINE_BITS = 16; //bits of block
-//const uint32 BLOCK_ENGINE_SIZE = 65536; //size of block
-//const uint32 BLOCK_ENGINE_SHIFT = 32 - BLOCK_ENGINE_BITS;
-//const uint32 BLOCK_ENGINE_STEP = 16;
+//const uint32_t BLOCK_ENGINE_BITS = 16; //bits of block
+//const uint32_t BLOCK_ENGINE_SIZE = 65536; //size of block
+//const uint32_t BLOCK_ENGINE_SHIFT = 32 - BLOCK_ENGINE_BITS;
+//const uint32_t BLOCK_ENGINE_STEP = 16;
 
-const uint32 BRANCH_ENGINE_SIZE = 4; //can be changed
+const uint32_t BRANCH_ENGINE_SIZE = 4; //can be changed
 
-const uchar8 EMPTY_TYPE = 0;
-const uchar8 MIN_BRANCH_TYPE1 = 1;
-const uchar8 MAX_BRANCH_TYPE1 = BRANCH_ENGINE_SIZE;
-const uchar8 MIN_BRANCH_TYPE2 = BRANCH_ENGINE_SIZE + 1;
-const uchar8 MAX_BRANCH_TYPE2 = BRANCH_ENGINE_SIZE * 2;
-const uchar8 MIN_BLOCK_TYPE = MAX_BRANCH_TYPE2 + 1;
-const uchar8 MAX_BLOCK_TYPE = MIN_BLOCK_TYPE + (32 / BLOCK_ENGINE_STEP) - 1;
-const uchar8 VAR_TYPE = MAX_BLOCK_TYPE + 1; //for var value
-const uchar8 CONTINUE_VAR_TYPE = VAR_TYPE + 1; //for continue var value
-const uchar8 CURRENT_VALUE_TYPE = CONTINUE_VAR_TYPE + 1;
-const uchar8 VALUE_TYPE = CURRENT_VALUE_TYPE + 1;
-const uchar8 ONLY_CONTENT_TYPE = VALUE_TYPE + 1;
+const uint8_t EMPTY_TYPE = 0;
+const uint8_t MIN_BRANCH_TYPE1 = 1;
+const uint8_t MAX_BRANCH_TYPE1 = BRANCH_ENGINE_SIZE;
+const uint8_t MIN_BRANCH_TYPE2 = BRANCH_ENGINE_SIZE + 1;
+const uint8_t MAX_BRANCH_TYPE2 = BRANCH_ENGINE_SIZE * 2;
+const uint8_t MIN_BLOCK_TYPE = MAX_BRANCH_TYPE2 + 1;
+const uint8_t MAX_BLOCK_TYPE = MIN_BLOCK_TYPE + (32 / BLOCK_ENGINE_STEP) - 1;
+const uint8_t VAR_TYPE = MAX_BLOCK_TYPE + 1; //for var value
+const uint8_t CONTINUE_VAR_TYPE = VAR_TYPE + 1; //for continue var value
+const uint8_t CURRENT_VALUE_TYPE = CONTINUE_VAR_TYPE + 1;
+const uint8_t VALUE_TYPE = CURRENT_VALUE_TYPE + 1;
+const uint8_t ONLY_CONTENT_TYPE = VALUE_TYPE + 1;
 
-const uchar8 MOVES_LEVEL1_STAT = 0;
-const uchar8 MOVES_LEVEL2_STAT = 1;
-const uchar8 MOVES_LEVEL3_STAT = 2;
-const uchar8 MOVES_LEVEL4_STAT = 3;
-const uchar8 MOVES_LEVEL5_STAT = 4;
-const uchar8 MOVES_LEVEL6_STAT = 5;
-const uchar8 MOVES_LEVEL7_STAT = 6;
-const uchar8 MOVES_LEVEL8_STAT = 7;
-const uchar8 SHORT_WAY_STAT = 8;
-const uchar8 LONG_WAY_STAT = 9;
-const uchar8 CONTENT_BRANCH_STAT = 10;
+const uint8_t MOVES_LEVEL1_STAT = 0;
+const uint8_t MOVES_LEVEL2_STAT = 1;
+const uint8_t MOVES_LEVEL3_STAT = 2;
+const uint8_t MOVES_LEVEL4_STAT = 3;
+const uint8_t MOVES_LEVEL5_STAT = 4;
+const uint8_t MOVES_LEVEL6_STAT = 5;
+const uint8_t MOVES_LEVEL7_STAT = 6;
+const uint8_t MOVES_LEVEL8_STAT = 7;
+const uint8_t SHORT_WAY_STAT = 8;
+const uint8_t LONG_WAY_STAT = 9;
+const uint8_t CONTENT_BRANCH_STAT = 10;
 
-const uchar8 CURRENT_VALUE_SEGMENT_TYPE = 1;
-const uchar8 BRANCH_SEGMENT_TYPE = CURRENT_VALUE_SEGMENT_TYPE + 1;
-const uchar8 BLOCK_VALUE_SEGMENT_TYPE = BRANCH_SEGMENT_TYPE + 1;
-const uchar8 BLOCK_BRANCH1_SEGMENT_TYPE = BLOCK_VALUE_SEGMENT_TYPE + 1;
-const uchar8 BLOCK_BRANCH2_SEGMENT_TYPE = BLOCK_BRANCH1_SEGMENT_TYPE + 1;
-const uchar8 BLOCK_OFFSET_SEGMENT_TYPE = BLOCK_BRANCH2_SEGMENT_TYPE + 1;
-const uchar8 VAR_SHUNT_SEGMENT_TYPE = BLOCK_OFFSET_SEGMENT_TYPE + 1;
-const uchar8 VAR_VALUE_SEGMENT_TYPE = VAR_SHUNT_SEGMENT_TYPE + 1;
+const uint8_t CURRENT_VALUE_SEGMENT_TYPE = 1;
+const uint8_t BRANCH_SEGMENT_TYPE = CURRENT_VALUE_SEGMENT_TYPE + 1;
+const uint8_t BLOCK_VALUE_SEGMENT_TYPE = BRANCH_SEGMENT_TYPE + 1;
+const uint8_t BLOCK_BRANCH1_SEGMENT_TYPE = BLOCK_VALUE_SEGMENT_TYPE + 1;
+const uint8_t BLOCK_BRANCH2_SEGMENT_TYPE = BLOCK_BRANCH1_SEGMENT_TYPE + 1;
+const uint8_t BLOCK_OFFSET_SEGMENT_TYPE = BLOCK_BRANCH2_SEGMENT_TYPE + 1;
+const uint8_t VAR_SHUNT_SEGMENT_TYPE = BLOCK_OFFSET_SEGMENT_TYPE + 1;
+const uint8_t VAR_VALUE_SEGMENT_TYPE = VAR_SHUNT_SEGMENT_TYPE + 1;
 
-const uint32 MIN_COUNT_RELEASED_CONTENT_CELLS = MAX_SHORT * 2; //two pages
-const uint32 MIN_COUNT_RELEASED_BRANCH_CELLS = MAX_SHORT;
-const uint32 MIN_COUNT_RELEASED_BLOCK_CELLS = MAX_SHORT;
-const uint32 MIN_COUNT_RELEASED_VAR_CELLS = MAX_SHORT;
+const uint32_t MIN_COUNT_RELEASED_CONTENT_CELLS = MAX_SHORT * 2; //two pages
+const uint32_t MIN_COUNT_RELEASED_BRANCH_CELLS = MAX_SHORT;
+const uint32_t MIN_COUNT_RELEASED_BLOCK_CELLS = MAX_SHORT;
+const uint32_t MIN_COUNT_RELEASED_VAR_CELLS = MAX_SHORT;
 
-const uchar8 MAX_KEY_SEGMENTS = MAX_CHAR - ONLY_CONTENT_TYPE;
-const uchar8 MIN_HEADER_BASE_BITS = 14;		  //16384 slots
-const uchar8 MAX_HEADER_FILL_FACTOR_BITS = 4; //fill factor 1/16 of header size
+const uint8_t MAX_KEY_SEGMENTS = MAX_CHAR - ONLY_CONTENT_TYPE;
+const uint8_t MIN_HEADER_BASE_BITS = 14;		  //16384 slots
+const uint8_t MAX_HEADER_FILL_FACTOR_BITS = 4; //fill factor 1/16 of header size
 
-typedef bool HARRAY_ITEM_VISIT_FUNC(uint32* key, uint32 keyLen, uint32 value, void* pData);
+typedef bool HARRAY_ITEM_VISIT_FUNC(uint32_t* key, uint32_t keyLen, uint32_t value, void* pData);
 
 struct HArrayFixBaseInfo
 {
-	uint32 Version;
+	uint32_t Version;
 
-	uint32 KeyLen;
-	uint32 ValueLen;
+	uint32_t KeyLen;
+	uint32_t ValueLen;
 
-	uint32 HeaderBase;
+	uint32_t HeaderBase;
 
-	uint32 ContentPagesCount;
-	uint32 VarPagesCount;
-	uint32 BranchPagesCount;
-	uint32 BlockPagesCount;
+	uint32_t ContentPagesCount;
+	uint32_t VarPagesCount;
+	uint32_t BranchPagesCount;
+	uint32_t BlockPagesCount;
 
-	uint32 LastContentOffset;
-	uint32 LastVarOffset;
-	uint32 LastBranchOffset;
-	uint32 LastBlockOffset;
+	uint32_t LastContentOffset;
+	uint32_t LastVarOffset;
+	uint32_t LastBranchOffset;
+	uint32_t LastBlockOffset;
 };
 
 struct HACursor
 {
-	uint32 CountFullContentPage;
-	uint32 SizeLastContentPage;
+	uint32_t CountFullContentPage;
+	uint32_t SizeLastContentPage;
 
-	uint32 Page;
-	uint32 Index;
+	uint32_t Page;
+	uint32_t Index;
 
-	uint32* Value;
+	uint32_t* Value;
 };
 
 //struct ContentTypeCell
 //{
-//	uchar8 Type;
+//	uint8_t Type;
 //};
 
 struct HArrayPair
 {
 public:
-	HArrayPair(uint32 maxKeyLen)
+	HArrayPair(uint32_t maxKeyLen)
 	{
-		Key = new uint32[maxKeyLen];
+		Key = new uint32_t[maxKeyLen];
 		KeyLen = 0;
 		Value = 0;
 		ValueType = 0;
 	}
 
-	uint32* Key;
-	uint32 KeyLen;
-	uint32 Value;
-	uchar8 ValueType;
+	uint32_t* Key;
+	uint32_t KeyLen;
+	uint32_t Value;
+	uint8_t ValueType;
 
-	inline void setPair(uint32 skipKeyLen,
-						uint32* key,
-						uint32 keyLen,
-						uint32 value,
-						uchar8 valueType)
+	inline void setPair(uint32_t skipKeyLen,
+						uint32_t* key,
+						uint32_t keyLen,
+						uint32_t value,
+						uint8_t valueType)
 	{
-		for (uint32 i=0; skipKeyLen < keyLen; i++, skipKeyLen++)
+		for (uint32_t i=0; skipKeyLen < keyLen; i++, skipKeyLen++)
 		{
 			Key[i] = key[skipKeyLen];
 		}
@@ -157,7 +157,7 @@ public:
 
 	void print()
 	{
-		for(uint32 i = 0; i < KeyLen; i++)
+		for(uint32_t i = 0; i < KeyLen; i++)
 		{
 			printf("%u ", Key[i]);
 		}
@@ -173,36 +173,36 @@ public:
 
 struct BranchCell
 {
-	uint32 Values[BRANCH_ENGINE_SIZE];
-	uint32 Offsets[BRANCH_ENGINE_SIZE];
+	uint32_t Values[BRANCH_ENGINE_SIZE];
+	uint32_t Offsets[BRANCH_ENGINE_SIZE];
 };
 
 struct BlockCell
 {
-	uchar8 Type;
-	uint32 Offset;
-	uint32 ValueOrOffset;
+	uint8_t Type;
+	uint32_t Offset;
+	uint32_t ValueOrOffset;
 };
 
 //struct ContentCell
 //{
-//	uchar8 Type;
-//	uint32 Value;
+//	uint8_t Type;
+//	uint32_t Value;
 //};
 
 struct VarCell
 {
-	uchar8 ValueContCellType;
-	uint32 ValueContCellValue;
+	uint8_t ValueContCellType;
+	uint32_t ValueContCellValue;
 
-	uchar8 ContCellType;
-	uint32 ContCellValue;
+	uint8_t ContCellType;
+	uint32_t ContCellValue;
 };
 
 struct ContentPage
 {
-	uchar8 pType[MAX_SHORT];
-	uint32 pContent[MAX_SHORT];
+	uint8_t pType[MAX_SHORT];
+	uint32_t pContent[MAX_SHORT];
 };
 
 struct VarPage
@@ -232,36 +232,36 @@ struct CompactPage
 		memset(this, 0, sizeof(CompactPage));
 	}
 
-	uint32 Values[MAX_CHAR];
-	uint32 Offsets[MAX_CHAR];
+	uint32_t Values[MAX_CHAR];
+	uint32_t Offsets[MAX_CHAR];
 
-	uint32 Count;
+	uint32_t Count;
 
 	CompactPage* pNextPage;
 };
 
 struct SegmentPath
 {
-	uchar8 Type;
+	uint8_t Type;
 
-	uchar8* pContentCellType;
-	uint32* pContentCellValue;
+	uint8_t* pContentCellType;
+	uint32_t* pContentCellValue;
 
 	BlockCell* pBlockCell;
-	uint32 StartBlockOffset;
+	uint32_t StartBlockOffset;
 
 	BranchCell* pBranchCell1;
-	uint32 BranchOffset1;
+	uint32_t BranchOffset1;
 
 	BranchCell* pBranchCell2;
-	uint32 BranchOffset2;
+	uint32_t BranchOffset2;
 
 	VarCell* pVarCell;
-	uint32 VarOffset;
+	uint32_t VarOffset;
 
-	uint32 BranchIndex;
-	uint32 ContentOffset;
-	uint32 BlockSubOffset;
+	uint32_t BranchIndex;
+	uint32_t ContentOffset;
+	uint32_t BlockSubOffset;
 
 	void print()
 	{
@@ -282,8 +282,8 @@ struct SegmentPath
 	}
 };
 
-typedef uint32 (*NormalizeFunc)(void* key);
+typedef uint32_t (*NormalizeFunc)(void* key);
 
-typedef int (*CompareFunc)(void* key1, uint32 keyLen1, void* key2, uint32 keyLen2);
+typedef int (*CompareFunc)(void* key1, uint32_t keyLen1, void* key2, uint32_t keyLen2);
 
-typedef int(*CompareSegmentFunc)(void* keySeg1, void* keySeg2, uint32 index);
+typedef int(*CompareSegmentFunc)(void* keySeg1, void* keySeg2, uint32_t index);

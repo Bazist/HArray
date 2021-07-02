@@ -1,4 +1,7 @@
 # HArray
+
+[![Build status](https://img.shields.io/github/workflow/status/Bazist/HArray/CMake%20Build%20Matrix?style=plastic)](https://img.shields.io/github/workflow/status/Bazist/HArray/CMake%20Build%20Matrix?style=plastic)
+
 ## Probably, this is most optimized Trie structure in the World ! Thats all what you need know about this project :)
 
 **HArrayInt** - Key\Value In Memory structure for 32bit keys
@@ -51,7 +54,7 @@ cd build && make
 To build release version of the library and benchmarks run instead:
 
 ```bash
-cmake -Bbuild --config Release
+cmake -Bbuild -DCMAKE_BUILD_TYPE=Release
 ```
 
 ### Build on Windows

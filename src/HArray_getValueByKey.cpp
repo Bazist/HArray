@@ -19,13 +19,13 @@
 #include "stdafx.h"
 #include "HArray.h"
 
-bool HArray::getValueByKey(uint32* key,
-	uint32 keyLen,
-	uint32& value)
+bool HArray::getValueByKey(uint32_t* key,
+	uint32_t keyLen,
+	uint32_t& value)
 {
-	uint32 maxSafeShort = MAX_SAFE_SHORT - keyLen;
+	uint32_t maxSafeShort = MAX_SAFE_SHORT - keyLen;
 
-	uint32 headerOffset;
+	uint32_t headerOffset;
 
 	if (!normalizeFunc)
 	{
@@ -36,21 +36,21 @@ bool HArray::getValueByKey(uint32* key,
 		headerOffset = (*normalizeFunc)(key);
 	}
 
-	uint32 contentOffset = pHeader[headerOffset];
+	uint32_t contentOffset = pHeader[headerOffset];
 
 	if (contentOffset)
 	{
-		uint32 keyOffset = 0;
+		uint32_t keyOffset = 0;
 
 	NEXT_KEY_PART:
 		ContentPage* pContentPage = pContentPages[contentOffset >> 16];
-		ushort16 contentIndex = contentOffset & 0xFFFF;
+		uint16_t contentIndex = contentOffset & 0xFFFF;
 
-		uchar8 contentCellType = pContentPage->pType[contentIndex]; //move to type part
+		uint8_t contentCellType = pContentPage->pType[contentIndex]; //move to type part
 
 		if (contentCellType >= ONLY_CONTENT_TYPE) //ONLY CONTENT =========================================================================================
 		{
-			if ((keyLen - keyOffset) != (uint32)(contentCellType - ONLY_CONTENT_TYPE))
+			if ((keyLen - keyOffset) != (uint32_t)(contentCellType - ONLY_CONTENT_TYPE))
 			{
 				return false;
 			}
@@ -79,8 +79,8 @@ bool HArray::getValueByKey(uint32* key,
 			return true;
 		}
 
-		uint32& keyValue = key[keyOffset];
-		uint32 contentCellValueOrOffset = pContentPage->pContent[contentIndex];
+		uint32_t& keyValue = key[keyOffset];
+		uint32_t contentCellValueOrOffset = pContentPage->pContent[contentIndex];
 
 		if (contentCellType == VAR_TYPE) //VAR =====================================================================
 		{
@@ -134,9 +134,9 @@ bool HArray::getValueByKey(uint32* key,
 			BranchCell& branchCell = pBranchPage->pBranch[contentCellValueOrOffset & 0xFFFF];
 
 			//try find value in the list
-			uint32* values = branchCell.Values;
+			uint32_t* values = branchCell.Values;
 
-			for (uint32 i = 0; i < contentCellType; i++)
+			for (uint32_t i = 0; i < contentCellType; i++)
 			{
 				if (values[i] == keyValue)
 				{
@@ -162,18 +162,18 @@ bool HArray::getValueByKey(uint32* key,
 		}
 		else if (contentCellType <= MAX_BLOCK_TYPE) //VALUE IN BLOCK ===================================================================
 		{
-			uchar8 idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
+			uint8_t idxKeyValue = (contentCellType - MIN_BLOCK_TYPE) * BLOCK_ENGINE_STEP;
 
-			uint32 startOffset = contentCellValueOrOffset;
+			uint32_t startOffset = contentCellValueOrOffset;
 
 		NEXT_BLOCK:
-			uint32 subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
-			uint32 blockOffset = startOffset + subOffset;
+			uint32_t subOffset = ((keyValue << idxKeyValue) >> BLOCK_ENGINE_SHIFT);
+			uint32_t blockOffset = startOffset + subOffset;
 
 			BlockPage* pBlockPage = pBlockPages[blockOffset >> 16];
 			BlockCell& blockCell = pBlockPage->pBlock[blockOffset & 0xFFFF];
 
-			uchar8& blockCellType = blockCell.Type;
+			uint8_t& blockCellType = blockCell.Type;
 
 			if (blockCellType == EMPTY_TYPE)
 			{
@@ -198,7 +198,7 @@ bool HArray::getValueByKey(uint32* key,
 				BranchCell& branchCell1 = pBranchPages[blockCell.Offset >> 16]->pBranch[blockCell.Offset & 0xFFFF];
 
 				//try find value in the list
-				for (uint32 i = 0; i < blockCellType; i++)
+				for (uint32_t i = 0; i < blockCellType; i++)
 				{
 					if (branchCell1.Values[i] == keyValue)
 					{
@@ -216,7 +216,7 @@ bool HArray::getValueByKey(uint32* key,
 				BranchCell& branchCell1 = pBranchPages[blockCell.Offset >> 16]->pBranch[blockCell.Offset & 0xFFFF];
 
 				//try find value in the list
-				for (uint32 i = 0; i < BRANCH_ENGINE_SIZE; i++)
+				for (uint32_t i = 0; i < BRANCH_ENGINE_SIZE; i++)
 				{
 					if (branchCell1.Values[i] == keyValue)
 					{
@@ -230,9 +230,9 @@ bool HArray::getValueByKey(uint32* key,
 				BranchCell& branchCell2 = pBranchPages[blockCell.ValueOrOffset >> 16]->pBranch[blockCell.ValueOrOffset & 0xFFFF];
 
 				//try find value in the list
-				uint32 countValues = blockCellType - MAX_BRANCH_TYPE1;
+				uint32_t countValues = blockCellType - MAX_BRANCH_TYPE1;
 
-				for (uint32 i = 0; i < countValues; i++)
+				for (uint32_t i = 0; i < countValues; i++)
 				{
 					if (branchCell2.Values[i] == keyValue)
 					{

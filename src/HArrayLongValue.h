@@ -26,13 +26,13 @@ private:
 
 	struct ScanLongValuesData
 	{
-		uint32 KeyLen;
-		uint32* Value;
-		uint32 ValueLen;
+		uint32_t KeyLen;
+		uint32_t* Value;
+		uint32_t ValueLen;
 		void* pData;
 	};
 
-	static bool scanValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
+	static bool scanValues(uint32_t* key, uint32_t keyLen, uint32_t value, void* pData)
 	{
 		ScanLongValuesData* pScanData = (ScanLongValuesData*)pData;
 
@@ -42,7 +42,7 @@ private:
 
 		if (pScanData->KeyLen + pScanData->ValueLen == keyLen) //our key is composite key: key + value
 		{
-			for (uint32 i = 0; i < pScanData->ValueLen; i++)
+			for (uint32_t i = 0; i < pScanData->ValueLen; i++)
 			{
 				pScanData->Value[i] = key[pScanData->KeyLen++];
 			}
@@ -57,17 +57,17 @@ private:
 
 public:
 
-	bool insert(uint32* key,
-		uint32 keyLen,
-		uint32* value,
-		uint32 valueLen)
+	bool insert(uint32_t* key,
+		uint32_t keyLen,
+		uint32_t* value,
+		uint32_t valueLen)
 	{
 		if (HArray::hasPartKey(key, keyLen)) //it is update
 		{
 			delValueByKey(key, keyLen);
 		}
 
-		for (uint32 i = 0; i < valueLen; i++, keyLen++)
+		for (uint32_t i = 0; i < valueLen; i++, keyLen++)
 		{
 			key[keyLen] = value[i];
 		}
@@ -77,10 +77,10 @@ public:
 		return HArray::insert(key, keyLen, 0);
 	}
 
-	bool getValueByKey(uint32* key,
-		uint32 keyLen,
-		uint32* value,
-		uint32& valueLen)
+	bool getValueByKey(uint32_t* key,
+		uint32_t keyLen,
+		uint32_t* value,
+		uint32_t& valueLen)
 	{
 		ScanLongValuesData scanData;
 		scanData.KeyLen = keyLen;
@@ -94,14 +94,14 @@ public:
 		return (valueLen > 0);
 	}
 
-	bool delValueByKey(uint32* key, uint32 keyLen)
+	bool delValueByKey(uint32_t* key, uint32_t keyLen)
 	{
-		uint32 value[MAX_CHAR - ONLY_CONTENT_TYPE];
-		uint32 valueLen = 0;
+		uint32_t value[MAX_CHAR - ONLY_CONTENT_TYPE];
+		uint32_t valueLen = 0;
 
 		if (getValueByKey(key, keyLen, value, valueLen))
 		{
-			for (uint32 i = 0; i < valueLen; i++, keyLen++)
+			for (uint32_t i = 0; i < valueLen; i++, keyLen++)
 			{
 				key[keyLen] = value[i];
 			}

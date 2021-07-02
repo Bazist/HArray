@@ -20,7 +20,7 @@
 
 #include "HArray.h"
 
-typedef bool HARRAY_VALUE_VISIT_FUNC(uint32* key, uint32 keyLen, uint32 value, void* pData);
+typedef bool HARRAY_VALUE_VISIT_FUNC(uint32 value, void* pData);
 
 class HArrayUniqueIntValueList : public HArray
 {
@@ -33,29 +33,18 @@ private:
 		void* pData;
 	};
 
-	static bool scanKeyValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
+	static bool scanValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
 	{
 		ScanValuesData* pScanData = (ScanValuesData*)pData;
 
 		if (pScanData->KeyLenWithValueLen == keyLen && !value)
 		{
-			keyLen--;
-
-			return pScanData->pVisitor(key, keyLen, key[keyLen], pScanData->pData);
+			return pScanData->pVisitor(key[keyLen - 1], pScanData->pData);
 		}
 		else
 		{
 			return true;
 		}
-	}
-
-	static bool scanAllValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
-	{
-		ScanValuesData* pScanData = (ScanValuesData*)pData;
-
-		keyLen--;
-
-		return pScanData->pVisitor(key, keyLen, key[keyLen], pScanData->pData);
 	}
 
 public:
@@ -64,9 +53,42 @@ public:
 		uint32 keyLen,
 		uint32 value)
 	{
-		key[keyLen++] = value;
+		uint32 existingValue;
 
-		return HArray::insert(key, keyLen, 0);
+		if (HArray::getValueByKey(key, keyLen, existingValue)) //list with one value
+		{
+			if (existingValue != value) //value already exists
+			{
+				//delete existing value
+				HArray::delValueByKey(key, keyLen);
+
+				//insert existing value as part of key
+				key[keyLen++] = existingValue;
+
+				HArray::insert(key, keyLen, 0);
+
+				//insert new value as part of key
+				key[keyLen - 1] = value;
+
+				HArray::insert(key, keyLen, 0);
+
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else if (HArray::hasPartKey(key, keyLen)) //insert new value in list
+		{
+			key[keyLen++] = value;
+
+			return HArray::insert(key, keyLen, 0);
+		}
+		else //insert new value as one value
+		{
+			return HArray::insert(key, keyLen, value);
+		}
 	}
 
 	bool getIntValuesByKey(uint32* key,
@@ -74,34 +96,38 @@ public:
 		HARRAY_VALUE_VISIT_FUNC visitor,
 		void* pData)
 	{
-		ScanValuesData scanData;
-		scanData.KeyLenWithValueLen = keyLen + 1;
-		scanData.pVisitor = visitor;
-		scanData.pData = pData;
+		uint32 value;
 
-		HArray::scanKeysAndValues(key, keyLen, scanKeyValues, &scanData);
+		if (HArray::getValueByKey(key, keyLen, value)) //list with one value
+		{
+			return visitor(value, pData);
+		}
+		else
+		{
+			ScanValuesData scanData;
+			scanData.KeyLenWithValueLen = keyLen + 1;
+			scanData.pVisitor = visitor;
+			scanData.pData = pData;
 
-		return true;
+			HArray::scanKeysAndValues(key, keyLen, scanValues, &scanData);
+
+			return true;
+		}
 	}
 
 	bool delValueByKey(uint32* key, uint32 keyLen, uint32 value)
 	{
-		key[keyLen++] = value;
+		uint32 existingValue;
 
-		return HArray::delValueByKey(key, keyLen);
-	}
+		if (HArray::getValueByKey(key, keyLen, existingValue)) //list with one value
+		{
+			return HArray::delValueByKey(key, keyLen);
+		}
+		else //list with many values
+		{
+			key[keyLen++] = value;
 
-	bool scanKeysAndValues(uint32* key,
-		uint32 keyLen,
-		HARRAY_VALUE_VISIT_FUNC visitor,
-		void* pData)
-	{
-		ScanValuesData scanData;
-		scanData.pVisitor = visitor;
-		scanData.pData = pData;
-
-		HArray::scanKeysAndValues(key, keyLen, scanAllValues, &scanData);
-
-		return true;
+			return HArray::delValueByKey(key, keyLen);
+		}
 	}
 };

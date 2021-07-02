@@ -32,7 +32,7 @@ private:
 		void* pData;
 	};
 
-	static bool scanAllValues(uint32* key, uint32 keyLen, uint32 value, void* pData)
+	static bool scanAllValues(uint32* key, uint32 keyLen, uint32 value, std::atomic<uchar8>& blockedByTranID, void* pData)
 	{
 		ScanValuesData* pScanData = (ScanValuesData*)pData;
 

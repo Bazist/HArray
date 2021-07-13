@@ -20,11 +20,17 @@
 
 #ifndef _HARRAY_FIX_BASE		 // Allow use of features specific to Windows XP or later.
 #define _HARRAY_FIX_BASE 0x709 // Change this to the appropriate value to target other versions of Windows.
-
 #endif
 
-#include "stdafx.h"
 #define _RELEASE 0x1234567
+
+const uint32_t MAX_CHAR = 256;
+const uint32_t MAX_SHORT = 65536;
+
+const uint32_t INIT_MAX_PAGES = 256;
+const uint32_t PAGE_SIZE = MAX_SHORT*2;
+const uint8_t BLOCK_SIZE = 16;
+const uint8_t ROW_LEN = 3;
 
 const uint32_t REPOSITORY_VERSION = 1;
 

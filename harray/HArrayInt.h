@@ -16,8 +16,9 @@
 # along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "stdafx.h"
+#pragma once
 
+#include "HArrayBase.h"
 struct HeaderCellInt
 {
 	uint32_t Offset;

@@ -35,12 +35,4 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-const uint32_t MAX_CHAR = 256;
-const uint32_t MAX_SHORT = 65536;
-
-const uint32_t INIT_MAX_PAGES = 256;
-const uint32_t PAGE_SIZE = MAX_SHORT*2;
-const uint8_t BLOCK_SIZE = 16;
-const uint8_t ROW_LEN = 3;
-
 // TODO: reference additional headers your program requires here

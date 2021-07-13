@@ -1,0 +1,12 @@
+target_sourcets(libharray
+PRIVATE
+  HArray_delValueByKey.cpp
+  HArray_getKeysAndValuesByRange.cpp
+  HArray_getValueByKey.cpp
+  HArray_hasPartKey.cpp
+  HArray_insert.cpp
+  HArray_insertOrGet.cpp
+  HArray_rebuild.cpp
+  HArray_scanKeysAndValues.cpp
+  HArray_shrink.cpp
+  HArray_test.cpp)

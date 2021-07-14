@@ -95,5 +95,5 @@ jobs:
         endif()
 
     - name: Run benchmarks
-      run: cd build && ./HArray
+      run: cd build && ./HArrayBenchmark
 

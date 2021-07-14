@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "HArrayLongValue.h"
@@ -48,9 +49,68 @@ private: // data
 template <typename K, typename V>
 class HArrayGeneric : public HArray
 {
-private:
-	uint32_t valueLen;
+public:
+	HArrayGeneric()
+	{
+		valuePool = std::make_unique<ValuePool>(valueLen);
+	}
 
+	V& operator[](const K& key)
+	{
+		uint32_t keyBuff[MAX_KEY_SEGMENTS];
+		uint32_t keyLen = 0;
+
+		uint32_t* keySegments = getKeySegments(key, keyBuff, keyLen);
+
+		uint32_t* pValue;
+
+		void* pValueData;
+
+		if (HArray::insertOrGet(keySegments, keyLen, &pValue))
+		{
+			pValueData = valuePool->insValue(valueLen, *pValue);
+
+			//copy empty value here
+			V v;
+			memcpy(pValueData, &v, valueLen);
+		}
+		else
+		{
+			pValueData = valuePool->getValue(*pValue);
+		}
+
+		return *(V*)pValueData;
+	}
+
+	bool erase(const K& key)
+	{
+		uint32_t keyBuff[MAX_KEY_SEGMENTS];
+		uint32_t keyLen = 0;
+
+		uint32_t* keySegments = getKeySegments(key, keyBuff, keyLen);
+
+		uint32_t value;
+
+		if (HArray::getValueByKey(keySegments, key, value))
+		{
+			valuePool->delValue(value);
+
+			HArray::delValueByKey(keySegments, keyLen);
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	~HArrayGeneric()
+	{
+		HArray::destroy();
+	}
+
+private: // helpers
 	template<class T>
 	inline uint32_t* getKeySegments(const T& obj, uint32_t* keyBuff, uint32_t& keyLen)
 	{
@@ -87,68 +147,7 @@ private:
 	uint32_t* getKeySegments(const std::string& obj, uint32_t* keyBuff, uint32_t& keyLen);
 	uint32_t* getKeySegments(const char*& obj, uint32_t* keyBuff, uint32_t& keyLen);
 
-public:
+private: // data
+	constexpr static uint32_t valueLen = sizeof(V);
 	std::unique_ptr<ValuePool> valuePool;
-
-	HArrayGeneric()
-	{
-		valueLen = sizeof(V);
-
-		valuePool = std::make_unique<ValuePool>(valueLen);
-	}
-
-	V& operator[](const K& key)
-	{
-		uint32_t keyBuff[MAX_KEY_SEGMENTS];
-		uint32_t keyLen = 0;
-
-		uint32_t* keySegments = getKeySegments(key, keyBuff, keyLen);
-
-		uint32_t* pValue;
-
-		void* pValueData;
-
-		if (HArray::insertOrGet(keySegments, keyLen, &pValue))
-		{
-			pValueData = pValuePool->insValue(valueLen, *pValue);
-
-			//copy empty value here
-			V v;
-			memcpy(pValueData, &v, valueLen);
-		}
-		else
-		{
-			pValueData = pValuePool->getValue(*pValue);
-		}
-
-		return *(V*)pValueData;
-	}
-
-	bool erase(const K& key)
-	{
-		uint32_t keyBuff[MAX_KEY_SEGMENTS];
-		uint32_t keyLen = 0;
-
-		uint32_t* keySegments = getKeySegments(key, keyBuff, keyLen);
-
-		uint32_t value;
-
-		if (HArray::getValueByKey(keySegments, key, value))
-		{
-			pValuePool->delValue(value);
-
-			HArray::delValueByKey(keySegments, keyLen);
-
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	~HArrayGeneric()
-	{
-		HArray::destroy();
-	}
 };

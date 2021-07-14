@@ -14,7 +14,8 @@ add_library(harray STATIC
   src/HArray_rebuild.cpp
   src/HArray_scanKeysAndValues.cpp
   src/HArray_shrink.cpp
-  src/HArray_test.cpp)
+  src/HArray_test.cpp
+  src/HArrayGeneric.cpp)
 
 target_include_directories(harray PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/harray)
 

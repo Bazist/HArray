@@ -43,7 +43,7 @@ private: // data
 	uint32_t CurrentPage;
 	uint32_t SizePages;
 
-	std::vector<std::vector<char> > Pages;
+	std::vector<std::vector<char>> Pages;
 };
 
 template <typename K, typename V>

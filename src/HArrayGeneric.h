@@ -61,7 +61,7 @@ public:
 
 		Pages = pages;
 
-		SizePages *= 2;
+		SizePages += 2;
 	}
 
 	void* insValue(uint32_t valueLen, uint32_t& position)

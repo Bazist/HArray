@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(HArray LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 14)
+
 add_library(harray STATIC
   src/HArray_delValueByKey.cpp
   src/HArray_getKeysAndValuesByRange.cpp

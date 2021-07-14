@@ -48,11 +48,7 @@ void* ValuePool::insValue(uint32_t valueLen, uint32_t& position)
 void ValuePool::delValue(uint32_t position)
 {
     char* value = &Pages[position >> 16][position & 0xFFFF];
-
-    for (uint32_t i = 0; i < ValueLen; i++)
-    {
-        value[i] = 0;
-    }
+    memset(value, 0, ValueLen);
 }
 
 void* ValuePool::getValue(uint32_t position)
@@ -113,11 +109,7 @@ uint32_t* HArrayGeneric<K, V>::getKeySegments(const char*& obj, uint32_t* keyBuf
 {
     keyLen = strlen(obj);
     char* keyBuffBytes = (char*)keyBuff;
-
-    for (uint32_t i = 0; i < keyLen; i++)
-    {
-        keyBuffBytes[i] = obj[i];
-    }
+    memcpy(keyBuffBytes, obj, keyLen);
 
     while (keyLen & 0x3)
     {

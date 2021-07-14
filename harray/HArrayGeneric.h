@@ -43,7 +43,7 @@ private: // data
 	uint32_t CurrentPage;
 	uint32_t SizePages;
 
-	std::vector<std::vector<char>> Pages;
+	std::vector<std::vector<char> > Pages;
 };
 
 template <typename K, typename V>
@@ -148,6 +148,6 @@ private: // helpers
 	uint32_t* getKeySegments(const char*& obj, uint32_t* keyBuff, uint32_t& keyLen);
 
 private: // data
-	constexpr static uint32_t valueLen = sizeof(V);
+	const static uint32_t valueLen = sizeof(V);
 	std::unique_ptr<ValuePool> valuePool;
 };

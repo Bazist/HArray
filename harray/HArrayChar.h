@@ -53,9 +53,11 @@ private:
 
 		if (pScanData->KeyLen + valueLenInSegments == keyLen) //our key is composite key: key + value
 		{
+			uint32_t* valueInSegments = (uint32_t*)pScanData->Value;
+
 			for (uint32_t i = 0; i < valueLenInSegments; i++)
 			{
-				pScanData->Value[i] = key[pScanData->KeyLen++];
+				valueInSegments[i] = key[pScanData->KeyLen++];
 			}
 
 			pScanData->ValueLen = valueLen; //value len in chars

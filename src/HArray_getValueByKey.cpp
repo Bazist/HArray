@@ -121,6 +121,8 @@ bool HArray::getValueByKey(uint32_t* key,
 			if (contentCellType == VALUE_TYPE)
 			{
 				value = contentCellValueOrOffset;
+
+				return true;
 			}
 			else
 			{
@@ -154,6 +156,8 @@ bool HArray::getValueByKey(uint32_t* key,
 			if (keyOffset == keyLen)
 			{
 				value = contentCellValueOrOffset;
+
+				return true;
 			}
 			else
 			{

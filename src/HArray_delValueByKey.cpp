@@ -893,7 +893,7 @@ bool HArray::delValueByKey(uint32_t* key,
 				}
 			}
 
-			return 0;
+			return false;
 		}
 		else if (contentCellType == VALUE_TYPE)
 		{
@@ -986,7 +986,7 @@ bool HArray::delValueByKey(uint32_t* key,
 					}
 				}
 
-				return 0;
+				return false;
 			}
 			else if (blockCellType <= MAX_BRANCH_TYPE2) //branch cell
 			{
@@ -1047,7 +1047,7 @@ bool HArray::delValueByKey(uint32_t* key,
 					}
 				}
 
-				return 0;
+				return false;
 			}
 			else if (blockCell.Type <= MAX_BLOCK_TYPE)
 			{

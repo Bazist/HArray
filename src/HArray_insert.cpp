@@ -211,12 +211,12 @@ bool HArray::insert(uint32_t* key,
 						for (contentIndex++, keyOffset++; keyOffset < originKeyLen; contentIndex++, keyOffset++)
 						{
 							pContentPage->pType[contentIndex] = CURRENT_VALUE_TYPE;
-					}
+						}
 
 						//pContentPage->pType[contentIndex] = VALUE_TYPE;
 
 						return true;
-				}
+					}
 					else if (contentCellValue != key[keyOffset])
 					{
 #ifndef _RELEASE
@@ -277,7 +277,7 @@ bool HArray::insert(uint32_t* key,
 					{
 						contentCellType = CURRENT_VALUE_TYPE; //reset to current value
 					}
-			}
+				}
 
 				if (keyLen > originKeyLen) //key longer than already inserted
 				{
@@ -328,7 +328,7 @@ bool HArray::insert(uint32_t* key,
 
 					return false;
 				}
-		}
+			}
 			else  //content in two pages
 			{
 				for (; keyOffset < originKeyLen; contentOffset++, keyOffset++)
@@ -381,12 +381,12 @@ bool HArray::insert(uint32_t* key,
 						for (contentOffset++, keyOffset++; keyOffset < originKeyLen; contentOffset++, keyOffset++)
 						{
 							pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF] = CURRENT_VALUE_TYPE;
-					}
+						}
 
 						//pContentPages[contentOffset >> 16]->pType[contentOffset & 0xFFFF] = VALUE_TYPE;
 
 						return true;
-				}
+					}
 					else if (pContentPage->pContent[contentIndex] != key[keyOffset])
 					{
 #ifndef _RELEASE
@@ -453,7 +453,7 @@ bool HArray::insert(uint32_t* key,
 					{
 						pContentPage->pType[contentIndex] = CURRENT_VALUE_TYPE; //reset to current value
 					}
-			}
+				}
 
 				pContentPage = pContentPages[contentOffset >> 16];
 				contentIndex = contentOffset & 0xFFFF;
@@ -506,10 +506,10 @@ bool HArray::insert(uint32_t* key,
 
 					return false;
 				}
-	}
+			}
 
 			return true;
-}
+		}
 
 		keyValue = key[keyOffset];
 
@@ -669,7 +669,7 @@ bool HArray::insert(uint32_t* key,
 				(*pContentCellType)++;
 
 				goto FILL_KEY;
-		}
+			}
 			else
 			{
 #ifndef _RELEASE
@@ -1095,7 +1095,7 @@ bool HArray::insert(uint32_t* key,
 							break;
 						default:
 							break;
-					}
+						}
 #endif
 
 						const uint16_t branchesSize = BRANCH_ENGINE_SIZE * 2;
@@ -1377,8 +1377,8 @@ bool HArray::insert(uint32_t* key,
 						}
 
 						goto FILL_KEY;
+					}
 				}
-			}
 				else if (blockCell.Type <= MAX_BLOCK_TYPE)
 				{
 					//go to block
@@ -1389,7 +1389,7 @@ bool HArray::insert(uint32_t* key,
 
 					goto NEXT_BLOCK;
 				}
-		}
+			}
 		}
 		else if (contentCellType == CURRENT_VALUE_TYPE) //PART OF KEY =========================================================================
 		{

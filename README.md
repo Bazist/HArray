@@ -98,7 +98,7 @@ Insert a key
 
 ```c++
 uint32 key[] = { 10, 20, 30, 40 };
-uint32 keyLen = sizeof(key);
+uint32 keyLen = sizeof(key) / 4; //in key segments
 uint32 value = 1;
 
 ha.insert(key, keyLen, value);
@@ -125,10 +125,10 @@ HArrayPair pairs[5];
 uint32 pairsSize = 5;
 
 uint32 minKey[] = { 10, 10 };
-uint32 minKeyLen = sizeof(minKey);
+uint32 minKeyLen = sizeof(minKey) / 4; //in key segments
 
 uint32 maxKey[] = { 20, 20 };
-uint32 maxKeyLen = sizeof(maxKey);
+uint32 maxKeyLen = sizeof(maxKey) / 4; //in key segments
 
 uint32 count = ha.getKeysAndValuesByRange(pairs, pairsSize, minKey, minKeyLen, maxKey, maxKeyLen);
 for (uint32 i = 0; i < count; i++)
@@ -173,7 +173,7 @@ Check if container has part of key
 
 ```c++
 uint32 key[] = { 10, 20, 30 };
-uint32 keyLen = sizeof(key);
+uint32 keyLen = sizeof(key) / 4; //in key segments
 
 if(ha.hasPartKey(key, keyLen))
 {
@@ -185,7 +185,7 @@ Set specific comparator to redefine order of keys in the container.
 
 ```c++
 float key[] = { 10.0, 20.0, 30.0 };
-uint32 keyLen = sizeof(key);
+uint32 keyLen = sizeof(key) / 4; //in key segments
 
 uint32 value = 1;
 

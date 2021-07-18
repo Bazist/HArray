@@ -18,32 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\HArrayBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\HArray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\HArrayInt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\HArrayChar.h">
-      <Filter>Header Files\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\HArrayGeneric.h">
-      <Filter>Header Files\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\HArrayLongValue.h">
-      <Filter>Header Files\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="src\HArrayUniqueIntValueList.h">
-      <Filter>Header Files\Wrappers</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\HArray_delValueByKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -71,11 +45,37 @@
     <ClCompile Include="src\HArray_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Main.cpp">
+    <ClCompile Include="src\HArray_insertOrGet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HArray_insertOrGet.cpp">
+    <ClCompile Include="benchmark\HArrayBenchmark.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="harray\HArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="harray\HArrayBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="harray\HArrayInt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="harray\HArrayLongValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="harray\HArrayUniqueIntValueList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="harray\HArrayChar.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="harray\HArrayGeneric.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="benchmark\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

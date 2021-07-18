@@ -67,6 +67,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\benchmark;.\harray;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,16 +91,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\HArrayBase.h" />
-    <ClInclude Include="src\HArray.h" />
-    <ClInclude Include="src\HArrayChar.h" />
-    <ClInclude Include="src\HArrayGeneric.h" />
-    <ClInclude Include="src\HArrayInt.h" />
-    <ClInclude Include="src\HArrayLongValue.h" />
-    <ClInclude Include="src\HArrayUniqueIntValueList.h" />
-    <ClInclude Include="src\stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
+    <ClCompile Include="benchmark\HArrayBenchmark.cpp" />
     <ClCompile Include="src\HArray_insertOrGet.cpp" />
     <ClCompile Include="src\HArray_delValueByKey.cpp" />
     <ClCompile Include="src\HArray_getKeysAndValuesByRange.cpp" />
@@ -110,10 +102,16 @@
     <ClCompile Include="src\HArray_scanKeysAndValues.cpp" />
     <ClCompile Include="src\HArray_shrink.cpp" />
     <ClCompile Include="src\HArray_test.cpp" />
-    <ClCompile Include="src\Main.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="benchmark\stdafx.h" />
+    <ClInclude Include="harray\HArray.h" />
+    <ClInclude Include="harray\HArrayBase.h" />
+    <ClInclude Include="harray\HArrayChar.h" />
+    <ClInclude Include="harray\HArrayGeneric.h" />
+    <ClInclude Include="harray\HArrayInt.h" />
+    <ClInclude Include="harray\HArrayLongValue.h" />
+    <ClInclude Include="harray\HArrayUniqueIntValueList.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

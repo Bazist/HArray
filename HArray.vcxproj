@@ -67,7 +67,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>.\benchmark;.\harray;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\src;.\harray;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -104,7 +104,6 @@
     <ClCompile Include="src\HArray_test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="benchmark\stdafx.h" />
     <ClInclude Include="harray\HArray.h" />
     <ClInclude Include="harray\HArrayBase.h" />
     <ClInclude Include="harray\HArrayChar.h" />
@@ -112,6 +111,7 @@
     <ClInclude Include="harray\HArrayInt.h" />
     <ClInclude Include="harray\HArrayLongValue.h" />
     <ClInclude Include="harray\HArrayUniqueIntValueList.h" />
+    <ClInclude Include="src\stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

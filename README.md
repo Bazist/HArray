@@ -1,6 +1,6 @@
 # HArray
 
-[![Build status](https://img.shields.io/github/actions/workflow/status/Bazist/HArray/test.yml?branch=main)](https://img.shields.io/github/actions/workflow/status/Bazist/HArray/test.yml?branch=main)
+[![Build status](https://img.shields.io/github/actions/workflow/status/Bazist/HArray/build.yml?branch=main)](https://img.shields.io/github/actions/workflow/status/Bazist/HArray/build.yml?branch=main)
 
 ## Probably, this is most optimized Trie structure in the World ! Thats all what you need know about this project :)
 
